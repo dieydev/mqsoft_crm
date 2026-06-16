@@ -1,0 +1,58 @@
+@model IEnumerable<AI_CRM.Domain.Entities.LichSuLamViec>
+@{
+    ViewData["Title"] = "Chăm sóc khách hàng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-headset me-2 text-primary"></i>Lịch sử Chăm sóc Khách hàng</h3>
+    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-medium d-flex align-items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Thêm tương tác
+    </a>
+</div>
+
+<div class="glass-card p-4 border-0 shadow-sm rounded-4" style="background: #fff;">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
+                <tr>
+                    <th class="ps-4 py-3 fw-bold border-bottom-0">Khách hàng</th>
+                    <th class="py-3 fw-bold border-bottom-0">Loại</th>
+                    <th class="py-3 fw-bold border-bottom-0">Nội dung trao đổi</th>
+                    <th class="py-3 fw-bold border-bottom-0">Kết quả</th>
+                    <th class="py-3 fw-bold border-bottom-0">Thời gian</th>
+                    <th class="py-3 fw-bold border-bottom-0">Nhân viên</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 py-3 fw-bold text-dark">@(item.KhachHang?.CompanyName ?? "N/A")</td>
+                            <td class="py-3">
+                                @if (item.InteractionType == "Call") { <span class="badge bg-success"><i class="fa-solid fa-phone me-1"></i> Gọi điện</span> }
+                                else if (item.InteractionType == "Email") { <span class="badge bg-warning text-dark"><i class="fa-solid fa-envelope me-1"></i> Email</span> }
+                                else if (item.InteractionType == "Meeting") { <span class="badge bg-primary"><i class="fa-solid fa-handshake me-1"></i> Gặp mặt</span> }
+                                else { <span class="badge bg-secondary">Khác</span> }
+                            </td>
+                            <td class="py-3 text-muted" style="max-width: 250px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="@item.Content">@item.Content</td>
+                            <td class="py-3 fw-medium">@item.Result</td>
+                            <td class="py-3">@item.WorkDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="py-3 text-primary">@(item.NhanVienPhuTrach?.FullName ?? "Unknown")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-comments fs-1 mb-3 opacity-50"></i>
+                            <p class="mb-0 fs-5">Chưa có lịch sử làm việc nào.</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

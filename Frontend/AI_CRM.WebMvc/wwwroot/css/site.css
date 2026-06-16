@@ -8,9 +8,9 @@
     --surface-color: #ffffff;
     --text-primary: #0f172a;
     --text-secondary: #64748b;
-    --sidebar-bg: #0f172a;
-    --sidebar-text: #f1f5f9;
-    --sidebar-hover: #1e293b;
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #475569;
+    --sidebar-hover: #f1f5f9;
 }
 
 body {
@@ -43,7 +43,7 @@ body {
     padding: 1rem 1.5rem;
     font-size: 1.5rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--sidebar-text);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -167,4 +167,34 @@ body {
 .form-control:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.25);
+}
+
+/* Dark Mode Overrides */
+[data-bs-theme="dark"] {
+    --bg-color: #0f172a;
+    --surface-color: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --sidebar-bg: #020617;
+    --sidebar-text: #cbd5e1;
+    --sidebar-hover: #1e293b;
+}
+
+[data-bs-theme="dark"] .glass-card {
+    background: var(--surface-color) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .bg-white, [data-bs-theme="dark"] .bg-light {
+    background-color: var(--surface-color) !important;
+}
+
+[data-bs-theme="dark"] .text-dark {
+    color: var(--text-primary) !important;
+}
+
+[data-bs-theme="dark"] .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-primary);
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
 }

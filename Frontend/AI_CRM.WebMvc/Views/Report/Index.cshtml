@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "Báo cáo thống kê";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-chart-line me-2 text-primary"></i>Báo cáo Hệ thống</h3>
+    <div class="d-flex gap-2">
+        <select class="form-select bg-light border-0 shadow-sm rounded-pill fw-medium text-muted">
+            <option>Tháng này</option>
+            <option>Quý này</option>
+            <option>Năm nay</option>
+        </select>
+        <button class="btn btn-success rounded-pill px-4 py-2 shadow-sm fw-medium d-flex align-items-center gap-2">
+            <i class="fa-solid fa-download"></i> Xuất PDF
+        </button>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 border-0 shadow-sm rounded-4 text-center bg-white h-100 d-flex flex-column justify-content-center">
+            <i class="fa-solid fa-chart-pie fs-1 text-primary mb-3"></i>
+            <h5 class="fw-bold text-dark mb-2">Báo cáo Khách hàng</h5>
+            <p class="text-muted small mb-4">Thống kê tỷ lệ chuyển đổi, tương tác, đánh giá khách hàng VIP.</p>
+            <button class="btn btn-outline-primary rounded-pill mt-auto">Xem chi tiết</button>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 border-0 shadow-sm rounded-4 text-center bg-white h-100 d-flex flex-column justify-content-center">
+            <i class="fa-solid fa-project-diagram fs-1 text-success mb-3"></i>
+            <h5 class="fw-bold text-dark mb-2">Báo cáo Dự án</h5>
+            <p class="text-muted small mb-4">Tiến độ, trễ hạn, sử dụng ngân sách và tình hình nhân sự.</p>
+            <button class="btn btn-outline-success rounded-pill mt-auto">Xem chi tiết</button>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 border-0 shadow-sm rounded-4 text-center bg-white h-100 d-flex flex-column justify-content-center">
+            <i class="fa-solid fa-file-contract fs-1 text-warning mb-3"></i>
+            <h5 class="fw-bold text-dark mb-2">Báo cáo Doanh thu</h5>
+            <p class="text-muted small mb-4">Giá trị hợp đồng, doanh thu thực tế, dự báo tài chính tháng tới.</p>
+            <button class="btn btn-outline-warning rounded-pill mt-auto">Xem chi tiết</button>
+        </div>
+    </div>
+</div>

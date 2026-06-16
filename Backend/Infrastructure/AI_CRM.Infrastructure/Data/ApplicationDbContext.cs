@@ -31,6 +31,25 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(builder);
 
+        // Map explicitly to singular table names as in CSDL.txt
+        builder.Entity<VaiTro>().ToTable("VaiTro");
+        builder.Entity<NguoiDung>().ToTable("NguoiDung");
+        builder.Entity<KhachHang>().ToTable("KhachHang");
+        builder.Entity<TrangThaiHopDong>().ToTable("TrangThaiHopDong");
+        builder.Entity<HopDong>().ToTable("HopDong");
+        builder.Entity<TrangThaiDuAn>().ToTable("TrangThaiDuAn");
+        builder.Entity<DuAn>().ToTable("DuAn");
+        builder.Entity<NhanVienPhuTrach>().ToTable("NhanVienPhuTrach");
+        builder.Entity<DuAnNhanVien>().ToTable("DuAnNhanVien");
+        builder.Entity<TienDoDuAn>().ToTable("TienDoDuAn");
+        builder.Entity<LichSuLamViec>().ToTable("LichSuLamViec");
+        builder.Entity<NhomTaiLieu>().ToTable("NhomTaiLieu");
+        builder.Entity<TaiLieuNoiBo>().ToTable("TaiLieuNoiBo");
+        builder.Entity<TaiLieuTag>().ToTable("TaiLieuTag");
+        builder.Entity<LichSuHoiDap>().ToTable("LichSuHoiDap");
+        builder.Entity<DanhGiaCauTraLoi>().ToTable("DanhGiaCauTraLoi");
+        builder.Entity<NhatKyHeThong>().ToTable("NhatKyHeThong");
+
         // NguoiDung -> VaiTro
         builder.Entity<NguoiDung>()
             .HasOne(u => u.VaiTro)

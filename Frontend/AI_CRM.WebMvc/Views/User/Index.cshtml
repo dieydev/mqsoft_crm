@@ -1,0 +1,73 @@
+@model IEnumerable<AI_CRM.Domain.Entities.NguoiDung>
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-users me-2 text-primary"></i>Quản lý Người dùng & Phân quyền</h3>
+    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-medium d-flex align-items-center gap-2">
+        <i class="fa-solid fa-user-plus"></i> Thêm tài khoản
+    </a>
+</div>
+
+<div class="glass-card overflow-hidden border-0 shadow-sm rounded-4" style="background: #fff;">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
+                <tr>
+                    <th class="ps-4 py-3 fw-bold border-bottom-0">Tài khoản</th>
+                    <th class="py-3 fw-bold border-bottom-0">Vai trò</th>
+                    <th class="py-3 fw-bold border-bottom-0">Trạng thái</th>
+                    <th class="py-3 fw-bold border-bottom-0">Ngày tạo</th>
+                    <th class="text-end pe-4 py-3 fw-bold border-bottom-0">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <div class="d-flex align-items-center">
+                                    <img src="https://ui-avatars.com/api/?name=@item.Username&background=random" class="rounded-circle me-3" style="width: 40px; height: 40px;" />
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-dark">@item.Username</h6>
+                                        <small class="text-muted">ID: #@item.UserId</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                <span class="badge bg-primary-light text-primary px-3 rounded-pill">@(item.VaiTro?.RoleName ?? "Chưa phân quyền")</span>
+                            </td>
+                            <td class="py-3">
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge bg-success-light text-success"><i class="fa-solid fa-check-circle me-1"></i>Đang hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger-light text-danger"><i class="fa-solid fa-ban me-1"></i>Đã khóa</span>
+                                }
+                            </td>
+                            <td class="py-3 text-muted">@item.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-end pe-4 py-3">
+                                <button class="btn btn-sm btn-light text-warning shadow-sm rounded-3 px-2 py-1" title="Đổi quyền"><i class="fa-solid fa-user-shield"></i></button>
+                                <button class="btn btn-sm btn-light text-danger shadow-sm rounded-3 px-2 py-1" title="Khóa/Xóa"><i class="fa-solid fa-lock"></i></button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-users-slash fs-1 mb-3 opacity-50"></i>
+                            <p class="mb-0 fs-5">Chưa có dữ liệu người dùng.</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

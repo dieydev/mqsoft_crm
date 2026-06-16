@@ -1,0 +1,69 @@
+@model IEnumerable<AI_CRM.Domain.Entities.DuAn>
+@{
+    ViewData["Title"] = "Quản lý dự án";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-project-diagram me-2 text-primary"></i>Quản lý Dự án phần mềm</h3>
+    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-medium d-flex align-items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Khởi tạo dự án
+    </a>
+</div>
+
+<div class="row g-4">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var item in Model)
+        {
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="glass-card p-4 h-100 position-relative border-0 shadow-sm rounded-4" style="background: #fff;">
+                    <div class="position-absolute top-0 end-0 p-3">
+                        <span class="badge bg-primary-light text-primary fw-medium rounded-pill px-3">@(item.TrangThaiDuAn?.StatusName ?? "Đang chạy")</span>
+                    </div>
+                    <h5 class="fw-bold text-dark pe-5 mb-1">@item.ProjectName</h5>
+                    <p class="text-muted small mb-3"><i class="fa-regular fa-building me-1"></i> @(item.KhachHang?.CompanyName ?? "Khách hàng cá nhân")</p>
+                    
+                    <div class="progress mb-3" style="height: 8px;">
+                        <!-- Mock progress since TienDo is in another table, we assume 50% for display -->
+                        <div class="progress-bar bg-success rounded-pill" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    
+                    <div class="row text-center mb-4">
+                        <div class="col-4 border-end">
+                            <h6 class="fw-bold mb-0">@(item.StartDate?.ToString("dd/MM") ?? "-")</h6>
+                            <small class="text-muted" style="font-size: 0.7rem;">BẮT ĐẦU</small>
+                        </div>
+                        <div class="col-4 border-end">
+                            <h6 class="fw-bold mb-0 text-danger">@(item.Deadline?.ToString("dd/MM") ?? "-")</h6>
+                            <small class="text-muted" style="font-size: 0.7rem;">DEADLINE</small>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="fw-bold mb-0 text-success">@(item.Budget?.ToString("N0") ?? "0")</h6>
+                            <small class="text-muted" style="font-size: 0.7rem;">NGÂN SÁCH</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                        <div class="avatar-group d-flex">
+                            <!-- Mock avatars -->
+                            <img src="https://ui-avatars.com/api/?name=DEV&background=random" class="rounded-circle border border-2 border-white" style="width: 32px; height: 32px; margin-right: -10px;" />
+                            <img src="https://ui-avatars.com/api/?name=PM&background=random" class="rounded-circle border border-2 border-white" style="width: 32px; height: 32px; margin-right: -10px;" />
+                            <div class="avatar bg-light text-muted rounded-circle border border-2 border-white d-flex align-items-center justify-content-center small fw-bold" style="width: 32px; height: 32px; font-size: 10px;">+3</div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-light text-primary rounded-circle" style="width: 32px; height: 32px;"><i class="fa-solid fa-list-check"></i></button>
+                            <button class="btn btn-sm btn-light text-warning rounded-circle" style="width: 32px; height: 32px;"><i class="fa-solid fa-pen"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 text-center py-5 text-muted glass-card border-0 shadow-sm rounded-4 bg-white">
+            <i class="fa-solid fa-box-open fs-1 mb-3 opacity-50"></i>
+            <p class="mb-0 fs-5">Chưa có dự án nào. Hãy bắt đầu một dự án mới!</p>
+        </div>
+    }
+</div>

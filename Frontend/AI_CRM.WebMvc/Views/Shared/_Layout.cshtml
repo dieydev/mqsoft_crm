@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AI CRM System</title>
+    <title>@ViewData["Title"] - MQSoft CRM</title>
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <!-- FontAwesome -->
@@ -14,8 +14,8 @@
 <body>
     <!-- Sidebar -->
     <nav class="sidebar shadow-lg">
-        <div class="sidebar-header">
-            <i class="fa-solid fa-layer-group"></i> AI CRM
+        <div class="sidebar-header text-center py-4">
+            <img src="~/images/logo.png" alt="MQ Soft Logo" class="img-fluid" style="max-height: 100px;" />
         </div>
         <ul class="nav flex-column">
             <li class="nav-item">
@@ -80,7 +80,10 @@
                 <input type="text" class="form-control border-0 bg-transparent shadow-none" placeholder="Tìm kiếm khách hàng, dự án, tài liệu...">
             </div>
             <div class="topbar-actions d-flex align-items-center gap-4">
-                <a href="#" class="text-secondary position-relative">
+                <button id="themeToggleBtn" class="btn btn-link text-secondary position-relative p-0 shadow-none border-0">
+                    <i id="themeIcon" class="fa-solid fa-moon fs-5"></i>
+                </button>
+                <a href="#" class="text-secondary position-relative ms-2">
                     <i class="fa-solid fa-bell fs-5"></i>
                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
                         <span class="visually-hidden">New alerts</span>
@@ -108,7 +111,7 @@
         </main>
         
         <footer class="text-center py-3 text-muted" style="font-size: 0.9rem;">
-            &copy; 2026 - AI CRM System v1.0
+            &copy; 2026 - MQSoft CRM v1.0
         </footer>
     </div>
 
@@ -118,7 +121,43 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleBtn = document.getElementById('themeToggleBtn');
+            const themeIcon = document.getElementById('themeIcon');
+            const htmlEl = document.documentElement;
+            
+            // Check saved theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                htmlEl.setAttribute('data-bs-theme', savedTheme);
+                updateIcon(savedTheme);
+            }
+
+            toggleBtn.addEventListener('click', function () {
+                const currentTheme = htmlEl.getAttribute('data-bs-theme') || 'light';
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                htmlEl.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateIcon(newTheme);
+            });
+
+            function updateIcon(theme) {
+                if (theme === 'dark') {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                    themeIcon.style.color = '#fbbf24'; // yellow sun
+                } else {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                    themeIcon.style.color = ''; // reset to default
+                }
+            }
+        });
+    </script>
 </body>
 </html>
