@@ -1,0 +1,227 @@
+-- ==========================================
+-- 1. VAITRO (Quản lý nhóm quyền)
+-- ==========================================
+CREATE TABLE VaiTro (
+    RoleId INT IDENTITY(1,1) PRIMARY KEY,
+    RoleName NVARCHAR(50) NOT NULL UNIQUE, -- Admin, NhanVien, Manager
+    Description NVARCHAR(255)
+);
+
+-- ==========================================
+-- 2. NGUOIDUNG (Tài khoản đăng nhập)
+-- ==========================================
+CREATE TABLE NguoiDung (
+    UserId INT IDENTITY(1,1) PRIMARY KEY,
+    RoleId INT NOT NULL,
+    Username NVARCHAR(50) NOT NULL UNIQUE,
+    PasswordHash NVARCHAR(255) NOT NULL,
+    IsActive BIT DEFAULT 1,
+    CreatedDate DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_NguoiDung_VaiTro FOREIGN KEY(RoleId) REFERENCES VaiTro(RoleId)
+);
+
+-- ==========================================
+-- 3. KHACHHANG (Quản lý khách hàng)
+-- ==========================================
+CREATE TABLE KhachHang (
+    CustomerId INT IDENTITY(1,1) PRIMARY KEY,
+    CustomerCode NVARCHAR(20) UNIQUE,
+    CompanyName NVARCHAR(255) NOT NULL,
+    Representative NVARCHAR(100),
+    Email NVARCHAR(100),
+    Phone NVARCHAR(20),
+    Address NVARCHAR(255),
+    Website NVARCHAR(255),
+    Note NVARCHAR(MAX),
+    CreatedDate DATETIME DEFAULT GETDATE(),
+    IsDeleted BIT DEFAULT 0
+);
+
+-- ==========================================
+-- 4. TRANGTHAIHOPDONG
+-- ==========================================
+CREATE TABLE TrangThaiHopDong (
+    StatusId INT IDENTITY(1,1) PRIMARY KEY,
+    StatusName NVARCHAR(50) NOT NULL, -- Mới tạo, Đang hiệu lực, Sắp hết hạn, Đã thanh lý
+    Description NVARCHAR(255)
+);
+
+-- ==========================================
+-- 5. HOPDONG
+-- ==========================================
+CREATE TABLE HopDong (
+    ContractId INT IDENTITY(1,1) PRIMARY KEY,
+    CustomerId INT NOT NULL,
+    StatusId INT NOT NULL,
+    ContractNumber NVARCHAR(50) NOT NULL UNIQUE,
+    ContractName NVARCHAR(255) NOT NULL,
+    ContractValue DECIMAL(18,2),
+    SignDate DATE,
+    ExpireDate DATE,
+    FilePath NVARCHAR(500),
+    CreatedDate DATETIME DEFAULT GETDATE(),
+    IsDeleted BIT DEFAULT 0,
+    CONSTRAINT FK_HopDong_KhachHang FOREIGN KEY(CustomerId) REFERENCES KhachHang(CustomerId),
+    CONSTRAINT FK_HopDong_TrangThai FOREIGN KEY(StatusId) REFERENCES TrangThaiHopDong(StatusId)
+);
+
+-- ==========================================
+-- 6. TRANGTHAIDUAN
+-- ==========================================
+CREATE TABLE TrangThaiDuAn (
+    StatusId INT IDENTITY(1,1) PRIMARY KEY,
+    StatusName NVARCHAR(50) NOT NULL, -- Khởi tạo, Đang triển khai, Tạm dừng, Hoàn thành
+    Description NVARCHAR(255)
+);
+
+-- ==========================================
+-- 7. DUAN
+-- ==========================================
+CREATE TABLE DuAn (
+    ProjectId INT IDENTITY(1,1) PRIMARY KEY,
+    CustomerId INT NOT NULL,
+    ContractId INT NULL,
+    StatusId INT NOT NULL,
+    ProjectName NVARCHAR(255) NOT NULL,
+    Description NVARCHAR(MAX),
+    StartDate DATE,
+    EndDate DATE,
+    Deadline DATE,
+    Budget DECIMAL(18,2),
+    CreatedDate DATETIME DEFAULT GETDATE(),
+    IsDeleted BIT DEFAULT 0,
+    CONSTRAINT FK_DuAn_KhachHang FOREIGN KEY(CustomerId) REFERENCES KhachHang(CustomerId),
+    CONSTRAINT FK_DuAn_HopDong FOREIGN KEY(ContractId) REFERENCES HopDong(ContractId),
+    CONSTRAINT FK_DuAn_TrangThai FOREIGN KEY(StatusId) REFERENCES TrangThaiDuAn(StatusId)
+);
+
+-- ==========================================
+-- 8. NHANVIENPHUTRACH (Hồ sơ nhân sự)
+-- ==========================================
+CREATE TABLE NhanVienPhuTrach (
+    EmployeeId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NULL, -- Liên kết với tài khoản đăng nhập (có thể NULL nếu nhân viên chưa có tài khoản)
+    FullName NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100),
+    Phone NVARCHAR(20),
+    Department NVARCHAR(100),
+    Position NVARCHAR(100),
+    IsActive BIT DEFAULT 1,
+    CONSTRAINT FK_NhanVien_NguoiDung FOREIGN KEY(UserId) REFERENCES NguoiDung(UserId)
+);
+
+-- ==========================================
+-- 9. DUANNHANVIEN (Phân công nhân sự)
+-- ==========================================
+CREATE TABLE DuAnNhanVien (
+    AssignmentId INT IDENTITY(1,1) PRIMARY KEY,
+    ProjectId INT NOT NULL,
+    EmployeeId INT NOT NULL,
+    ProjectRole NVARCHAR(100), -- PM, Backend, Frontend, Tester, BA
+    JoinDate DATE,
+    CONSTRAINT FK_DuAnNV_DuAn FOREIGN KEY(ProjectId) REFERENCES DuAn(ProjectId),
+    CONSTRAINT FK_DuAnNV_NhanVien FOREIGN KEY(EmployeeId) REFERENCES NhanVienPhuTrach(EmployeeId)
+);
+
+-- ==========================================
+-- 10. TIENDODUAN (Cập nhật % hoàn thành)
+-- ==========================================
+CREATE TABLE TienDoDuAn (
+    ProgressId INT IDENTITY(1,1) PRIMARY KEY,
+    ProjectId INT NOT NULL,
+    ProgressPercent INT CHECK(ProgressPercent BETWEEN 0 AND 100),
+    Note NVARCHAR(MAX),
+    UpdateDate DATETIME DEFAULT GETDATE(),
+    UpdatedBy INT, -- ID của NhanVienPhuTrach thực hiện cập nhật
+    CONSTRAINT FK_TienDo_DuAn FOREIGN KEY(ProjectId) REFERENCES DuAn(ProjectId),
+    CONSTRAINT FK_TienDo_NhanVien FOREIGN KEY(UpdatedBy) REFERENCES NhanVienPhuTrach(EmployeeId)
+);
+
+-- ==========================================
+-- 11. LICHSULAMVIEC (Chăm sóc khách hàng)
+-- ==========================================
+CREATE TABLE LichSuLamViec (
+    WorkLogId INT IDENTITY(1,1) PRIMARY KEY,
+    CustomerId INT NOT NULL,
+    EmployeeId INT NOT NULL,
+    InteractionType NVARCHAR(50), -- Call, Email, Meeting
+    WorkDate DATETIME DEFAULT GETDATE(),
+    Content NVARCHAR(MAX) NOT NULL,
+    Result NVARCHAR(MAX),
+    CONSTRAINT FK_LichSu_KhachHang FOREIGN KEY(CustomerId) REFERENCES KhachHang(CustomerId),
+    CONSTRAINT FK_LichSu_NhanVien FOREIGN KEY(EmployeeId) REFERENCES NhanVienPhuTrach(EmployeeId)
+);
+
+-- ==========================================
+-- 12. NHOMTAILIEU (Danh mục tài liệu)
+-- ==========================================
+CREATE TABLE NhomTaiLieu (
+    CategoryId INT IDENTITY(1,1) PRIMARY KEY,
+    CategoryName NVARCHAR(100) NOT NULL,
+    Description NVARCHAR(255)
+);
+
+-- ==========================================
+-- 13. TAILIEUNOIBO (Lưu trữ và phục vụ AI RAG)
+-- ==========================================
+CREATE TABLE TaiLieuNoiBo (
+    DocumentId INT IDENTITY(1,1) PRIMARY KEY,
+    CategoryId INT NOT NULL,
+    Title NVARCHAR(255) NOT NULL,
+    Description NVARCHAR(MAX),
+    FilePath NVARCHAR(500),
+    UploadedBy INT NOT NULL,
+    UploadDate DATETIME DEFAULT GETDATE(),
+    IsProcessedForAI BIT DEFAULT 0, -- Cờ đánh dấu đã Embedding cho VectorDB chưa
+    IsDeleted BIT DEFAULT 0,
+    CONSTRAINT FK_TaiLieu_Nhom FOREIGN KEY(CategoryId) REFERENCES NhomTaiLieu(CategoryId),
+    CONSTRAINT FK_TaiLieu_NhanVien FOREIGN KEY(UploadedBy) REFERENCES NhanVienPhuTrach(EmployeeId)
+);
+
+-- ==========================================
+-- 14. TAILIEUTAG (Gắn thẻ phân loại)
+-- ==========================================
+CREATE TABLE TaiLieuTag (
+    TagId INT IDENTITY(1,1) PRIMARY KEY,
+    DocumentId INT NOT NULL,
+    TagName NVARCHAR(100) NOT NULL,
+    CONSTRAINT FK_Tag_TaiLieu FOREIGN KEY(DocumentId) REFERENCES TaiLieuNoiBo(DocumentId)
+);
+
+-- ==========================================
+-- 15. LICHSUHOIDAP (Chatbot AI)
+-- ==========================================
+CREATE TABLE LichSuHoiDap (
+    ChatHistoryId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    Question NVARCHAR(MAX) NOT NULL,
+    Answer NVARCHAR(MAX) NOT NULL,
+    CreatedDate DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_ChatHistory_User FOREIGN KEY(UserId) REFERENCES NguoiDung(UserId)
+);
+
+-- ==========================================
+-- 16. DANHGIACAUTRALOI (Feedback AI)
+-- ==========================================
+CREATE TABLE DanhGiaCauTraLoi (
+    FeedbackId INT IDENTITY(1,1) PRIMARY KEY,
+    ChatHistoryId INT NOT NULL,
+    IsHelpful BIT NOT NULL, -- 1: Tốt, 0: Không tốt
+    Comment NVARCHAR(MAX),
+    CreatedDate DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_Feedback_ChatHistory FOREIGN KEY(ChatHistoryId) REFERENCES LichSuHoiDap(ChatHistoryId)
+);
+
+-- ==========================================
+-- 17. NHATKYHETHONG (Audit Log)
+-- ==========================================
+CREATE TABLE NhatKyHeThong (
+    LogId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NULL,
+    Action NVARCHAR(50), -- INSERT, UPDATE, DELETE, LOGIN
+    TableName NVARCHAR(100),
+    RecordId INT,
+    Details NVARCHAR(MAX),
+    Timestamp DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_NhatKy_User FOREIGN KEY(UserId) REFERENCES NguoiDung(UserId)
+);

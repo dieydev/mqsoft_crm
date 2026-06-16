@@ -1,0 +1,188 @@
+1. Quản lý người dùng & phân quyền
+
+Bảng
+
+VaiTro
+NguoiDung
+
+Chức năng
+
+Đăng nhập
+Đăng xuất
+Đổi mật khẩu
+Quản lý tài khoản
+Phân quyền Admin/Nhân viên
+2. Quản lý khách hàng
+
+Bảng
+
+KhachHang
+
+Chức năng
+
+Thêm khách hàng
+Sửa khách hàng
+Xóa khách hàng
+Tìm kiếm khách hàng
+Xem chi tiết khách hàng
+Quản lý:
+Tên doanh nghiệp
+Người đại diện
+Email
+Điện thoại
+Địa chỉ
+Website
+Ghi chú
+3. Quản lý hợp đồng
+
+Bảng
+
+TrangThaiHopDong
+HopDong
+
+Chức năng
+
+Tạo hợp đồng
+Sửa hợp đồng
+Xóa hợp đồng
+Upload file PDF
+Gia hạn hợp đồng
+Thanh lý hợp đồng
+Theo dõi ngày hết hạn
+Theo dõi giá trị hợp đồng
+4. Quản lý dự án phần mềm
+
+Bảng
+
+TrangThaiDuAn
+DuAn
+
+Chức năng
+
+Tạo dự án
+Cập nhật dự án
+Xóa dự án
+Liên kết khách hàng
+Liên kết hợp đồng
+Theo dõi:
+Ngày bắt đầu
+Ngày kết thúc
+Deadline
+Ngân sách
+Trạng thái
+5. Quản lý nhân sự phụ trách
+
+Bảng
+
+NhanVienPhuTrach
+DuAnNhanVien
+
+Chức năng
+
+Quản lý nhân viên
+Phân công dự án
+Quản lý vai trò:
+PM
+Backend
+Frontend
+Tester
+BA
+6. Quản lý tiến độ dự án
+
+Bảng
+
+TienDoDuAn
+
+Chức năng
+
+Cập nhật % hoàn thành
+Lưu lịch sử cập nhật
+Ghi chú tiến độ
+Theo dõi dự án trễ hạn
+7. Quản lý lịch sử chăm sóc khách hàng
+
+Bảng
+
+LichSuLamViec
+
+Chức năng
+
+Lưu lịch sử:
+Gọi điện
+Email
+Họp
+Kết quả làm việc
+Theo dõi tương tác khách hàng
+8. Quản lý tài liệu nội bộ
+
+Bảng
+
+NhomTaiLieu
+TaiLieuNoiBo
+TaiLieuTag
+
+Chức năng
+
+Upload tài liệu
+Download tài liệu
+Xóa tài liệu
+Chỉnh sửa tài liệu
+Gắn Tag
+Phân loại:
+Quy trình
+Kỹ thuật
+Hướng dẫn sử dụng
+Biểu mẫu
+9. AI Chatbot
+
+Bảng
+
+LichSuHoiDap
+DanhGiaCauTraLoi
+
+Chức năng
+
+Giao diện chat
+Hỏi đáp tự nhiên
+Tìm tài liệu
+Tìm quy trình
+Tìm hướng dẫn
+Tìm thông tin dự án
+Lưu lịch sử chat
+Đánh giá câu trả lời
+10. Dashboard
+
+Chức năng
+
+KPI
+Tổng khách hàng
+Tổng dự án
+Tổng hợp đồng
+Tổng nhân viên
+Tổng tài liệu
+Thống kê
+Dự án theo trạng thái
+Dự án theo khách hàng
+Dự án theo tháng
+Hợp đồng sắp hết hạn
+Tiến độ dự án
+Biểu đồ
+Pie Chart
+Bar Chart
+Line Chart
+11. Báo cáo
+
+Chức năng
+
+Xuất PDF:
+
+Báo cáo khách hàng
+Báo cáo dự án
+Báo cáo hợp đồng
+Báo cáo tiến độ
+
+Xuất Excel:
+
+Danh sách khách hàng
+Danh sách dự án
+Danh sách hợp đồng

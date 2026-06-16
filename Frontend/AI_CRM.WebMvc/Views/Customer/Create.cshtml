@@ -1,0 +1,69 @@
+@model AI_CRM.Domain.Entities.KhachHang
+@{
+    ViewData["Title"] = "Thêm Khách Hàng Mới";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0 text-dark">Thêm Khách hàng Mới</h3>
+    <a asp-action="Index" class="btn btn-light shadow-sm fw-medium d-flex align-items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<div class="glass-card p-4 border-0 shadow-sm rounded-4" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+    <form asp-action="Create" method="post">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label asp-for="CustomerCode" class="form-label fw-bold text-muted small text-uppercase">Mã khách hàng</label>
+                <input asp-for="CustomerCode" class="form-control form-control-lg bg-light border-0 shadow-none rounded-3" placeholder="Ví dụ: KH001" />
+                <span asp-validation-for="CustomerCode" class="text-danger small"></span>
+            </div>
+            
+            <div class="col-md-6">
+                <label asp-for="CompanyName" class="form-label fw-bold text-muted small text-uppercase">Tên doanh nghiệp <span class="text-danger">*</span></label>
+                <input asp-for="CompanyName" class="form-control form-control-lg bg-light border-0 shadow-none rounded-3" placeholder="Nhập tên doanh nghiệp" required />
+                <span asp-validation-for="CompanyName" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Representative" class="form-label fw-bold text-muted small text-uppercase">Người đại diện</label>
+                <input asp-for="Representative" class="form-control form-control-lg bg-light border-0 shadow-none rounded-3" placeholder="Nhập họ tên người đại diện" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Phone" class="form-label fw-bold text-muted small text-uppercase">Số điện thoại</label>
+                <input asp-for="Phone" class="form-control form-control-lg bg-light border-0 shadow-none rounded-3" placeholder="Nhập số điện thoại" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label fw-bold text-muted small text-uppercase">Email</label>
+                <input asp-for="Email" type="email" class="form-control form-control-lg bg-light border-0 shadow-none rounded-3" placeholder="Nhập email" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Website" class="form-label fw-bold text-muted small text-uppercase">Website</label>
+                <input asp-for="Website" class="form-control form-control-lg bg-light border-0 shadow-none rounded-3" placeholder="https://..." />
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Address" class="form-label fw-bold text-muted small text-uppercase">Địa chỉ</label>
+                <input asp-for="Address" class="form-control form-control-lg bg-light border-0 shadow-none rounded-3" placeholder="Nhập địa chỉ chi tiết" />
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Note" class="form-label fw-bold text-muted small text-uppercase">Ghi chú thêm</label>
+                <textarea asp-for="Note" class="form-control bg-light border-0 shadow-none rounded-3" rows="3" placeholder="Nhập ghi chú..."></textarea>
+            </div>
+            
+            <div class="col-12 text-end mt-4">
+                <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow-sm fw-bold">
+                    <i class="fa-solid fa-floppy-disk me-2"></i> Lưu khách hàng
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

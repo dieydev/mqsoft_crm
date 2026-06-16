@@ -19,38 +19,53 @@
         </div>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link active" asp-controller="Home" asp-action="Index">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">
                     <i class="fa-solid fa-chart-pie w-20px"></i> Tổng quan
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Customer" ? "active" : "")" asp-controller="Customer" asp-action="Index">
                     <i class="fa-solid fa-building w-20px"></i> Khách hàng
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fa-solid fa-project-diagram w-20px"></i> Dự án
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Contract" ? "active" : "")" asp-controller="Contract" asp-action="Index">
                     <i class="fa-solid fa-file-contract w-20px"></i> Hợp đồng
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Project" ? "active" : "")" asp-controller="Project" asp-action="Index">
+                    <i class="fa-solid fa-project-diagram w-20px"></i> Dự án phần mềm
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Task" ? "active" : "")" asp-controller="Task" asp-action="Index">
+                    <i class="fa-solid fa-tasks w-20px"></i> Tiến độ dự án
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Interaction" ? "active" : "")" asp-controller="Interaction" asp-action="Index">
+                    <i class="fa-solid fa-headset w-20px"></i> CSKH
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Document" ? "active" : "")" asp-controller="Document" asp-action="Index">
                     <i class="fa-solid fa-folder-open w-20px"></i> Tài liệu nội bộ
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fa-solid fa-robot w-20px"></i> Trợ lý AI
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Report" ? "active" : "")" asp-controller="Report" asp-action="Index">
+                    <i class="fa-solid fa-chart-line w-20px"></i> Báo cáo
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fa-solid fa-users w-20px"></i> Nhân sự
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "User" ? "active" : "")" asp-controller="User" asp-action="Index">
+                    <i class="fa-solid fa-users w-20px"></i> Người dùng
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Chatbot" ? "active" : "")" asp-controller="Chatbot" asp-action="Index">
+                    <i class="fa-solid fa-robot w-20px"></i> Trợ lý AI
                 </a>
             </li>
         </ul>

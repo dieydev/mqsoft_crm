@@ -1,64 +1,198 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using AI_CRM.Domain.Entities;
 
 namespace AI_CRM.Infrastructure.Data;
 
-public class ApplicationDbContext : IdentityDbContext<NguoiDung>
+public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
 
-    public DbSet<KhachHang> KhachHangs => Set<KhachHang>();
-    public DbSet<DuAn> DuAns => Set<DuAn>();
-    public DbSet<ThanhVienDuAn> ThanhVienDuAns => Set<ThanhVienDuAn>();
-    public DbSet<HopDong> HopDongs => Set<HopDong>();
-    public DbSet<LichSuChamSoc> LichSuChamSocs => Set<LichSuChamSoc>();
-    public DbSet<TaiLieu> TaiLieus => Set<TaiLieu>();
-    public DbSet<LichSuChat> LichSuChats => Set<LichSuChat>();
+    public DbSet<VaiTro> VaiTros { get; set; }
+    public DbSet<NguoiDung> NguoiDungs { get; set; }
+    public DbSet<KhachHang> KhachHangs { get; set; }
+    public DbSet<TrangThaiHopDong> TrangThaiHopDongs { get; set; }
+    public DbSet<HopDong> HopDongs { get; set; }
+    public DbSet<TrangThaiDuAn> TrangThaiDuAns { get; set; }
+    public DbSet<DuAn> DuAns { get; set; }
+    public DbSet<NhanVienPhuTrach> NhanVienPhuTrachs { get; set; }
+    public DbSet<DuAnNhanVien> DuAnNhanViens { get; set; }
+    public DbSet<TienDoDuAn> TienDoDuAns { get; set; }
+    public DbSet<LichSuLamViec> LichSuLamViecs { get; set; }
+    public DbSet<NhomTaiLieu> NhomTaiLieus { get; set; }
+    public DbSet<TaiLieuNoiBo> TaiLieuNoiBos { get; set; }
+    public DbSet<TaiLieuTag> TaiLieuTags { get; set; }
+    public DbSet<LichSuHoiDap> LichSuHoiDaps { get; set; }
+    public DbSet<DanhGiaCauTraLoi> DanhGiaCauTraLois { get; set; }
+    public DbSet<NhatKyHeThong> NhatKyHeThongs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<ThanhVienDuAn>()
-            .HasKey(pm => pm.Id);
-
-        builder.Entity<ThanhVienDuAn>()
-            .HasOne(pm => pm.DuAn)
-            .WithMany(p => p.ThanhViens)
-            .HasForeignKey(pm => pm.DuAnId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.Entity<ThanhVienDuAn>()
-            .HasOne(pm => pm.NguoiDung)
-            .WithMany(u => u.ThanhVienDuAns)
-            .HasForeignKey(pm => pm.NguoiDungId)
+        // NguoiDung -> VaiTro
+        builder.Entity<NguoiDung>()
+            .HasOne(u => u.VaiTro)
+            .WithMany(r => r.NguoiDungs)
+            .HasForeignKey(u => u.RoleId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Entity<LichSuChamSoc>()
-            .HasOne(ci => ci.KhachHang)
-            .WithMany(c => c.LichSuChamSocs)
-            .HasForeignKey(ci => ci.KhachHangId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.Entity<LichSuChamSoc>()
-            .HasOne(ci => ci.NhanVienPhuTrach)
-            .WithMany(u => u.LichSuChamSocs)
-            .HasForeignKey(ci => ci.NhanVienPhuTrachId)
-            .OnDelete(DeleteBehavior.Restrict);
-
+        // HopDong -> KhachHang
         builder.Entity<HopDong>()
-            .HasOne(c => c.DuAn)
-            .WithMany(p => p.HopDongs)
-            .HasForeignKey(c => c.DuAnId)
+            .HasOne(h => h.KhachHang)
+            .WithMany(k => k.HopDongs)
+            .HasForeignKey(h => h.CustomerId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Entity<DuAn>()
-            .HasOne(p => p.KhachHang)
-            .WithMany(c => c.DuAns)
-            .HasForeignKey(p => p.KhachHangId)
+        // HopDong -> TrangThaiHopDong
+        builder.Entity<HopDong>()
+            .HasOne(h => h.TrangThaiHopDong)
+            .WithMany(t => t.HopDongs)
+            .HasForeignKey(h => h.StatusId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // DuAn -> KhachHang
+        builder.Entity<DuAn>()
+            .HasOne(d => d.KhachHang)
+            .WithMany(k => k.DuAns)
+            .HasForeignKey(d => d.CustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // DuAn -> HopDong
+        builder.Entity<DuAn>()
+            .HasOne(d => d.HopDong)
+            .WithMany(h => h.DuAns)
+            .HasForeignKey(d => d.ContractId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // DuAn -> TrangThaiDuAn
+        builder.Entity<DuAn>()
+            .HasOne(d => d.TrangThaiDuAn)
+            .WithMany(t => t.DuAns)
+            .HasForeignKey(d => d.StatusId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // NhanVienPhuTrach -> NguoiDung
+        builder.Entity<NhanVienPhuTrach>()
+            .HasOne(nv => nv.NguoiDung)
+            .WithMany(u => u.NhanVienPhuTrachs)
+            .HasForeignKey(nv => nv.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // DuAnNhanVien -> DuAn & NhanVienPhuTrach
+        builder.Entity<DuAnNhanVien>()
+            .HasKey(danv => danv.AssignmentId);
+
+        builder.Entity<DuAnNhanVien>()
+            .HasOne(danv => danv.DuAn)
+            .WithMany(d => d.DuAnNhanViens)
+            .HasForeignKey(danv => danv.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<DuAnNhanVien>()
+            .HasOne(danv => danv.NhanVienPhuTrach)
+            .WithMany(nv => nv.DuAnNhanViens)
+            .HasForeignKey(danv => danv.EmployeeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // TienDoDuAn
+        builder.Entity<TienDoDuAn>()
+            .HasKey(td => td.ProgressId);
+        
+        builder.Entity<TienDoDuAn>()
+            .HasOne(td => td.DuAn)
+            .WithMany(d => d.TienDoDuAns)
+            .HasForeignKey(td => td.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<TienDoDuAn>()
+            .HasOne(td => td.NhanVienPhuTrach)
+            .WithMany(nv => nv.TienDoDuAns)
+            .HasForeignKey(td => td.UpdatedBy)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // LichSuLamViec
+        builder.Entity<LichSuLamViec>()
+            .HasKey(ls => ls.WorkLogId);
+
+        builder.Entity<LichSuLamViec>()
+            .HasOne(ls => ls.KhachHang)
+            .WithMany(k => k.LichSuLamViecs)
+            .HasForeignKey(ls => ls.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<LichSuLamViec>()
+            .HasOne(ls => ls.NhanVienPhuTrach)
+            .WithMany(nv => nv.LichSuLamViecs)
+            .HasForeignKey(ls => ls.EmployeeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // TaiLieuNoiBo
+        builder.Entity<TaiLieuNoiBo>()
+            .HasKey(tl => tl.DocumentId);
+
+        builder.Entity<TaiLieuNoiBo>()
+            .HasOne(tl => tl.NhomTaiLieu)
+            .WithMany(nt => nt.TaiLieuNoiBos)
+            .HasForeignKey(tl => tl.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<TaiLieuNoiBo>()
+            .HasOne(tl => tl.NhanVienPhuTrach)
+            .WithMany(nv => nv.TaiLieuNoiBos)
+            .HasForeignKey(tl => tl.UploadedBy)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // TaiLieuTag
+        builder.Entity<TaiLieuTag>()
+            .HasKey(t => t.TagId);
+
+        builder.Entity<TaiLieuTag>()
+            .HasOne(t => t.TaiLieuNoiBo)
+            .WithMany(tl => tl.TaiLieuTags)
+            .HasForeignKey(t => t.DocumentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // LichSuHoiDap
+        builder.Entity<LichSuHoiDap>()
+            .HasKey(ls => ls.ChatHistoryId);
+            
+        builder.Entity<LichSuHoiDap>()
+            .HasOne(ls => ls.NguoiDung)
+            .WithMany(u => u.LichSuHoiDaps)
+            .HasForeignKey(ls => ls.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // DanhGiaCauTraLoi
+        builder.Entity<DanhGiaCauTraLoi>()
+            .HasKey(dg => dg.FeedbackId);
+
+        builder.Entity<DanhGiaCauTraLoi>()
+            .HasOne(dg => dg.LichSuHoiDap)
+            .WithMany(ls => ls.DanhGiaCauTraLois)
+            .HasForeignKey(dg => dg.ChatHistoryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // NhatKyHeThong
+        builder.Entity<NhatKyHeThong>()
+            .HasKey(nk => nk.LogId);
+
+        builder.Entity<NhatKyHeThong>()
+            .HasOne(nk => nk.NguoiDung)
+            .WithMany(u => u.NhatKyHeThongs)
+            .HasForeignKey(nk => nk.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Setting PKs for simple tables
+        builder.Entity<VaiTro>().HasKey(v => v.RoleId);
+        builder.Entity<NguoiDung>().HasKey(n => n.UserId);
+        builder.Entity<KhachHang>().HasKey(k => k.CustomerId);
+        builder.Entity<TrangThaiHopDong>().HasKey(t => t.StatusId);
+        builder.Entity<HopDong>().HasKey(h => h.ContractId);
+        builder.Entity<TrangThaiDuAn>().HasKey(t => t.StatusId);
+        builder.Entity<DuAn>().HasKey(d => d.ProjectId);
+        builder.Entity<NhanVienPhuTrach>().HasKey(n => n.EmployeeId);
+        builder.Entity<NhomTaiLieu>().HasKey(n => n.CategoryId);
     }
 }
