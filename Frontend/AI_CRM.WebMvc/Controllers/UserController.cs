@@ -24,6 +24,24 @@ namespace AI_CRM.WebMvc.Controllers
                 .ToListAsync();
             return View(users);
         }
+
+        public async Task<IActionResult> Profile()
+        {
+            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("Index", "Admin");
+
+            var nhanVien = await _context.NhanVienPhuTrachs
+                .Include(nv => nv.NguoiDung)
+                .ThenInclude(nd => nd.VaiTro)
+                .FirstOrDefaultAsync(nv => nv.Email == email);
+
+            return View(nhanVien);
+        }
+
+        public IActionResult Settings()
+        {
+            return View();
+        }
     }
 }
 

@@ -15,6 +15,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = "Cookies";
+        options.DefaultSignInScheme = "ExternalCookie";
         // Do not set DefaultChallengeScheme here so we can support both Cookie and Google
     })
     .AddCookie("Cookies", options =>
@@ -23,6 +24,7 @@ builder.Services.AddAuthentication(options =>
         options.LogoutPath = "/Auth/Logout";
         options.AccessDeniedPath = "/Auth/AccessDenied";
     })
+    .AddCookie("ExternalCookie")
     .AddGoogle(options =>
     {
         options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "dummy-client-id";

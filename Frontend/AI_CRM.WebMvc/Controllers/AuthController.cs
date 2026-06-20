@@ -18,11 +18,20 @@ namespace AI_CRM.WebMvc.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login(string returnUrl = null)
+        public async Task<IActionResult> Login(string returnUrl = null)
         {
             if (User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Index", "Admin");
+                var currentRole = User.FindFirst(ClaimTypes.Role)?.Value ?? "User";
+                if (currentRole != "User")
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+                
+                // Thu hồi cookie bị kẹt của bản cũ
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                TempData["ErrorMessage"] = "Phiên đăng nhập cũ đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.";
+                return RedirectToAction("Login", "Auth");
             }
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -77,19 +86,18 @@ namespace AI_CRM.WebMvc.Controllers
                             new ClaimsPrincipal(claimsIdentity),
                             authProperties);
 
-                        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                        {
-                            return Redirect(returnUrl);
-                        }
-                        
                         // Phân quyền chuyển trang
                         if (roleName != "User")
                         {
+                            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                            {
+                                return Redirect(returnUrl);
+                            }
                             return RedirectToAction("Index", "Admin");
                         }
                         else
                         {
-                            // Tài khoản thường thì ra trang chủ
+                            // Chặn người dùng lạ vào Admin dù có returnUrl
                             return RedirectToAction("Index", "Home");
                         }
                     }
@@ -140,71 +148,16 @@ namespace AI_CRM.WebMvc.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Admin");
-            }
-            return View();
+            // Vô hiệu hóa tính năng tự do đăng ký cho hệ thống nội bộ
+            return RedirectToAction("Login");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        public IActionResult Register(RegisterViewModel model)
         {
-            if (ModelState.IsValid)
-            {
-                // Kiểm tra xem Username hoặc Email đã tồn tại chưa
-                var userExists = await _context.NguoiDungs.AnyAsync(u => u.Username == model.Username);
-                var emailExists = await _context.NhanVienPhuTrachs.AnyAsync(nv => nv.Email == model.Email);
-                
-                if (userExists)
-                {
-                    ModelState.AddModelError("Username", "Tên đăng nhập đã tồn tại.");
-                    return View(model);
-                }
-                if (emailExists)
-                {
-                    ModelState.AddModelError("Email", "Email này đã được sử dụng.");
-                    return View(model);
-                }
-
-                if (model.AgreeTerms)
-                {
-                    // Lấy Role mặc định cho nhân viên hoặc User
-                    var defaultRole = await _context.VaiTros.FirstOrDefaultAsync(r => r.RoleName == "User") 
-                        ?? await _context.VaiTros.FirstOrDefaultAsync();
-
-                    // Băm mật khẩu bằng BCrypt
-                    string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
-
-                    var newUser = new AI_CRM.Domain.Entities.NguoiDung 
-                    { 
-                        Username = model.Username, 
-                        PasswordHash = hashedPassword,
-                        IsActive = true,
-                        CreatedDate = DateTime.Now,
-                        RoleId = defaultRole?.RoleId ?? 0
-                    };
-                    
-                    _context.NguoiDungs.Add(newUser);
-                    await _context.SaveChangesAsync();
-                    
-                    // Thêm thông tin vào bảng NhanVienPhuTrach để lưu Email
-                    var newStaff = new AI_CRM.Domain.Entities.NhanVienPhuTrach
-                    {
-                        UserId = newUser.UserId,
-                        Email = model.Email,
-                        FullName = model.Username, // Lấy tạm username làm tên
-                        IsActive = true
-                    };
-                    
-                    _context.NhanVienPhuTrachs.Add(newStaff);
-                    await _context.SaveChangesAsync();
-                    
-                    return RedirectToAction("Login", new { returnUrl = "/Admin/Index" });
-                }
-            }
-            return View(model);
+            // Vô hiệu hóa tính năng tự do đăng ký cho hệ thống nội bộ
+            return RedirectToAction("Login");
         }
 
         [HttpPost]
@@ -217,18 +170,7 @@ namespace AI_CRM.WebMvc.Controllers
 
         public async Task<IActionResult> GoogleResponse(string returnUrl = null)
         {
-            var result = await HttpContext.AuthenticateAsync("Cookies");
-            if (result.Succeeded)
-            {
-                var currentRole = result.Principal.FindFirst(ClaimTypes.Role)?.Value ?? "User";
-                if (currentRole != "User")
-                {
-                    return LocalRedirect(returnUrl ?? "/Admin/Index");
-                }
-                return LocalRedirect(returnUrl ?? "/Home/Index");
-            }
-
-            var googleAuth = await HttpContext.AuthenticateAsync("Google");
+            var googleAuth = await HttpContext.AuthenticateAsync("ExternalCookie");
             if (googleAuth.Succeeded)
             {
                 var emailClaim = googleAuth.Principal.FindFirst(ClaimTypes.Email)?.Value;
@@ -254,22 +196,27 @@ namespace AI_CRM.WebMvc.Controllers
                 claims.Add(new Claim(ClaimTypes.Role, roleName));
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity));
-
-                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                {
-                    return LocalRedirect(returnUrl);
-                }
+                // Xóa ExternalCookie
+                await HttpContext.SignOutAsync("ExternalCookie");
 
                 if (roleName != "User")
                 {
+                    // Chỉ cấp Cookie chính thức cho nhân viên hợp lệ
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity));
+
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    {
+                        return LocalRedirect(returnUrl);
+                    }
                     return RedirectToAction("Index", "Admin");
                 }
                 else
                 {
-                    return RedirectToAction("Index", "Home");
+                    // Chặn người dùng lạ, KHÔNG cho đăng nhập
+                    TempData["ErrorMessage"] = "Truy cập bị từ chối. Tài khoản Gmail này không có quyền truy cập hệ thống nội bộ.";
+                    return RedirectToAction("Login");
                 }
             }
             return RedirectToAction("Login");
