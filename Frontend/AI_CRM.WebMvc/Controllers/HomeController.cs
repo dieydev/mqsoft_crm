@@ -17,13 +17,8 @@ public class HomeController : Controller
         _context = context;
     }
 
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
-        ViewBag.TotalCustomers = await _context.KhachHangs.CountAsync(k => !k.IsDeleted);
-        ViewBag.ActiveProjects = await _context.DuAns.CountAsync(d => !d.IsDeleted);
-        ViewBag.TotalContracts = await _context.HopDongs.CountAsync(h => !h.IsDeleted);
-        ViewBag.ChatbotQueries = await _context.LichSuHoiDaps.CountAsync();
-
         return View();
     }
 

@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace AI_CRM.WebMvc.Controllers
 {
+    using Microsoft.AspNetCore.Authorization;
+
+    [Authorize]
     public class UserController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,3 +26,4 @@ namespace AI_CRM.WebMvc.Controllers
         }
     }
 }
+

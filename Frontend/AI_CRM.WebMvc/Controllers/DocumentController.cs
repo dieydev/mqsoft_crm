@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace AI_CRM.WebMvc.Controllers
 {
+    using Microsoft.AspNetCore.Authorization;
+
+    [Authorize]
     public class DocumentController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -29,3 +32,4 @@ namespace AI_CRM.WebMvc.Controllers
         }
     }
 }
+

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MQSoft CRM</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- AOS Animation CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="~/css/user-site.css" asp-append-version="true" />
+</head>
+<body data-bs-spy="scroll" data-bs-target=".navbar">
+    
+    <!-- Header/Navbar -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light fixed-top transition-all" id="mainNav">
+            <div class="container py-2">
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" alt="MQSoft Logo" style="max-height: 50px; object-fit: contain;" />
+                </a>
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPublic" aria-controls="navbarPublic"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="fa-solid fa-bars fs-3 text-primary"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarPublic">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-medium">
+                        <li class="nav-item px-2">
+                            <a class="nav-link active" asp-area="" asp-controller="Home" asp-action="Index">Trang Chủ</a>
+                        </li>
+                        <li class="nav-item px-2">
+                            <a class="nav-link" href="#services">Chuyên Khoa</a>
+                        </li>
+                        <li class="nav-item px-2">
+                            <a class="nav-link" href="#about">Giới Thiệu</a>
+                        </li>
+                        <li class="nav-item px-2">
+                            <a class="nav-link" href="#team">Bác Sĩ</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex align-items-center gap-3">
+                        <a class="btn-text" asp-controller="Admin" asp-action="Index">
+                            <i class="fa-regular fa-user me-1"></i> Đăng nhập
+                        </a>
+                        <a class="btn-premium" href="#appointment">
+                            <span>Đặt Lịch Ngay</span>
+                            <i class="fa-solid fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <!-- Footer Premium Light -->
+    <footer class="footer-premium pt-5 pb-4 mt-5 border-top border-light-subtle bg-white">
+        <div class="container">
+            <div class="row g-5 mb-5">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <a class="navbar-brand d-flex align-items-center mb-4 text-decoration-none" href="#">
+                        <img src="~/images/logo.png" alt="MQSoft Logo" style="max-height: 55px; object-fit: contain;" />
+                    </a>
+                    <p class="text-muted pe-4 mb-4 lh-lg">
+                        Tiên phong ứng dụng công nghệ 4.0 vào y tế, mang đến trải nghiệm chăm sóc sức khỏe cá nhân hóa, đẳng cấp và tin cậy cho mọi gia đình.
+                    </p>
+                    <div class="social-links d-flex gap-3">
+                        <a href="#" class="social-btn"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="social-btn"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#" class="social-btn"><i class="fa-brands fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <h5 class="text-dark fw-bold mb-4">Khám Phá</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="#">Trang chủ</a></li>
+                        <li><a href="#about">Về chúng tôi</a></li>
+                        <li><a href="#services">Dịch vụ</a></li>
+                        <li><a href="#team">Đội ngũ chuyên gia</a></li>
+                        <li><a href="#">Tin tức y tế</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <h5 class="text-dark fw-bold mb-4">Chuyên Khoa</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="#">Nội Tim Mạch</a></li>
+                        <li><a href="#">Nha Khoa Thẩm Mỹ</a></li>
+                        <li><a href="#">Khoa Nhi & Sơ Sinh</a></li>
+                        <li><a href="#">Thần Kinh Học</a></li>
+                        <li><a href="#">Chẩn Đoán Hình Ảnh</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <h5 class="text-dark fw-bold mb-4">Liên Hệ</h5>
+                    <div class="contact-info text-muted">
+                        <p class="d-flex align-items-start mb-3">
+                            <i class="fa-solid fa-location-dot mt-1 me-3 text-primary fs-5"></i>
+                            <span>Tòa nhà MQSoft, 123 Đường Công Nghệ, Quận 1, TP.HCM</span>
+                        </p>
+                        <p class="d-flex align-items-center mb-3">
+                            <i class="fa-solid fa-phone me-3 text-primary fs-5"></i>
+                            <span class="fw-bold text-dark">Hotline: 1900 8888</span>
+                        </p>
+                        <p class="d-flex align-items-center">
+                            <i class="fa-solid fa-envelope me-3 text-primary fs-5"></i>
+                            <span>hello@mqsoft.vn</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-top border-light-subtle pt-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
+                <p class="text-muted mb-0 small fw-medium">&copy; 2026 MQSoft CRM. Đã đăng ký bản quyền.</p>
+                <div class="footer-bottom-links mt-3 mt-md-0 small">
+                    <a href="#" class="text-muted me-3 text-decoration-none hover-primary">Điều khoản sử dụng</a>
+                    <a href="#" class="text-muted text-decoration-none hover-primary">Chính sách bảo mật</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AOS Animation JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const nav = document.getElementById('mainNav');
+            if (window.scrollY > 50) {
+                nav.classList.add('glass-nav', 'shadow-sm');
+                nav.classList.remove('py-2');
+            } else {
+                nav.classList.remove('glass-nav', 'shadow-sm');
+                nav.classList.add('py-2');
+            }
+        });
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
