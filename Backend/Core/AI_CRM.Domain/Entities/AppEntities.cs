@@ -31,7 +31,7 @@ namespace AI_CRM.Domain.Entities
     public class KhachHang
     {
         public int CustomerId { get; set; }
-        public string CustomerCode { get; set; }
+        public string CustomerCode { get; set; } // Mã nội bộ CRM
         public string CompanyName { get; set; }
         public string Representative { get; set; }
         public string Email { get; set; }
@@ -39,6 +39,21 @@ namespace AI_CRM.Domain.Entities
         public string Address { get; set; }
         public string Website { get; set; }
         public string Note { get; set; }
+        
+        // --- CÁC TRƯỜNG ĐẶC THÙ Y TẾ ---
+        public string TaxCode { get; set; } // Mã số thuế
+        public string FacilityCode { get; set; } // Mã CSKCB (Mã cơ sở khám chữa bệnh)
+        public string HospitalLevel { get; set; } // Tuyến bệnh viện (TW, Tỉnh, Huyện, Xã)
+        public string HospitalClass { get; set; } // Hạng bệnh viện (Đặc biệt, I, II, III, IV, Chưa phân hạng)
+        public int? BedCount { get; set; } // Số giường bệnh kế hoạch
+        public int? DailyOutpatients { get; set; } // Lượt khám trung bình/ngày
+        public string CurrentSoftware { get; set; } // Hiện trạng phần mềm cũ đang dùng
+        
+        // --- ĐẦU MỐI LIÊN HỆ CNTT ---
+        public string ITContactName { get; set; } // Tên trưởng phòng/nhân viên IT
+        public string ITContactPhone { get; set; } // SĐT IT
+        public string ITContactEmail { get; set; } // Email IT
+
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public bool IsDeleted { get; set; } = false;
 

@@ -21,5 +21,10 @@ namespace AI_CRM.WebMvc.Controllers
                 .ToListAsync();
             return View(history);
         }
+
+        public IActionResult Chat()
+        {
+            return View();
+        }
     }
 }

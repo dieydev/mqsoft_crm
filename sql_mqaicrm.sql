@@ -42,6 +42,29 @@ CREATE TABLE KhachHang (
 );
 
 -- ==========================================
+-- SỬA LỖI: CẬP NHẬT TRƯỜNG ĐẶC THÙ Y TẾ CHO BẢNG KHACHHANG
+-- ==========================================
+
+ALTER TABLE KhachHang -- Đã sửa từ KhachHangs thành KhachHang
+ADD 
+    -- 1. Mã số thuế
+    TaxCode NVARCHAR(50) NULL,
+    -- 2. Thông tin quy mô Bệnh viện
+    FacilityCode NVARCHAR(50) NULL,           -- Mã CSKCB do Bộ Y Tế cấp
+    HospitalLevel NVARCHAR(100) NULL,         -- Tuyến bệnh viện (VD: Tuyến Tỉnh, Tuyến Huyện)
+    HospitalClass NVARCHAR(100) NULL,         -- Hạng bệnh viện (VD: Hạng I, Hạng II)
+    BedCount INT NULL,                        -- Số giường bệnh
+    DailyOutpatients INT NULL,                -- Số lượt khám trung bình/ngày
+    CurrentSoftware NVARCHAR(MAX) NULL,       -- Hiện trạng phần mềm cũ đang dùng
+    
+    -- 3. Thông tin liên hệ đầu mối IT (Quan trọng để triển khai dự án phần mềm)
+    ITContactName NVARCHAR(100) NULL,         -- Tên Trưởng/Phó phòng IT
+    ITContactPhone NVARCHAR(50) NULL,         -- Số điện thoại IT
+    ITContactEmail NVARCHAR(100) NULL;        -- Email IT
+GO
+
+
+-- ==========================================
 -- 4. TRANGTHAIHOPDONG
 -- ==========================================
 CREATE TABLE TrangThaiHopDong (

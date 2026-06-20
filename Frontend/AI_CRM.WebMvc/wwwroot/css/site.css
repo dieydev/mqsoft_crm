@@ -81,6 +81,15 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    transition: margin-left 0.3s ease;
+}
+
+body.sidebar-collapsed .sidebar {
+    transform: translateX(-260px);
+}
+
+body.sidebar-collapsed .main-content {
+    margin-left: 0;
 }
 
 /* Topbar */

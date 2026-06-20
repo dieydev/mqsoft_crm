@@ -22,5 +22,10 @@ namespace AI_CRM.WebMvc.Controllers
                 .ToListAsync();
             return View(projects);
         }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
     }
 }

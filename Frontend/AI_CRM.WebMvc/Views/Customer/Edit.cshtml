@@ -1,0 +1,185 @@
+@model AI_CRM.Domain.Entities.KhachHang
+@{
+    ViewData["Title"] = "Chỉnh sửa thông tin khách hàng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Cập nhật Khách hàng</h3>
+    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm fw-medium">
+        <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+    </a>
+</div>
+
+<div class="glass-card border-0 shadow-sm rounded-4" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="CustomerId" />
+        <input type="hidden" asp-for="CreatedDate" />
+        <input type="hidden" asp-for="IsDeleted" />
+
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs nav-fill border-bottom-0 bg-light rounded-top-4 p-2 gap-2" id="customerTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active rounded-3 fw-bold" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin-pane" type="button" role="tab" aria-selected="true">
+                    <i class="fa-solid fa-building me-2"></i>Thông tin hành chính
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-3 fw-bold" id="medical-tab" data-bs-toggle="tab" data-bs-target="#medical-pane" type="button" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-hospital me-2"></i>Quy mô & Đặc thù Y tế
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-3 fw-bold" id="it-tab" data-bs-toggle="tab" data-bs-target="#it-pane" type="button" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-network-wired me-2"></i>Đầu mối liên hệ IT
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab content -->
+        <div class="tab-content p-4" id="customerTabsContent">
+            
+            <!-- TAB 1: THÔNG TIN HÀNH CHÍNH -->
+            <div class="tab-pane fade show active" id="admin-pane" role="tabpanel" tabindex="0">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label asp-for="CustomerCode" class="form-label fw-bold text-muted small text-uppercase">Mã khách hàng nội bộ</label>
+                        <input asp-for="CustomerCode" class="form-control bg-light border-0 shadow-none rounded-3 py-2" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="TaxCode" class="form-label fw-bold text-muted small text-uppercase">Mã số thuế</label>
+                        <input asp-for="TaxCode" class="form-control bg-light border-0 shadow-none rounded-3 py-2" placeholder="Nhập MST..." />
+                    </div>
+                    <div class="col-md-12">
+                        <label asp-for="CompanyName" class="form-label fw-bold text-muted small text-uppercase">Tên Bệnh viện / Phòng khám <span class="text-danger">*</span></label>
+                        <input asp-for="CompanyName" class="form-control bg-light border-0 shadow-none rounded-3 py-2" placeholder="Ví dụ: Bệnh viện Đa khoa tỉnh..." required />
+                        <span asp-validation-for="CompanyName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Representative" class="form-label fw-bold text-muted small text-uppercase">Ban Giám đốc (Người đại diện)</label>
+                        <input asp-for="Representative" class="form-control bg-light border-0 shadow-none rounded-3 py-2" placeholder="Tên Giám đốc/Phó Giám đốc..." />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Phone" class="form-label fw-bold text-muted small text-uppercase">Số điện thoại chung</label>
+                        <input asp-for="Phone" class="form-control bg-light border-0 shadow-none rounded-3 py-2" placeholder="SĐT Hành chính..." />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label fw-bold text-muted small text-uppercase">Email chung</label>
+                        <input asp-for="Email" type="email" class="form-control bg-light border-0 shadow-none rounded-3 py-2" placeholder="contact@benhvien.vn" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Website" class="form-label fw-bold text-muted small text-uppercase">Website</label>
+                        <input asp-for="Website" class="form-control bg-light border-0 shadow-none rounded-3 py-2" placeholder="https://..." />
+                    </div>
+                    <div class="col-md-12">
+                        <label asp-for="Address" class="form-label fw-bold text-muted small text-uppercase">Địa chỉ</label>
+                        <input asp-for="Address" class="form-control bg-light border-0 shadow-none rounded-3 py-2" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/TP..." />
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: QUY MÔ & ĐẶC THÙ Y TẾ -->
+            <div class="tab-pane fade" id="medical-pane" role="tabpanel" tabindex="0">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label asp-for="FacilityCode" class="form-label fw-bold text-muted small text-uppercase">Mã CSKCB (Bộ Y Tế)</label>
+                        <input asp-for="FacilityCode" class="form-control bg-light border-0 shadow-none rounded-3 py-2 text-primary fw-bold" placeholder="VD: 79001..." />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="HospitalLevel" class="form-label fw-bold text-muted small text-uppercase">Tuyến bệnh viện</label>
+                        <select asp-for="HospitalLevel" class="form-select bg-light border-0 shadow-none rounded-3 py-2">
+                            <option value="">-- Chọn tuyến --</option>
+                            <option value="Tuyến Trung ương">Tuyến Trung ương</option>
+                            <option value="Tuyến Tỉnh/Thành phố">Tuyến Tỉnh/Thành phố</option>
+                            <option value="Tuyến Quận/Huyện">Tuyến Quận/Huyện</option>
+                            <option value="Tuyến Xã/Phường">Tuyến Xã/Phường</option>
+                            <option value="Phòng khám tư nhân">Phòng khám tư nhân</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="HospitalClass" class="form-label fw-bold text-muted small text-uppercase">Hạng bệnh viện</label>
+                        <select asp-for="HospitalClass" class="form-select bg-light border-0 shadow-none rounded-3 py-2">
+                            <option value="">-- Chọn hạng --</option>
+                            <option value="Hạng Đặc biệt">Hạng Đặc biệt</option>
+                            <option value="Hạng I">Hạng I</option>
+                            <option value="Hạng II">Hạng II</option>
+                            <option value="Hạng III">Hạng III</option>
+                            <option value="Hạng IV">Hạng IV</option>
+                            <option value="Chưa xếp hạng">Chưa xếp hạng</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="BedCount" class="form-label fw-bold text-muted small text-uppercase">Số giường bệnh</label>
+                        <div class="input-group">
+                            <input asp-for="BedCount" type="number" class="form-control bg-light border-0 shadow-none rounded-start-3 py-2" />
+                            <span class="input-group-text bg-light border-0 text-muted rounded-end-3">giường</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="DailyOutpatients" class="form-label fw-bold text-muted small text-uppercase">Lượt khám TB/ngày</label>
+                        <div class="input-group">
+                            <input asp-for="DailyOutpatients" type="number" class="form-control bg-light border-0 shadow-none rounded-start-3 py-2" />
+                            <span class="input-group-text bg-light border-0 text-muted rounded-end-3">lượt</span>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label asp-for="CurrentSoftware" class="form-label fw-bold text-muted small text-uppercase">Hiện trạng phần mềm (HIS/LIS/PACS cũ)</label>
+                        <textarea asp-for="CurrentSoftware" class="form-control bg-light border-0 shadow-none rounded-3 py-2" rows="3" placeholder="Đang dùng HIS của VNPT, Viettel, FPT hay tự build? Ưu/nhược điểm hiện tại..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: ĐẦU MỐI LIÊN HỆ IT -->
+            <div class="tab-pane fade" id="it-pane" role="tabpanel" tabindex="0">
+                <div class="row g-4">
+                    <div class="col-md-12 mb-2">
+                        <div class="alert alert-primary d-flex align-items-center mb-0 border-0 rounded-3 shadow-sm" role="alert">
+                            <i class="fa-solid fa-circle-info fs-4 me-3"></i>
+                            <div>Đây là thông tin liên hệ của Trưởng phòng/Phó phòng hoặc Chuyên viên IT phụ trách dự án phần mềm tại Bệnh viện. Dùng để trao đổi kỹ thuật.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="ITContactName" class="form-label fw-bold text-muted small text-uppercase">Tên đầu mối IT</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-muted rounded-start-3"><i class="fa-solid fa-user-tie"></i></span>
+                            <input asp-for="ITContactName" class="form-control bg-light border-0 shadow-none rounded-end-3 py-2" placeholder="Họ và tên..." />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="ITContactPhone" class="form-label fw-bold text-muted small text-uppercase">Số điện thoại IT</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-muted rounded-start-3"><i class="fa-solid fa-mobile-screen"></i></span>
+                            <input asp-for="ITContactPhone" class="form-control bg-light border-0 shadow-none rounded-end-3 py-2" placeholder="09xxxx..." />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="ITContactEmail" class="form-label fw-bold text-muted small text-uppercase">Email IT</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 text-muted rounded-start-3"><i class="fa-solid fa-envelope"></i></span>
+                            <input asp-for="ITContactEmail" type="email" class="form-control bg-light border-0 shadow-none rounded-end-3 py-2" placeholder="Email công việc..." />
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label asp-for="Note" class="form-label fw-bold text-muted small text-uppercase">Ghi chú chiến lược tiếp cận</label>
+                        <textarea asp-for="Note" class="form-control bg-light border-0 shadow-none rounded-3 py-2" rows="3" placeholder="Ghi chú thêm về thái độ hợp tác của IT, các yêu cầu kỹ thuật đặc biệt, hoặc lịch hẹn..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- End Tab content -->
+
+        <div class="card-footer bg-white border-top-0 p-4 text-end rounded-bottom-4">
+            <button type="submit" class="btn btn-warning rounded-pill px-5 py-2 shadow-sm fw-bold text-dark">
+                <i class="fa-solid fa-save me-2"></i> Lưu cập nhật hồ sơ Y tế
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <style>
+        .nav-tabs .nav-link { border: none; color: #64748b; transition: all 0.3s; }
+        .nav-tabs .nav-link:hover { background: #f1f5f9; color: #0f172a; }
+        .nav-tabs .nav-link.active { background: #fff; color: var(--primary-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    </style>
+}

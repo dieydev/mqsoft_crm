@@ -1,0 +1,53 @@
+@model AI_CRM.Domain.Entities.HopDong
+@{
+    ViewData["Title"] = "Thêm mới Hợp đồng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-file-contract me-2 text-primary"></i>Thêm Hợp đồng mới</h3>
+    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm fw-medium">
+        <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+    </a>
+</div>
+
+<div class="glass-card p-4 border-0 shadow-sm rounded-4 bg-white">
+    <form>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small text-uppercase">Khách hàng</label>
+                <select class="form-select bg-light border-0 shadow-none rounded-3 py-2">
+                    <option>-- Chọn khách hàng --</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small text-uppercase">Số hợp đồng</label>
+                <input type="text" class="form-control bg-light border-0 shadow-none rounded-3 py-2" placeholder="VD: HD-2026-001">
+            </div>
+            <div class="col-md-12">
+                <label class="form-label fw-bold text-muted small text-uppercase">Tên hợp đồng</label>
+                <input type="text" class="form-control bg-light border-0 shadow-none rounded-3 py-2" placeholder="Nhập tên hợp đồng...">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-muted small text-uppercase">Giá trị hợp đồng (VNĐ)</label>
+                <input type="number" class="form-control bg-light border-0 shadow-none rounded-3 py-2">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-muted small text-uppercase">Ngày ký</label>
+                <input type="date" class="form-control bg-light border-0 shadow-none rounded-3 py-2">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-muted small text-uppercase">Ngày hết hạn</label>
+                <input type="date" class="form-control bg-light border-0 shadow-none rounded-3 py-2">
+            </div>
+            <div class="col-md-12">
+                <label class="form-label fw-bold text-muted small text-uppercase">File đính kèm (PDF)</label>
+                <input type="file" class="form-control bg-light border-0 shadow-none rounded-3 py-2" accept=".pdf">
+            </div>
+            <div class="col-12 text-end mt-4">
+                <button type="button" class="btn btn-primary rounded-pill px-5 py-2 shadow-sm fw-bold">
+                    <i class="fa-solid fa-save me-2"></i> Lưu Hợp đồng
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
