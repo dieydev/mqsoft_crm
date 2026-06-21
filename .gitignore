@@ -204,3 +204,8 @@ ASALocalRun/
 # Rider
 .idea/
 *.sln.iml
+
+# Personal Notes and DB Backups
+CSDL.txt
+DA.txt
+sql_mqaicrm.sql
