@@ -1,25 +1,149 @@
 @model IEnumerable<AI_CRM.Domain.Entities.NguoiDung>
 @{
     ViewData["Title"] = "Quản lý người dùng";
+    var roles = ViewBag.Roles as List<AI_CRM.Domain.Entities.VaiTro> ?? new List<AI_CRM.Domain.Entities.VaiTro>();
+    var currentFilter = ViewData["CurrentFilter"]?.ToString() ?? "";
+    var currentRole = ViewData["CurrentRole"]?.ToString() ?? "";
+    var currentStatus = ViewData["CurrentStatus"]?.ToString() ?? "";
+    var isAdmin = User.IsInRole("Admin");
 }
 
+<!-- Thông báo -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 shadow-sm" role="alert">
+        <i class="fa-solid fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 shadow-sm" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-users me-2 text-primary"></i>Quản lý Người dùng & Phân quyền</h3>
-    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-medium d-flex align-items-center gap-2">
-        <i class="fa-solid fa-user-plus"></i> Thêm tài khoản
-    </a>
+    <div>
+        <h3 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-users-gear me-2 text-primary"></i>Quản lý Người dùng & Phân quyền</h3>
+        <p class="text-muted mb-0 small">Quản lý tài khoản, phân quyền và bảo mật hệ thống</p>
+    </div>
+    @if (isAdmin)
+    {
+        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-medium d-flex align-items-center gap-2">
+            <i class="fa-solid fa-user-plus"></i> Thêm tài khoản
+        </a>
+    }
 </div>
 
+<!-- Thống kê nhanh -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="glass-card p-3 border-0 rounded-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon bg-primary-light"><i class="fa-solid fa-users"></i></div>
+                <div>
+                    <div class="text-muted small fw-medium">Tổng tài khoản</div>
+                    <div class="fw-bold fs-5 text-dark">@(Model?.Count() ?? 0)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="glass-card p-3 border-0 rounded-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon bg-success-light"><i class="fa-solid fa-user-check"></i></div>
+                <div>
+                    <div class="text-muted small fw-medium">Đang hoạt động</div>
+                    <div class="fw-bold fs-5 text-success">@(Model?.Count(u => u.IsActive) ?? 0)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="glass-card p-3 border-0 rounded-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon bg-danger-light"><i class="fa-solid fa-user-lock"></i></div>
+                <div>
+                    <div class="text-muted small fw-medium">Đã khóa</div>
+                    <div class="fw-bold fs-5 text-danger">@(Model?.Count(u => !u.IsActive) ?? 0)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="glass-card p-3 border-0 rounded-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon bg-warning-light"><i class="fa-solid fa-user-shield"></i></div>
+                <div>
+                    <div class="text-muted small fw-medium">Vai trò</div>
+                    <div class="fw-bold fs-5 text-warning">@roles.Count</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bộ lọc và tìm kiếm -->
+<div class="glass-card border-0 shadow-sm rounded-4 p-3 mb-4" style="background: #fff;">
+    <form asp-action="Index" method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label text-muted small fw-bold">
+                <i class="fa-solid fa-search me-1"></i> Tìm kiếm
+            </label>
+            <input type="text" name="searchString" value="@currentFilter" class="form-control rounded-3" placeholder="Nhập tên đăng nhập..." />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label text-muted small fw-bold">
+                <i class="fa-solid fa-user-tag me-1"></i> Vai trò
+            </label>
+            <select name="roleFilter" class="form-select rounded-3">
+                <option value="">-- Tất cả vai trò --</option>
+                @foreach (var role in roles)
+                {
+                    <option value="@role.RoleId" selected="@(currentRole == role.RoleId.ToString())">@role.RoleName</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label text-muted small fw-bold">
+                <i class="fa-solid fa-filter me-1"></i> Trạng thái
+            </label>
+            <select name="statusFilter" class="form-select rounded-3">
+                <option value="">-- Tất cả --</option>
+                <option value="1" selected="@(currentStatus == "1")">Đang hoạt động</option>
+                <option value="2" selected="@(currentStatus == "2")">Đã khóa</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary rounded-3 flex-fill">
+                    <i class="fa-solid fa-search"></i> Lọc
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-3">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Bảng danh sách người dùng -->
 <div class="glass-card overflow-hidden border-0 shadow-sm rounded-4" style="background: #fff;">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table class="table table-hover align-middle mb-0" id="userTable">
             <thead class="bg-light text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
                 <tr>
                     <th class="ps-4 py-3 fw-bold border-bottom-0">Tài khoản</th>
                     <th class="py-3 fw-bold border-bottom-0">Vai trò</th>
                     <th class="py-3 fw-bold border-bottom-0">Trạng thái</th>
                     <th class="py-3 fw-bold border-bottom-0">Ngày tạo</th>
-                    <th class="text-end pe-4 py-3 fw-bold border-bottom-0">Thao tác</th>
+                    @if (isAdmin)
+                    {
+                        <th class="text-end pe-4 py-3 fw-bold border-bottom-0">Thao tác</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -30,7 +154,7 @@
                         <tr>
                             <td class="ps-4 py-3">
                                 <div class="d-flex align-items-center">
-                                    <img src="https://ui-avatars.com/api/?name=@item.Username&background=random" class="rounded-circle me-3" style="width: 40px; height: 40px;" />
+                                    <img src="https://ui-avatars.com/api/?name=@item.Username&background=random&bold=true" class="rounded-circle me-3 shadow-sm" style="width: 42px; height: 42px;" />
                                     <div>
                                         <h6 class="mb-0 fw-bold text-dark">@item.Username</h6>
                                         <small class="text-muted">ID: #@item.UserId</small>
@@ -38,32 +162,97 @@
                                 </div>
                             </td>
                             <td class="py-3">
-                                <span class="badge bg-primary-light text-primary px-3 rounded-pill">@(item.VaiTro?.RoleName ?? "Chưa phân quyền")</span>
+                                @{
+                                    var roleName = item.VaiTro?.RoleName ?? "Chưa phân quyền";
+                                    var roleBadgeClass = roleName switch
+                                    {
+                                        "Admin" => "bg-danger text-white",
+                                        "Manager" => "bg-warning text-dark",
+                                        "Employee" => "bg-primary-light text-primary",
+                                        _ => "bg-secondary text-white"
+                                    };
+                                }
+                                <span class="badge @roleBadgeClass px-3 py-2 rounded-pill fw-medium">
+                                    <i class="fa-solid @(roleName == "Admin" ? "fa-crown" : roleName == "Manager" ? "fa-star" : "fa-user") me-1"></i>
+                                    @roleName
+                                </span>
                             </td>
                             <td class="py-3">
                                 @if (item.IsActive)
                                 {
-                                    <span class="badge bg-success-light text-success"><i class="fa-solid fa-check-circle me-1"></i>Đang hoạt động</span>
+                                    <span class="badge bg-success-light text-success px-3 py-2 rounded-pill">
+                                        <i class="fa-solid fa-check-circle me-1"></i>Đang hoạt động
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-danger-light text-danger"><i class="fa-solid fa-ban me-1"></i>Đã khóa</span>
+                                    <span class="badge bg-danger-light text-danger px-3 py-2 rounded-pill">
+                                        <i class="fa-solid fa-ban me-1"></i>Đã khóa
+                                    </span>
                                 }
                             </td>
-                            <td class="py-3 text-muted">@item.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td class="text-end pe-4 py-3">
-                                <button class="btn btn-sm btn-light text-warning shadow-sm rounded-3 px-2 py-1" title="Đổi quyền"><i class="fa-solid fa-user-shield"></i></button>
-                                <button class="btn btn-sm btn-light text-danger shadow-sm rounded-3 px-2 py-1" title="Khóa/Xóa"><i class="fa-solid fa-lock"></i></button>
+                            <td class="py-3 text-muted">
+                                <i class="fa-regular fa-calendar me-1"></i>
+                                @item.CreatedDate.ToString("dd/MM/yyyy HH:mm")
                             </td>
+                            @if (isAdmin)
+                            {
+                                <td class="text-end pe-4 py-3">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <a asp-action="Details" asp-route-id="@item.UserId" class="btn btn-sm btn-light text-info shadow-sm rounded-3 px-2 py-1" title="Xem chi tiết">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.UserId" class="btn btn-sm btn-light text-primary shadow-sm rounded-3 px-2 py-1" title="Sửa">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-light text-warning shadow-sm rounded-3 px-2 py-1"
+                                                title="Đổi quyền"
+                                                data-bs-toggle="modal" data-bs-target="#changeRoleModal"
+                                                data-userid="@item.UserId"
+                                                data-username="@item.Username"
+                                                data-currentrole="@(item.VaiTro?.RoleName ?? "N/A")"
+                                                data-currentroleid="@item.RoleId">
+                                            <i class="fa-solid fa-user-shield"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-light text-success shadow-sm rounded-3 px-2 py-1"
+                                                title="Reset mật khẩu"
+                                                data-bs-toggle="modal" data-bs-target="#resetPasswordModal"
+                                                data-userid="@item.UserId"
+                                                data-username="@item.Username">
+                                            <i class="fa-solid fa-key"></i>
+                                        </button>
+                                        <form asp-action="ToggleStatus" asp-route-id="@item.UserId" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-light @(item.IsActive ? "text-danger" : "text-success") shadow-sm rounded-3 px-2 py-1"
+                                                    title="@(item.IsActive ? "Khóa tài khoản" : "Mở khóa tài khoản")"
+                                                    onclick="return confirm('@(item.IsActive ? "Bạn có chắc muốn KHÓA tài khoản này?" : "Bạn có chắc muốn MỞ KHÓA tài khoản này?")')">
+                                                <i class="fa-solid @(item.IsActive ? "fa-lock" : "fa-lock-open")"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-action="Delete" asp-route-id="@item.UserId" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-light text-danger shadow-sm rounded-3 px-2 py-1"
+                                                    title="Xóa tài khoản"
+                                                    onclick="return confirm('⚠️ Bạn có chắc muốn XÓA VĨNH VIỄN tài khoản \'@item.Username\'? Hành động này không thể hoàn tác!')">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            }
                         </tr>
                     }
                 }
                 else
                 {
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">
+                        <td colspan="@(isAdmin ? 5 : 4)" class="text-center py-5 text-muted">
                             <i class="fa-solid fa-users-slash fs-1 mb-3 opacity-50"></i>
                             <p class="mb-0 fs-5">Chưa có dữ liệu người dùng.</p>
+                            @if (!string.IsNullOrEmpty(currentFilter))
+                            {
+                                <p class="small text-muted mt-2">Không tìm thấy kết quả phù hợp với "<strong>@currentFilter</strong>"</p>
+                            }
                         </td>
                     </tr>
                 }
@@ -71,3 +260,192 @@
         </table>
     </div>
 </div>
+
+@if (isAdmin)
+{
+    <!-- Modal Đổi quyền -->
+    <div class="modal fade" id="changeRoleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fa-solid fa-user-shield text-warning me-2"></i> Phân quyền người dùng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form asp-action="ChangeRole" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <input type="hidden" name="UserId" id="changeRoleUserId" />
+                        <input type="hidden" name="Username" id="changeRoleUsername" />
+                        <input type="hidden" name="CurrentRole" id="changeRoleCurrentRole" />
+
+                        <div class="alert alert-light border rounded-3 mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <img id="changeRoleAvatar" src="" class="rounded-circle" style="width: 50px; height: 50px;" />
+                                <div>
+                                    <h6 class="fw-bold mb-0" id="changeRoleDisplayName"></h6>
+                                    <small class="text-muted">Vai trò hiện tại: <span class="badge bg-secondary" id="changeRoleCurrentRoleDisplay"></span></small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small">Chọn vai trò mới</label>
+                            <select name="NewRoleId" class="form-select rounded-3" id="changeRoleSelect" required>
+                                @foreach (var role in roles)
+                                {
+                                    <option value="@role.RoleId">@role.RoleName - @(role.Description ?? "Không có mô tả")</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="alert alert-warning border-0 rounded-3 small mb-0">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                            <strong>Lưu ý:</strong> Thay đổi vai trò sẽ ảnh hưởng đến quyền truy cập của người dùng trên toàn hệ thống. Người dùng cần đăng nhập lại để áp dụng thay đổi.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-warning rounded-pill px-4 fw-medium">
+                            <i class="fa-solid fa-user-shield me-1"></i> Xác nhận phân quyền
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Reset mật khẩu -->
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fa-solid fa-key text-success me-2"></i> Đặt lại mật khẩu
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form asp-action="ResetPassword" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <input type="hidden" name="UserId" id="resetPasswordUserId" />
+                        <input type="hidden" name="Username" id="resetPasswordUsername" />
+
+                        <div class="alert alert-light border rounded-3 mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <img id="resetPasswordAvatar" src="" class="rounded-circle" style="width: 50px; height: 50px;" />
+                                <div>
+                                    <h6 class="fw-bold mb-0" id="resetPasswordDisplayName"></h6>
+                                    <small class="text-muted">Đặt lại mật khẩu cho tài khoản này</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small">Mật khẩu mới</label>
+                            <div class="input-group">
+                                <input type="password" name="NewPassword" class="form-control rounded-start-3" placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)..." required minlength="6" id="resetNewPassword" />
+                                <button class="btn btn-outline-secondary rounded-end-3" type="button" onclick="toggleResetPassword('resetNewPassword')">
+                                    <i class="fa-solid fa-eye" id="resetNewPasswordIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small">Xác nhận mật khẩu mới</label>
+                            <div class="input-group">
+                                <input type="password" name="ConfirmNewPassword" class="form-control rounded-start-3" placeholder="Nhập lại mật khẩu mới..." required minlength="6" id="resetConfirmPassword" />
+                                <button class="btn btn-outline-secondary rounded-end-3" type="button" onclick="toggleResetPassword('resetConfirmPassword')">
+                                    <i class="fa-solid fa-eye" id="resetConfirmPasswordIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill" onclick="generateRandomPassword()">
+                                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Tạo mật khẩu ngẫu nhiên
+                            </button>
+                        </div>
+
+                        <div class="alert alert-info border-0 rounded-3 small mb-0">
+                            <i class="fa-solid fa-circle-info me-1"></i>
+                            Sau khi đặt lại, người dùng cần sử dụng mật khẩu mới để đăng nhập.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-medium">
+                            <i class="fa-solid fa-key me-1"></i> Đặt lại mật khẩu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Modal Đổi quyền - populate dữ liệu
+        document.getElementById('changeRoleModal')?.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var userId = button.getAttribute('data-userid');
+            var username = button.getAttribute('data-username');
+            var currentRole = button.getAttribute('data-currentrole');
+            var currentRoleId = button.getAttribute('data-currentroleid');
+
+            document.getElementById('changeRoleUserId').value = userId;
+            document.getElementById('changeRoleUsername').value = username;
+            document.getElementById('changeRoleCurrentRole').value = currentRole;
+            document.getElementById('changeRoleDisplayName').textContent = username;
+            document.getElementById('changeRoleCurrentRoleDisplay').textContent = currentRole;
+            document.getElementById('changeRoleAvatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(username) + '&background=random&bold=true';
+            document.getElementById('changeRoleSelect').value = currentRoleId;
+        });
+
+        // Modal Reset mật khẩu - populate dữ liệu
+        document.getElementById('resetPasswordModal')?.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var userId = button.getAttribute('data-userid');
+            var username = button.getAttribute('data-username');
+
+            document.getElementById('resetPasswordUserId').value = userId;
+            document.getElementById('resetPasswordUsername').value = username;
+            document.getElementById('resetPasswordDisplayName').textContent = username;
+            document.getElementById('resetPasswordAvatar').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(username) + '&background=random&bold=true';
+            
+            // Reset fields
+            document.getElementById('resetNewPassword').value = '';
+            document.getElementById('resetConfirmPassword').value = '';
+        });
+
+        // Toggle hiển thị mật khẩu
+        function toggleResetPassword(inputId) {
+            var input = document.getElementById(inputId);
+            var icon = document.getElementById(inputId + 'Icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Tạo mật khẩu ngẫu nhiên
+        function generateRandomPassword() {
+            var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@@#$';
+            var password = '';
+            for (var i = 0; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('resetNewPassword').value = password;
+            document.getElementById('resetConfirmPassword').value = password;
+            document.getElementById('resetNewPassword').type = 'text';
+            document.getElementById('resetConfirmPassword').type = 'text';
+        }
+    </script>
+}

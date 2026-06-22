@@ -1,12 +1,22 @@
 @model AI_CRM.Domain.Entities.NhanVienPhuTrach
 @{
     ViewData["Title"] = "Hồ sơ cá nhân";
+    var currentRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "Chưa rõ vai trò";
+}
+
+<!-- Thông báo -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 shadow-sm" role="alert">
+        <i class="fa-solid fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
 
 <div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-12">
-            <h2 class="fw-bold mb-0">Hồ sơ cá nhân</h2>
+            <h2 class="fw-bold mb-0"><i class="fa-solid fa-id-card me-2 text-primary"></i>Hồ sơ cá nhân</h2>
             <p class="text-muted">Quản lý thông tin tài khoản của bạn</p>
         </div>
     </div>
@@ -15,22 +25,43 @@
         <div class="col-lg-4 mb-4">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body text-center p-4">
-                    <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(User.Identity.Name ?? "User"))&background=4f46e5&color=fff&size=120" 
-                         alt="User" class="rounded-circle mb-3 shadow-sm" style="width: 120px; height: 120px; border: 4px solid #fff;">
+                    <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(User.Identity.Name ?? "User"))&background=4f46e5&color=fff&size=120&bold=true" 
+                         alt="User" class="rounded-circle mb-3 shadow" style="width: 120px; height: 120px; border: 4px solid #e2e8f0;">
                     
                     <h4 class="fw-bold mb-1">@(User.Identity.Name ?? "Người dùng")</h4>
-                    <p class="text-muted mb-3">@(User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "Chưa rõ vai trò")</p>
+                    <p class="text-muted mb-3">
+                        @{
+                            var roleBadgeClass = currentRole switch
+                            {
+                                "Admin" => "bg-danger",
+                                "Manager" => "bg-warning text-dark",
+                                "Employee" => "bg-primary",
+                                _ => "bg-secondary"
+                            };
+                        }
+                        <span class="badge @roleBadgeClass px-3 py-2 rounded-pill">
+                            <i class="fa-solid @(currentRole == "Admin" ? "fa-crown" : "fa-user") me-1"></i> @currentRole
+                        </span>
+                    </p>
                     
                     <div class="d-flex justify-content-center gap-2 mb-4">
-                        <button class="btn btn-outline-primary btn-sm rounded-pill px-3"><i class="fa-solid fa-camera me-1"></i> Đổi ảnh</button>
-                        <a asp-controller="Auth" asp-action="Logout" class="btn btn-outline-danger btn-sm rounded-pill px-3"><i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Đăng xuất</a>
+                        <a asp-controller="User" asp-action="ChangePassword" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                            <i class="fa-solid fa-key me-1"></i> Đổi mật khẩu
+                        </a>
+                        <a asp-controller="Auth" asp-action="Logout" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                            <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Đăng xuất
+                        </a>
                     </div>
                     
                     <hr class="text-muted">
                     
-                    <div class="d-flex justify-content-between align-items-center text-start mt-3">
+                    <div class="d-flex justify-content-between align-items-center text-start mt-3 mb-2">
                         <span class="text-muted small"><i class="fa-regular fa-calendar-check me-1"></i> Ngày tham gia:</span>
                         <span class="fw-medium small">@(Model?.NguoiDung?.CreatedDate.ToString("dd/MM/yyyy") ?? "Không có dữ liệu")</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center text-start">
+                        <span class="text-muted small"><i class="fa-solid fa-fingerprint me-1"></i> Mã tài khoản:</span>
+                        <span class="fw-medium small">#@(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "N/A")</span>
                     </div>
                 </div>
             </div>
@@ -39,42 +70,46 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
-                    <h5 class="fw-bold mb-0">Thông tin chi tiết</h5>
+                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-user-pen text-primary me-2"></i>Thông tin chi tiết</h5>
                 </div>
                 <div class="card-body p-4">
                     <form>
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label text-muted small fw-bold">Họ và tên</label>
-                                <input type="text" class="form-control" value="@(Model?.FullName ?? User.Identity.Name)" readonly>
+                                <input type="text" class="form-control rounded-3" value="@(Model?.FullName ?? User.Identity.Name)" readonly>
                             </div>
                             <div class="col-md-6 mt-3 mt-md-0">
                                 <label class="form-label text-muted small fw-bold">Chức vụ</label>
-                                <input type="text" class="form-control" value="@(Model?.Position ?? "Nhân viên")" readonly>
+                                <input type="text" class="form-control rounded-3" value="@(Model?.Position ?? "Nhân viên")" readonly>
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label text-muted small fw-bold">Email</label>
-                                <input type="email" class="form-control" value="@Model?.Email" readonly>
+                                <input type="email" class="form-control rounded-3" value="@(Model?.Email ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "N/A")" readonly>
                             </div>
                             <div class="col-md-6 mt-3 mt-md-0">
                                 <label class="form-label text-muted small fw-bold">Số điện thoại</label>
-                                <input type="text" class="form-control" value="@(Model?.Phone ?? "Chưa cập nhật")" readonly>
+                                <input type="text" class="form-control rounded-3" value="@(Model?.Phone ?? "Chưa cập nhật")" readonly>
                             </div>
                         </div>
 
                         <div class="row mb-4">
-                            <div class="col-12">
+                            <div class="col-md-6">
                                 <label class="form-label text-muted small fw-bold">Bộ phận</label>
-                                <input type="text" class="form-control" value="@(Model?.Department ?? "Chưa cập nhật")" readonly>
+                                <input type="text" class="form-control rounded-3" value="@(Model?.Department ?? "Chưa cập nhật")" readonly>
+                            </div>
+                            <div class="col-md-6 mt-3 mt-md-0">
+                                <label class="form-label text-muted small fw-bold">Vai trò hệ thống</label>
+                                <input type="text" class="form-control rounded-3" value="@currentRole" readonly>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end">
-                            <button type="button" class="btn btn-primary rounded-pill px-4" disabled><i class="fa-solid fa-save me-1"></i> Lưu thay đổi</button>
-                            <small class="text-muted ms-3 align-self-center">*Tính năng chỉnh sửa đang phát triển</small>
+                        <div class="alert alert-light border rounded-3 small text-muted mb-0">
+                            <i class="fa-solid fa-circle-info me-1"></i>
+                            Thông tin cá nhân được quản lý bởi Quản trị viên (Admin). Liên hệ Admin nếu cần chỉnh sửa.
                         </div>
                     </form>
                 </div>
@@ -82,11 +117,38 @@
 
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
-                    <h5 class="fw-bold text-danger mb-0">Bảo mật tài khoản</h5>
+                    <h5 class="fw-bold text-warning mb-0"><i class="fa-solid fa-shield-halved me-2"></i>Bảo mật tài khoản</h5>
                 </div>
                 <div class="card-body p-4">
-                    <p class="text-muted small mb-4">Vì tài khoản của bạn được liên kết với Google Workspace của công ty, bạn không thể đổi mật khẩu tại đây. Vui lòng liên hệ IT để được hỗ trợ.</p>
-                    <button class="btn btn-outline-secondary rounded-pill px-4" disabled><i class="fa-solid fa-key me-1"></i> Đổi mật khẩu</button>
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6 class="fw-bold text-dark mb-1">Đổi mật khẩu đăng nhập</h6>
+                            <p class="text-muted small mb-0">
+                                Cập nhật mật khẩu định kỳ để bảo vệ tài khoản. Mật khẩu phải có ít nhất 6 ký tự.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <a asp-action="ChangePassword" class="btn btn-warning rounded-pill px-4 fw-medium">
+                                <i class="fa-solid fa-key me-1"></i> Đổi mật khẩu
+                            </a>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted opacity-25 my-3">
+
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6 class="fw-bold text-dark mb-1">Phiên đăng nhập</h6>
+                            <p class="text-muted small mb-0">
+                                Đang đăng nhập với tư cách <strong>@(User.Identity.Name)</strong>. Phiên đăng nhập sẽ hết hạn sau 7 ngày hoặc khi đăng xuất.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <a asp-controller="Auth" asp-action="Logout" class="btn btn-outline-danger rounded-pill px-4 fw-medium">
+                                <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Đăng xuất
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

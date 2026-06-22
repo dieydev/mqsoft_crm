@@ -1,27 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
-using AI_CRM.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using AI_CRM.Application.Interfaces;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    using Microsoft.AspNetCore.Authorization;
-
     [Authorize]
     public class ChatbotController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IChatbotService _chatbotService;
 
-        public ChatbotController(ApplicationDbContext context)
+        public ChatbotController(IChatbotService chatbotService)
         {
-            _context = context;
+            _chatbotService = chatbotService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var history = await _context.LichSuHoiDaps
-                .Include(c => c.NguoiDung)
-                .ToListAsync();
+            var history = await _chatbotService.GetChatHistoryAsync();
             return View(history);
         }
 
@@ -31,4 +27,3 @@ namespace AI_CRM.WebMvc.Controllers
         }
     }
 }
-

@@ -1,20 +1,17 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using AI_CRM.WebMvc.Models;
-using AI_CRM.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace AI_CRM.WebMvc.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-    private readonly ApplicationDbContext _context;
 
-    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+    public HomeController(ILogger<HomeController> logger)
     {
         _logger = logger;
-        _context = context;
     }
 
     public IActionResult Index()

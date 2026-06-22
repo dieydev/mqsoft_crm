@@ -23,6 +23,9 @@
             <button type="submit" class="btn btn-secondary rounded-pill px-3 shadow-sm"><i class="fa-solid fa-search"></i></button>
             <a asp-action="Index" class="btn btn-light rounded-pill px-3 shadow-sm text-muted"><i class="fa-solid fa-rotate-right"></i></a>
         </form>
+        <a asp-action="ExportExcel" asp-route-searchString="@ViewBag.SearchString" asp-route-statusId="@ViewBag.CurrentStatus" class="btn btn-success rounded-pill px-4 shadow-sm fw-medium d-flex align-items-center gap-2">
+            <i class="fa-solid fa-file-excel"></i> Xuất Excel
+        </a>
         <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm fw-medium d-flex align-items-center gap-2">
             <i class="fa-solid fa-plus"></i> Tạo hợp đồng
         </a>
@@ -83,8 +86,9 @@
                                 <div class="d-flex justify-content-end gap-2">
                                     @if (!string.IsNullOrEmpty(item.FilePath))
                                     {
-                                        <a href="@item.FilePath" target="_blank" class="btn btn-sm btn-light text-primary shadow-sm rounded-3 px-2 py-1" title="Xem file"><i class="fa-solid fa-file-pdf"></i></a>
+                                        <a href="@item.FilePath" target="_blank" class="btn btn-sm btn-light text-danger shadow-sm rounded-3 px-2 py-1" title="Xem file"><i class="fa-solid fa-file-pdf"></i></a>
                                     }
+                                    <a asp-action="Details" asp-route-id="@item.ContractId" class="btn btn-sm btn-light text-primary shadow-sm rounded-3 px-2 py-1" title="Chi tiết"><i class="fa-solid fa-eye"></i></a>
                                     <a asp-action="Edit" asp-route-id="@item.ContractId" class="btn btn-sm btn-light text-warning shadow-sm rounded-3 px-2 py-1" title="Sửa"><i class="fa-solid fa-pen"></i></a>
                                     
                                     <form asp-action="Delete" asp-route-id="@item.ContractId" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa hợp đồng này không?');">

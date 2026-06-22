@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using AI_CRM.WebMvc.Models;
-using AI_CRM.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-
+using AI_CRM.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace AI_CRM.WebMvc.Controllers;
 
@@ -13,12 +13,12 @@ namespace AI_CRM.WebMvc.Controllers;
 public class AdminController : Controller
 {
     private readonly ILogger<AdminController> _logger;
-    private readonly ApplicationDbContext _context;
+    private readonly IAdminService _adminService;
 
-    public AdminController(ILogger<AdminController> logger, ApplicationDbContext context)
+    public AdminController(ILogger<AdminController> logger, IAdminService adminService)
     {
         _logger = logger;
-        _context = context;
+        _adminService = adminService;
     }
 
     public async Task<IActionResult> Index()
@@ -32,10 +32,10 @@ public class AdminController : Controller
             return RedirectToAction("Login", "Auth");
         }
 
-        ViewBag.TotalCustomers = await _context.KhachHangs.CountAsync(k => !k.IsDeleted);
-        ViewBag.ActiveProjects = await _context.DuAns.CountAsync(d => !d.IsDeleted);
-        ViewBag.TotalContracts = await _context.HopDongs.CountAsync(h => !h.IsDeleted);
-        ViewBag.ChatbotQueries = await _context.LichSuHoiDaps.CountAsync();
+        ViewBag.TotalCustomers = await _adminService.GetTotalCustomersAsync();
+        ViewBag.ActiveProjects = await _adminService.GetActiveProjectsAsync();
+        ViewBag.TotalContracts = await _adminService.GetTotalContractsAsync();
+        ViewBag.ChatbotQueries = await _adminService.GetTotalChatbotQueriesAsync();
 
         return View();
     }

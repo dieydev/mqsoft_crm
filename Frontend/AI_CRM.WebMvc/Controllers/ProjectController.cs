@@ -1,28 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
-using AI_CRM.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using AI_CRM.Application.Interfaces;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    using Microsoft.AspNetCore.Authorization;
-
     [Authorize]
     public class ProjectController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IProjectService _projectService;
 
-        public ProjectController(ApplicationDbContext context)
+        public ProjectController(IProjectService projectService)
         {
-            _context = context;
+            _projectService = projectService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var projects = await _context.DuAns
-                .Include(d => d.KhachHang)
-                .Include(d => d.TrangThaiDuAn)
-                .ToListAsync();
+            var projects = await _projectService.GetProjectsAsync();
             return View(projects);
         }
 
@@ -32,4 +27,3 @@ namespace AI_CRM.WebMvc.Controllers
         }
     }
 }
-

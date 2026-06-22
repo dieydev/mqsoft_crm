@@ -1,0 +1,112 @@
+@model AI_CRM.WebMvc.Models.EditUserViewModel
+@{
+    ViewData["Title"] = "Sửa tài khoản";
+    var roles = ViewBag.Roles as List<AI_CRM.Domain.Entities.VaiTro> ?? new List<AI_CRM.Domain.Entities.VaiTro>();
+}
+
+<div class="d-flex align-items-center mb-4">
+    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-3 py-2 me-3">
+        <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div>
+        <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Sửa tài khoản</h3>
+        <p class="text-muted mb-0 small">Chỉnh sửa thông tin tài khoản: <strong>@Model.Username</strong></p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-lg-5">
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-3"></div>
+                    <input type="hidden" asp-for="UserId" />
+                    <input type="hidden" asp-for="CreatedDate" />
+
+                    <!-- Avatar + tên user -->
+                    <div class="text-center mb-4">
+                        <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(Model.Username))&background=4f46e5&color=fff&size=100&bold=true" 
+                             class="rounded-circle shadow-sm mb-3" style="width: 100px; height: 100px; border: 4px solid #e2e8f0;" />
+                        <h5 class="fw-bold text-dark">@Model.Username</h5>
+                        <small class="text-muted">ID: #@Model.UserId · Ngày tạo: @Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
+                    </div>
+
+                    <hr class="text-muted opacity-25 mb-4">
+
+                    <!-- Thông tin tài khoản -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-dark mb-3">
+                            <i class="fa-solid fa-user text-primary me-2"></i> Thông tin tài khoản
+                        </h5>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label asp-for="Username" class="form-label text-muted small fw-bold">
+                                <i class="fa-solid fa-at me-1"></i> Tên đăng nhập <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Username" class="form-control rounded-3 py-2" />
+                            <span asp-validation-for="Username" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Phân quyền -->
+                    <div class="mb-4 mt-4">
+                        <h5 class="fw-bold text-dark mb-3">
+                            <i class="fa-solid fa-shield-halved text-warning me-2"></i> Phân quyền & Trạng thái
+                        </h5>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="RoleId" class="form-label text-muted small fw-bold">
+                                <i class="fa-solid fa-user-tag me-1"></i> Vai trò <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="RoleId" class="form-select rounded-3 py-2">
+                                <option value="">-- Chọn vai trò --</option>
+                                @foreach (var role in roles)
+                                {
+                                    <option value="@role.RoleId">@role.RoleName - @(role.Description ?? "")</option>
+                                }
+                            </select>
+                            <span asp-validation-for="RoleId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mt-3 mt-md-0">
+                            <label class="form-label text-muted small fw-bold">
+                                <i class="fa-solid fa-toggle-on me-1"></i> Trạng thái tài khoản
+                            </label>
+                            <div class="form-check form-switch mt-2">
+                                <input asp-for="IsActive" class="form-check-input fs-5" type="checkbox" role="switch">
+                                <label class="form-check-label fw-medium text-dark mt-1" asp-for="IsActive">
+                                    @(Model.IsActive ? "Đang hoạt động" : "Đã khóa")
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning border-0 rounded-3 mt-4">
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                        <small>
+                            <strong>Lưu ý:</strong> Nếu muốn đổi mật khẩu cho tài khoản này, vui lòng sử dụng chức năng
+                            <strong>"Reset mật khẩu"</strong> tại trang danh sách người dùng.
+                        </small>
+                    </div>
+
+                    <!-- Nút hành động -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-medium">
+                            <i class="fa-solid fa-save me-1"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

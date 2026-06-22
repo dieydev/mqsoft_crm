@@ -1,0 +1,143 @@
+@model AI_CRM.WebMvc.Models.CreateUserViewModel
+@{
+    ViewData["Title"] = "Thêm tài khoản mới";
+    var roles = ViewBag.Roles as List<AI_CRM.Domain.Entities.VaiTro> ?? new List<AI_CRM.Domain.Entities.VaiTro>();
+}
+
+<div class="d-flex align-items-center mb-4">
+    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-3 py-2 me-3">
+        <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div>
+        <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-user-plus me-2 text-primary"></i>Thêm tài khoản mới</h3>
+        <p class="text-muted mb-0 small">Tạo tài khoản người dùng mới cho hệ thống</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-lg-5">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-3"></div>
+
+                    <!-- Thông tin tài khoản -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-dark mb-3">
+                            <i class="fa-solid fa-user text-primary me-2"></i> Thông tin tài khoản
+                        </h5>
+                        <hr class="text-muted opacity-25">
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label asp-for="Username" class="form-label text-muted small fw-bold">
+                                <i class="fa-solid fa-at me-1"></i> Tên đăng nhập <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Username" class="form-control rounded-3 py-2" placeholder="Nhập tên đăng nhập (vd: nguyenvana)..." />
+                            <span asp-validation-for="Username" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label text-muted small fw-bold">
+                                <i class="fa-solid fa-lock me-1"></i> Mật khẩu <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input asp-for="Password" type="password" class="form-control rounded-start-3 py-2" placeholder="Ít nhất 6 ký tự..." id="createPassword" />
+                                <button class="btn btn-outline-secondary rounded-end-3" type="button" onclick="togglePassword('createPassword')">
+                                    <i class="fa-solid fa-eye" id="createPasswordIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mt-3 mt-md-0">
+                            <label asp-for="ConfirmPassword" class="form-label text-muted small fw-bold">
+                                <i class="fa-solid fa-lock me-1"></i> Xác nhận mật khẩu <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input asp-for="ConfirmPassword" type="password" class="form-control rounded-start-3 py-2" placeholder="Nhập lại mật khẩu..." id="createConfirmPassword" />
+                                <button class="btn btn-outline-secondary rounded-end-3" type="button" onclick="togglePassword('createConfirmPassword')">
+                                    <i class="fa-solid fa-eye" id="createConfirmPasswordIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Phân quyền -->
+                    <div class="mb-4 mt-4">
+                        <h5 class="fw-bold text-dark mb-3">
+                            <i class="fa-solid fa-shield-halved text-warning me-2"></i> Phân quyền
+                        </h5>
+                        <hr class="text-muted opacity-25">
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="RoleId" class="form-label text-muted small fw-bold">
+                                <i class="fa-solid fa-user-tag me-1"></i> Vai trò <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="RoleId" class="form-select rounded-3 py-2">
+                                <option value="">-- Chọn vai trò --</option>
+                                @foreach (var role in roles)
+                                {
+                                    <option value="@role.RoleId">@role.RoleName - @(role.Description ?? "")</option>
+                                }
+                            </select>
+                            <span asp-validation-for="RoleId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mt-3 mt-md-0">
+                            <label class="form-label text-muted small fw-bold">
+                                <i class="fa-solid fa-toggle-on me-1"></i> Trạng thái
+                            </label>
+                            <div class="form-check form-switch mt-2">
+                                <input asp-for="IsActive" class="form-check-input fs-5" type="checkbox" role="switch" checked>
+                                <label class="form-check-label fw-medium text-dark mt-1" asp-for="IsActive">Kích hoạt tài khoản ngay</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ghi chú -->
+                    <div class="alert alert-light border rounded-3 mt-4">
+                        <i class="fa-solid fa-circle-info text-primary me-1"></i>
+                        <small class="text-muted">
+                            <strong>Lưu ý:</strong> Sau khi tạo, hãy chia sẻ thông tin đăng nhập (tên đăng nhập + mật khẩu) cho người dùng.
+                            Khuyến khích người dùng đổi mật khẩu ngay sau lần đăng nhập đầu tiên.
+                        </small>
+                    </div>
+
+                    <!-- Nút hành động -->
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                            <i class="fa-solid fa-xmark me-1"></i> Hủy
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-medium">
+                            <i class="fa-solid fa-user-plus me-1"></i> Tạo tài khoản
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePassword(inputId) {
+            var input = document.getElementById(inputId);
+            var icon = document.getElementById(inputId + 'Icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+}

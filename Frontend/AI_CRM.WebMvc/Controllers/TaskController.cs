@@ -1,30 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
-using AI_CRM.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using AI_CRM.Application.Interfaces;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    using Microsoft.AspNetCore.Authorization;
-
     [Authorize]
     public class TaskController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ITaskService _taskService;
 
-        public TaskController(ApplicationDbContext context)
+        public TaskController(ITaskService taskService)
         {
-            _context = context;
+            _taskService = taskService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var tasks = await _context.TienDoDuAns
-                .Include(t => t.DuAn)
-                .Include(t => t.NhanVienPhuTrach)
-                .ToListAsync();
+            var tasks = await _taskService.GetTasksAsync();
             return View(tasks);
         }
     }
 }
-

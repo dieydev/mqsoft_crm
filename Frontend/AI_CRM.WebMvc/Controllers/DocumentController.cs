@@ -1,28 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
-using AI_CRM.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using AI_CRM.Application.Interfaces;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    using Microsoft.AspNetCore.Authorization;
-
     [Authorize]
     public class DocumentController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IDocumentService _documentService;
 
-        public DocumentController(ApplicationDbContext context)
+        public DocumentController(IDocumentService documentService)
         {
-            _context = context;
+            _documentService = documentService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var docs = await _context.TaiLieuNoiBos
-                .Include(d => d.NhomTaiLieu)
-                .Include(d => d.NhanVienPhuTrach)
-                .ToListAsync();
+            var docs = await _documentService.GetDocumentsAsync();
             return View(docs);
         }
 
@@ -32,4 +27,3 @@ namespace AI_CRM.WebMvc.Controllers
         }
     }
 }
-

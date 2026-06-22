@@ -12,6 +12,18 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+// Register Services
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.IUserService, AI_CRM.Infrastructure.Services.UserService>();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.ICustomerService, AI_CRM.Infrastructure.Services.CustomerService>();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.IContractService, AI_CRM.Infrastructure.Services.ContractService>();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.IProjectService, AI_CRM.Infrastructure.Services.ProjectService>();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.ITaskService, AI_CRM.Infrastructure.Services.TaskService>();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.IDocumentService, AI_CRM.Infrastructure.Services.DocumentService>();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.IInteractionService, AI_CRM.Infrastructure.Services.InteractionService>();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.IChatbotService, AI_CRM.Infrastructure.Services.ChatbotService>();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.IAdminService, AI_CRM.Infrastructure.Services.AdminService>();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.IAuthService, AI_CRM.Infrastructure.Services.AuthService>();
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = "Cookies";

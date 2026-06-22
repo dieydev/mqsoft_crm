@@ -1,30 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
-using AI_CRM.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using AI_CRM.Application.Interfaces;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    using Microsoft.AspNetCore.Authorization;
-
     [Authorize]
     public class InteractionController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IInteractionService _interactionService;
 
-        public InteractionController(ApplicationDbContext context)
+        public InteractionController(IInteractionService interactionService)
         {
-            _context = context;
+            _interactionService = interactionService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var logs = await _context.LichSuLamViecs
-                .Include(l => l.KhachHang)
-                .Include(l => l.NhanVienPhuTrach)
-                .ToListAsync();
+            var logs = await _interactionService.GetInteractionsAsync();
             return View(logs);
         }
     }
 }
-

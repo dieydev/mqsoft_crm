@@ -2,19 +2,22 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using AI_CRM.Infrastructure.Data;
+using AI_CRM.Application.Interfaces;
 using AI_CRM.WebMvc.Models;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
+using System.Linq;
 
 namespace AI_CRM.WebMvc.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IAuthService _authService;
 
-        public AuthController(ApplicationDbContext context)
+        public AuthController(IAuthService authService)
         {
-            _context = context;
+            _authService = authService;
         }
 
         [HttpGet]
@@ -44,62 +47,42 @@ namespace AI_CRM.WebMvc.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                // Simple login: check username and verify bcrypt password
-                var user = await _context.NguoiDungs
-                    .Include(u => u.VaiTro)
-                    .FirstOrDefaultAsync(u => u.Username == model.Username && u.IsActive);
+                var (isValid, roleName, userId) = await _authService.ValidateUserAsync(model.Username, model.Password);
 
-                if (user != null)
+                if (isValid)
                 {
-                    bool isValidPassword = false;
-                    try
+                    var claims = new List<Claim>
                     {
-                        // Verify BCrypt hash
-                        isValidPassword = BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash);
-                    }
-                    catch (Exception)
+                        new Claim(ClaimTypes.Name, model.Username),
+                        new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                        new Claim(ClaimTypes.Role, roleName)
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authProperties = new AuthenticationProperties
                     {
-                        // Handle cases where the existing password in DB is not a valid bcrypt hash
-                        // Fallback for development if plain text was used before adding bcrypt
-                        isValidPassword = (user.PasswordHash == model.Password);
-                    }
+                        IsPersistent = model.RememberMe,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+                    };
 
-                    if (isValidPassword)
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity),
+                        authProperties);
+
+                    // Phân quyền chuyển trang
+                    if (roleName != "User")
                     {
-                        var roleName = user.VaiTro?.RoleName ?? "User";
-                        var claims = new List<Claim>
+                        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         {
-                            new Claim(ClaimTypes.Name, user.Username),
-                            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                            new Claim(ClaimTypes.Role, roleName)
-                        };
-
-                        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                        var authProperties = new AuthenticationProperties
-                        {
-                            IsPersistent = model.RememberMe,
-                            ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
-                        };
-
-                        await HttpContext.SignInAsync(
-                            CookieAuthenticationDefaults.AuthenticationScheme,
-                            new ClaimsPrincipal(claimsIdentity),
-                            authProperties);
-
-                        // Phân quyền chuyển trang
-                        if (roleName != "User")
-                        {
-                            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                            {
-                                return Redirect(returnUrl);
-                            }
-                            return RedirectToAction("Index", "Admin");
+                            return Redirect(returnUrl);
                         }
-                        else
-                        {
-                            // Chặn người dùng lạ vào Admin dù có returnUrl
-                            return RedirectToAction("Index", "Home");
-                        }
+                        return RedirectToAction("Index", "Admin");
+                    }
+                    else
+                    {
+                        // Chặn người dùng lạ vào Admin dù có returnUrl
+                        return RedirectToAction("Index", "Home");
                     }
                 }
 
@@ -174,22 +157,11 @@ namespace AI_CRM.WebMvc.Controllers
             if (googleAuth.Succeeded)
             {
                 var emailClaim = googleAuth.Principal.FindFirst(ClaimTypes.Email)?.Value;
-                var nameClaim = googleAuth.Principal.FindFirst(ClaimTypes.Name)?.Value;
-                
-                string roleName = "User"; // Mặc định khách vãng lai
+                var roleName = "User"; // Mặc định khách vãng lai
 
                 if (!string.IsNullOrEmpty(emailClaim))
                 {
-                    // Tìm xem nhân viên này có trong CSDL không
-                    var nhanVien = await _context.NhanVienPhuTrachs
-                        .Include(nv => nv.NguoiDung)
-                        .ThenInclude(nd => nd.VaiTro)
-                        .FirstOrDefaultAsync(nv => nv.Email == emailClaim && nv.IsActive);
-
-                    if (nhanVien != null && nhanVien.NguoiDung != null)
-                    {
-                        roleName = nhanVien.NguoiDung.VaiTro?.RoleName ?? "Employee";
-                    }
+                    roleName = await _authService.GetUserRoleByEmailAsync(emailClaim);
                 }
 
                 var claims = googleAuth.Principal.Claims.ToList();
