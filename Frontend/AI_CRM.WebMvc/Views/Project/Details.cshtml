@@ -1,0 +1,119 @@
+@model AI_CRM.Domain.Entities.DuAn
+@{
+    ViewData["Title"] = "Chi tiết Dự án";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-project-diagram me-2 text-info"></i>Chi tiết Dự án</h3>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.ProjectId" class="btn btn-warning rounded-pill px-4 shadow-sm fw-medium me-2">
+            <i class="fa-solid fa-pen me-2"></i> Chỉnh sửa
+        </a>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm fw-medium">
+            <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="glass-card p-4 border-0 shadow-sm rounded-4 bg-white h-100">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <div>
+                    <h4 class="fw-bold text-primary mb-1">@Model.ProjectName</h4>
+                    <p class="text-muted mb-0"><i class="fa-regular fa-calendar me-1"></i> Tạo ngày: @Model.CreatedDate.ToString("dd/MM/yyyy")</p>
+                </div>
+                <span class="badge bg-primary-light text-primary fs-6 px-3 py-2 rounded-pill">@(Model.TrangThaiDuAn?.StatusName ?? "Không rõ")</span>
+            </div>
+
+            <h6 class="fw-bold text-uppercase text-muted mb-3"><i class="fa-solid fa-align-left me-2"></i> Mô tả chi tiết</h6>
+            <div class="p-3 bg-light rounded-3 mb-4 text-dark" style="white-space: pre-wrap;">
+                @(string.IsNullOrEmpty(Model.Description) ? "Chưa có mô tả." : Model.Description)
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="p-3 border rounded-3 text-center">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Ngày bắt đầu</small>
+                        <h5 class="fw-bold text-dark mb-0">@(Model.StartDate?.ToString("dd/MM/yyyy") ?? "-")</h5>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 border rounded-3 text-center">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Deadline</small>
+                        <h5 class="fw-bold text-danger mb-0">@(Model.Deadline?.ToString("dd/MM/yyyy") ?? "-")</h5>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 border rounded-3 text-center">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Ngân sách</small>
+                        <h5 class="fw-bold text-success mb-0">@(Model.Budget?.ToString("N0") ?? "0") đ</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="glass-card p-4 border-0 shadow-sm rounded-4 bg-white mb-4">
+            <h6 class="fw-bold text-uppercase text-muted mb-3"><i class="fa-solid fa-link me-2"></i> Liên kết</h6>
+            
+            <div class="mb-3">
+                <small class="text-muted fw-bold d-block mb-1">Khách hàng</small>
+                @if (Model.KhachHang != null)
+                {
+                    <a asp-controller="Customer" asp-action="Details" asp-route-id="@Model.CustomerId" class="text-decoration-none fw-medium text-primary">
+                        <i class="fa-regular fa-building me-1"></i> @Model.KhachHang.CompanyName
+                    </a>
+                }
+                else
+                {
+                    <span class="text-muted">Không có</span>
+                }
+            </div>
+            
+            <div>
+                <small class="text-muted fw-bold d-block mb-1">Hợp đồng</small>
+                @if (Model.HopDong != null)
+                {
+                    <a asp-controller="Contract" asp-action="Details" asp-route-id="@Model.ContractId" class="text-decoration-none fw-medium text-info">
+                        <i class="fa-solid fa-file-contract me-1"></i> @Model.HopDong.ContractNumber
+                    </a>
+                }
+                else
+                {
+                    <span class="text-muted">Không liên kết hợp đồng</span>
+                }
+            </div>
+        </div>
+
+        <div class="glass-card p-4 border-0 shadow-sm rounded-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold text-uppercase text-muted mb-0"><i class="fa-solid fa-users me-2"></i> Nhân sự phụ trách</h6>
+                <button class="btn btn-sm btn-outline-primary rounded-pill"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            
+            @if (Model.DuAnNhanViens != null && Model.DuAnNhanViens.Any())
+            {
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var nv in Model.DuAnNhanViens)
+                    {
+                        <div class="d-flex align-items-center p-2 bg-light rounded-3">
+                            <img src="https://ui-avatars.com/api/?name=@(nv.NhanVienPhuTrach?.FullName ?? "U")&background=random" class="rounded-circle me-3" style="width: 40px; height: 40px;" />
+                            <div>
+                                <h6 class="mb-0 fw-bold fs-6">@(nv.NhanVienPhuTrach?.FullName ?? "Unknown")</h6>
+                                <small class="text-muted">Vai trò: @nv.ProjectRole</small>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-3 bg-light rounded-3 text-muted small">
+                    Chưa phân công nhân sự nào cho dự án này.
+                </div>
+            }
+        </div>
+    </div>
+</div>

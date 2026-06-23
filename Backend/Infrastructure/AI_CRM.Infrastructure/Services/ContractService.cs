@@ -51,7 +51,8 @@ namespace AI_CRM.Infrastructure.Services
 
         public async Task<string> SaveFileAsync(Stream fileStream, string fileName, string webRootPath)
         {
-            string uploadsFolder = Path.Combine(webRootPath, "uploads", "contracts");
+            string rootPath = string.IsNullOrEmpty(webRootPath) ? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot") : webRootPath;
+            string uploadsFolder = Path.Combine(rootPath, "uploads", "contracts");
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
 

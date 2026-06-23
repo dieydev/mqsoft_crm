@@ -45,6 +45,10 @@ namespace AI_CRM.WebMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(HopDong hopDong, IFormFile pdfFile)
         {
+            ModelState.Remove("KhachHang");
+            ModelState.Remove("TrangThaiHopDong");
+            ModelState.Remove("DuAns");
+
             if (ModelState.IsValid)
             {
                 if (pdfFile != null && pdfFile.Length > 0)
@@ -81,6 +85,10 @@ namespace AI_CRM.WebMvc.Controllers
         public async Task<IActionResult> Edit(int id, HopDong hopDong, IFormFile pdfFile)
         {
             if (id != hopDong.ContractId) return NotFound();
+
+            ModelState.Remove("KhachHang");
+            ModelState.Remove("TrangThaiHopDong");
+            ModelState.Remove("DuAns");
 
             if (ModelState.IsValid)
             {
