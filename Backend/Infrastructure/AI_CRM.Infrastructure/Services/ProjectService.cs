@@ -22,6 +22,7 @@ namespace AI_CRM.Infrastructure.Services
                 .Include(d => d.KhachHang)
                 .Include(d => d.TrangThaiDuAn)
                 .Include(d => d.HopDong)
+                .Include(d => d.TienDoDuAns)
                 .Where(d => !d.IsDeleted)
                 .AsQueryable();
 

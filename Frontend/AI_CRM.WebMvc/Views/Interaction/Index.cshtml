@@ -1,58 +1,92 @@
 @model IEnumerable<AI_CRM.Domain.Entities.LichSuLamViec>
 @{
-    ViewData["Title"] = "Chăm sóc khách hàng";
+    ViewData["Title"] = "Lịch sử CSKH";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-headset me-2 text-primary"></i>Lịch sử Chăm sóc Khách hàng</h3>
-    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-medium d-flex align-items-center gap-2">
-        <i class="fa-solid fa-plus"></i> Thêm tương tác
-    </a>
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 rounded-4" role="alert">
+        <i class="fa-solid fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-headset me-2 text-info"></i>Lịch sử Chăm sóc khách hàng</h3>
+    
+    <div class="d-flex flex-column flex-md-row gap-2">
+        <form asp-action="Index" method="get" class="d-flex gap-2">
+            <select name="customerId" class="form-select rounded-pill px-3 shadow-sm border-0" asp-items="ViewBag.CustomerList">
+                <option value="">-- Tất cả khách hàng --</option>
+            </select>
+            <button type="submit" class="btn btn-secondary rounded-pill px-3 shadow-sm"><i class="fa-solid fa-filter"></i> Lọc</button>
+        </form>
+        <a asp-action="Create" class="btn btn-info text-white rounded-pill px-4 shadow-sm fw-bold d-flex align-items-center gap-2">
+            <i class="fa-solid fa-plus"></i> Thêm nhật ký
+        </a>
+    </div>
 </div>
 
-<div class="glass-card p-4 border-0 shadow-sm rounded-4" style="background: #fff;">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
-                <tr>
-                    <th class="ps-4 py-3 fw-bold border-bottom-0">Khách hàng</th>
-                    <th class="py-3 fw-bold border-bottom-0">Loại</th>
-                    <th class="py-3 fw-bold border-bottom-0">Nội dung trao đổi</th>
-                    <th class="py-3 fw-bold border-bottom-0">Kết quả</th>
-                    <th class="py-3 fw-bold border-bottom-0">Thời gian</th>
-                    <th class="py-3 fw-bold border-bottom-0">Nhân viên</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
+<div class="row g-4">
+    @if (Model != null && Model.Any())
+    {
+        <!-- Timeline View -->
+        <div class="col-12">
+            <div class="position-relative p-4 glass-card border-0 shadow-sm rounded-4 bg-white">
+                <div class="border-start border-3 border-info ms-3 position-absolute" style="top: 2rem; bottom: 2rem; z-index: 0;"></div>
+                
+                @foreach (var item in Model)
                 {
-                    foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="ps-4 py-3 fw-bold text-dark">@(item.KhachHang?.CompanyName ?? "N/A")</td>
-                            <td class="py-3">
-                                @if (item.InteractionType == "Call") { <span class="badge bg-success"><i class="fa-solid fa-phone me-1"></i> Gọi điện</span> }
-                                else if (item.InteractionType == "Email") { <span class="badge bg-warning text-dark"><i class="fa-solid fa-envelope me-1"></i> Email</span> }
-                                else if (item.InteractionType == "Meeting") { <span class="badge bg-primary"><i class="fa-solid fa-handshake me-1"></i> Gặp mặt</span> }
-                                else { <span class="badge bg-secondary">Khác</span> }
-                            </td>
-                            <td class="py-3 text-muted" style="max-width: 250px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="@item.Content">@item.Content</td>
-                            <td class="py-3 fw-medium">@item.Result</td>
-                            <td class="py-3">@item.WorkDate.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td class="py-3 text-primary">@(item.NhanVienPhuTrach?.FullName ?? "Unknown")</td>
-                        </tr>
-                    }
+                    <div class="d-flex position-relative mb-4">
+                        <div class="me-3 position-relative" style="z-index: 1;">
+                            <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; border: 4px solid #fff;">
+                                @if (item.InteractionType == "Call" || item.InteractionType == "Gọi điện") { <i class="fa-solid fa-phone"></i> }
+                                else if (item.InteractionType == "Email") { <i class="fa-solid fa-envelope"></i> }
+                                else if (item.InteractionType == "Meeting" || item.InteractionType == "Họp") { <i class="fa-solid fa-handshake"></i> }
+                                else { <i class="fa-solid fa-comment-dots"></i> }
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 p-3 bg-light rounded-4 shadow-sm">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-dark">
+                                        <a asp-controller="Customer" asp-action="Details" asp-route-id="@item.CustomerId" class="text-decoration-none text-dark">
+                                            @item.KhachHang?.CompanyName
+                                        </a>
+                                    </h5>
+                                    <div class="text-muted small">
+                                        <i class="fa-regular fa-clock me-1"></i> @item.WorkDate.ToString("dd/MM/yyyy HH:mm") 
+                                        &bull; <i class="fa-regular fa-user me-1"></i> @(item.NhanVienPhuTrach?.FullName ?? "Unknown")
+                                        &bull; <span class="badge bg-secondary">@item.InteractionType</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a asp-action="Edit" asp-route-id="@item.WorkLogId" class="btn btn-sm btn-outline-warning rounded-circle"><i class="fa-solid fa-pen"></i></a>
+                                    <form asp-action="Delete" asp-route-id="@item.WorkLogId" method="post" onsubmit="return confirm('Xóa nhật ký này?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle"><i class="fa-solid fa-trash"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-2 text-dark" style="white-space: pre-wrap;">@item.Content</div>
+                            
+                            @if (!string.IsNullOrEmpty(item.Result))
+                            {
+                                <div class="p-2 bg-success bg-opacity-10 text-success rounded-3 small fw-medium mt-2 border border-success border-opacity-25">
+                                    <i class="fa-solid fa-check-circle me-1"></i> Kết quả: @item.Result
+                                </div>
+                            }
+                        </div>
+                    </div>
                 }
-                else
-                {
-                    <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <i class="fa-solid fa-comments fs-1 mb-3 opacity-50"></i>
-                            <p class="mb-0 fs-5">Chưa có lịch sử làm việc nào.</p>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-12 text-center py-5 text-muted glass-card border-0 shadow-sm rounded-4 bg-white">
+            <i class="fa-solid fa-clipboard-list fs-1 mb-3 opacity-50"></i>
+            <p class="mb-0 fs-5">Chưa có lịch sử làm việc nào. Hãy bắt đầu ghi chú lại tương tác!</p>
+        </div>
+    }
 </div>
