@@ -15,6 +15,21 @@
     </div>
 </div>
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-3 border-0" role="alert">
+        <i class="fa-solid fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-3 border-0" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="row g-4">
     <div class="col-md-8">
         <div class="glass-card p-4 border-0 shadow-sm rounded-4 bg-white h-100">
@@ -90,7 +105,7 @@
         <div class="glass-card p-4 border-0 shadow-sm rounded-4 bg-white">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="fw-bold text-uppercase text-muted mb-0"><i class="fa-solid fa-users me-2"></i> Nhân sự phụ trách</h6>
-                <button class="btn btn-sm btn-outline-primary rounded-pill"><i class="fa-solid fa-plus"></i></button>
+                <button class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#assignMemberModal"><i class="fa-solid fa-plus"></i></button>
             </div>
             
             @if (Model.DuAnNhanViens != null && Model.DuAnNhanViens.Any())
@@ -98,12 +113,19 @@
                 <div class="d-flex flex-column gap-2">
                     @foreach (var nv in Model.DuAnNhanViens)
                     {
-                        <div class="d-flex align-items-center p-2 bg-light rounded-3">
+                        <div class="d-flex align-items-center p-2 bg-light rounded-3 position-relative">
                             <img src="https://ui-avatars.com/api/?name=@(nv.NhanVienPhuTrach?.FullName ?? "U")&background=random" class="rounded-circle me-3" style="width: 40px; height: 40px;" />
-                            <div>
+                            <div class="flex-grow-1">
                                 <h6 class="mb-0 fw-bold fs-6">@(nv.NhanVienPhuTrach?.FullName ?? "Unknown")</h6>
                                 <small class="text-muted">Vai trò: @nv.ProjectRole</small>
                             </div>
+                            <form asp-action="RemoveMember" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhân sự này khỏi dự án?');" class="position-absolute end-0 me-2 top-50 translate-middle-y">
+                                <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                                <input type="hidden" name="assignmentId" value="@nv.AssignmentId" />
+                                <button type="submit" class="btn btn-sm text-danger border-0 bg-transparent p-0" title="Xóa nhân sự khỏi dự án">
+                                    <i class="fa-solid fa-times fs-5"></i>
+                                </button>
+                            </form>
                         </div>
                     }
                 </div>
@@ -114,6 +136,47 @@
                     Chưa phân công nhân sự nào cho dự án này.
                 </div>
             }
+        </div>
+    </div>
+</div>
+
+<!-- Modal Gán Nhân sự -->
+<div class="modal fade" id="assignMemberModal" tabindex="-1" aria-labelledby="assignMemberModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form asp-action="AssignMember" method="post">
+                <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="assignMemberModalLabel">Thêm Nhân sự vào Dự án</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Chọn nhân sự</label>
+                        <select name="employeeId" class="form-select" asp-items="ViewBag.AvailableEmployees" required>
+                            <option value="">-- Chọn nhân viên --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Vai trò trong dự án</label>
+                        <select name="projectRole" class="form-select" required>
+                            <option value="">-- Chọn vai trò --</option>
+                            <option value="Project Manager (PM)">Project Manager (PM)</option>
+                            <option value="Backend Developer">Backend Developer</option>
+                            <option value="Frontend Developer">Frontend Developer</option>
+                            <option value="Fullstack Developer">Fullstack Developer</option>
+                            <option value="Business Analyst (BA)">Business Analyst (BA)</option>
+                            <option value="Tester / QA">Tester / QA</option>
+                            <option value="Designer (UI/UX)">Designer (UI/UX)</option>
+                            <option value="DevOps Engineer">DevOps Engineer</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-medium" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm fw-medium">Thêm nhân sự</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

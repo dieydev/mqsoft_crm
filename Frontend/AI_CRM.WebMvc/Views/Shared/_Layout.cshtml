@@ -59,6 +59,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Employee" ? "active" : "")" asp-controller="Employee" asp-action="Index">
+                    <i class="fa-solid fa-users-gear w-20px"></i> Nhân sự dự án
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "User" ? "active" : "")" asp-controller="User" asp-action="Index">
                     <i class="fa-solid fa-users w-20px"></i> Người dùng
                 </a>

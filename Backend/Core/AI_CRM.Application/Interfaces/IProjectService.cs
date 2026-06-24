@@ -16,5 +16,10 @@ namespace AI_CRM.Application.Interfaces
         Task<List<KhachHang>> GetActiveCustomersAsync();
         Task<List<HopDong>> GetActiveContractsAsync();
         Task<byte[]> ExportExcelAsync(string searchString, int? statusId);
+
+        // Phân công nhân sự
+        Task<bool> AssignMemberAsync(int projectId, int employeeId, string role);
+        Task<bool> RemoveMemberAsync(int assignmentId);
+        Task<List<NhanVienPhuTrach>> GetAvailableEmployeesForProjectAsync(int projectId);
     }
 }

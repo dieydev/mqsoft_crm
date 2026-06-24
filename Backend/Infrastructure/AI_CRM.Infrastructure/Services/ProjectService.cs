@@ -132,5 +132,48 @@ namespace AI_CRM.Infrastructure.Services
 
             return System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(builder.ToString())).ToArray();
         }
+
+        public async Task<bool> AssignMemberAsync(int projectId, int employeeId, string role)
+        {
+            var exists = await _context.DuAnNhanViens.AnyAsync(d => d.ProjectId == projectId && d.EmployeeId == employeeId);
+            if (exists) return false;
+
+            var assignment = new DuAnNhanVien
+            {
+                ProjectId = projectId,
+                EmployeeId = employeeId,
+                ProjectRole = role,
+                JoinDate = System.DateTime.Now
+            };
+
+            _context.DuAnNhanViens.Add(assignment);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RemoveMemberAsync(int assignmentId)
+        {
+            var assignment = await _context.DuAnNhanViens.FindAsync(assignmentId);
+            if (assignment != null)
+            {
+                _context.DuAnNhanViens.Remove(assignment);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<List<NhanVienPhuTrach>> GetAvailableEmployeesForProjectAsync(int projectId)
+        {
+            var assignedEmployeeIds = await _context.DuAnNhanViens
+                .Where(d => d.ProjectId == projectId)
+                .Select(d => d.EmployeeId)
+                .ToListAsync();
+
+            return await _context.NhanVienPhuTrachs
+                .Where(e => !assignedEmployeeIds.Contains(e.EmployeeId) && e.IsActive)
+                .OrderBy(e => e.FullName)
+                .ToListAsync();
+        }
     }
 }

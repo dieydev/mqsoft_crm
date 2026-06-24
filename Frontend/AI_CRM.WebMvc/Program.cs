@@ -23,6 +23,7 @@ builder.Services.AddScoped<AI_CRM.Application.Interfaces.IInteractionService, AI
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.IChatbotService, AI_CRM.Infrastructure.Services.ChatbotService>();
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.IAdminService, AI_CRM.Infrastructure.Services.AdminService>();
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.IAuthService, AI_CRM.Infrastructure.Services.AuthService>();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.IEmployeeService, AI_CRM.Infrastructure.Services.EmployeeService>();
 
 builder.Services.AddAuthentication(options =>
     {

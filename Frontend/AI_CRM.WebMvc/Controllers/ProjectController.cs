@@ -122,7 +122,41 @@ namespace AI_CRM.WebMvc.Controllers
             var project = await _projectService.GetProjectDetailsAsync(id.Value);
             if (project == null || project.IsDeleted) return NotFound();
 
+            ViewBag.AvailableEmployees = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(await _projectService.GetAvailableEmployeesForProjectAsync(project.ProjectId), "EmployeeId", "FullName");
+
             return View(project);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignMember(int projectId, int employeeId, string projectRole)
+        {
+            var success = await _projectService.AssignMemberAsync(projectId, employeeId, projectRole);
+            if (success)
+            {
+                TempData["SuccessMessage"] = "Đã thêm nhân sự vào dự án.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Có lỗi xảy ra hoặc nhân sự đã nằm trong dự án.";
+            }
+            return RedirectToAction(nameof(Details), new { id = projectId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveMember(int projectId, int assignmentId)
+        {
+            var success = await _projectService.RemoveMemberAsync(assignmentId);
+            if (success)
+            {
+                TempData["SuccessMessage"] = "Đã xóa nhân sự khỏi dự án.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa nhân sự.";
+            }
+            return RedirectToAction(nameof(Details), new { id = projectId });
         }
     }
 }
