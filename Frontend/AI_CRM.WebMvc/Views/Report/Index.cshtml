@@ -1,44 +1,153 @@
 @{
-    ViewData["Title"] = "Báo cáo thống kê";
+    ViewData["Title"] = "Báo cáo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var customers = ViewBag.Customers as IEnumerable<AI_CRM.Domain.Entities.KhachHang> ?? new List<AI_CRM.Domain.Entities.KhachHang>();
+    var projects = ViewBag.Projects as IEnumerable<AI_CRM.Domain.Entities.DuAn> ?? new List<AI_CRM.Domain.Entities.DuAn>();
+    var contracts = ViewBag.Contracts as IEnumerable<AI_CRM.Domain.Entities.HopDong> ?? new List<AI_CRM.Domain.Entities.HopDong>();
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-chart-line me-2 text-primary"></i>Báo cáo Hệ thống</h3>
-    <div class="d-flex gap-2">
-        <select class="form-select bg-light border-0 shadow-sm rounded-pill fw-medium text-muted">
-            <option>Tháng này</option>
-            <option>Quý này</option>
-            <option>Năm nay</option>
-        </select>
-        <button class="btn btn-success rounded-pill px-4 py-2 shadow-sm fw-medium d-flex align-items-center gap-2">
-            <i class="fa-solid fa-download"></i> Xuất PDF
-        </button>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-0 text-primary"><i class="bi bi-file-earmark-bar-graph me-2"></i>Trung tâm Báo cáo</h2>
+            <p class="text-muted">Xuất dữ liệu hệ thống ra định dạng Excel và PDF</p>
+        </div>
     </div>
-</div>
 
-<div class="row g-4">
-    <div class="col-md-6 col-lg-4">
-        <div class="glass-card p-4 border-0 shadow-sm rounded-4 text-center bg-white h-100 d-flex flex-column justify-content-center">
-            <i class="fa-solid fa-chart-pie fs-1 text-primary mb-3"></i>
-            <h5 class="fw-bold text-dark mb-2">Báo cáo Khách hàng</h5>
-            <p class="text-muted small mb-4">Thống kê tỷ lệ chuyển đổi, tương tác, đánh giá khách hàng VIP.</p>
-            <button class="btn btn-outline-primary rounded-pill mt-auto">Xem chi tiết</button>
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    </div>
-    <div class="col-md-6 col-lg-4">
-        <div class="glass-card p-4 border-0 shadow-sm rounded-4 text-center bg-white h-100 d-flex flex-column justify-content-center">
-            <i class="fa-solid fa-project-diagram fs-1 text-success mb-3"></i>
-            <h5 class="fw-bold text-dark mb-2">Báo cáo Dự án</h5>
-            <p class="text-muted small mb-4">Tiến độ, trễ hạn, sử dụng ngân sách và tình hình nhân sự.</p>
-            <button class="btn btn-outline-success rounded-pill mt-auto">Xem chi tiết</button>
+    }
+
+    <div class="row g-4">
+        <!-- Xuất Danh sách Excel -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white border-0 py-3">
+                    <h5 class="card-title mb-0"><i class="bi bi-file-earmark-excel me-2"></i>Xuất Excel (Danh sách)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                            <div>
+                                <h6 class="mb-1">Danh sách Khách hàng</h6>
+                                <small class="text-muted">Xuất toàn bộ thông tin khách hàng đang quản lý</small>
+                            </div>
+                            <a href="@Url.Action("ExportCustomersExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4">
+                                <i class="bi bi-download me-1"></i> Tải về
+                            </a>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                            <div>
+                                <h6 class="mb-1">Danh sách Dự án</h6>
+                                <small class="text-muted">Xuất thông tin tất cả các dự án và trạng thái</small>
+                            </div>
+                            <a href="@Url.Action("ExportProjectsExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4">
+                                <i class="bi bi-download me-1"></i> Tải về
+                            </a>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom-0">
+                            <div>
+                                <h6 class="mb-1">Danh sách Hợp đồng</h6>
+                                <small class="text-muted">Xuất thông tin tất cả hợp đồng và giá trị</small>
+                            </div>
+                            <a href="@Url.Action("ExportContractsExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4">
+                                <i class="bi bi-download me-1"></i> Tải về
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="col-md-6 col-lg-4">
-        <div class="glass-card p-4 border-0 shadow-sm rounded-4 text-center bg-white h-100 d-flex flex-column justify-content-center">
-            <i class="fa-solid fa-file-contract fs-1 text-warning mb-3"></i>
-            <h5 class="fw-bold text-dark mb-2">Báo cáo Doanh thu</h5>
-            <p class="text-muted small mb-4">Giá trị hợp đồng, doanh thu thực tế, dự báo tài chính tháng tới.</p>
-            <button class="btn btn-outline-warning rounded-pill mt-auto">Xem chi tiết</button>
+
+        <!-- Xuất Báo cáo PDF -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-danger text-white border-0 py-3">
+                    <h5 class="card-title mb-0"><i class="bi bi-file-earmark-pdf me-2"></i>Xuất PDF (Chi tiết)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        
+                        <div class="list-group-item px-0 py-3 border-0">
+                            <form action="@Url.Action("ExportCustomerPdf", "Report")" method="get" class="d-flex align-items-center w-100">
+                                <div class="flex-grow-1 me-3">
+                                    <label class="form-label mb-1">Báo cáo Khách hàng</label>
+                                    <select name="id" class="form-select form-select-sm" required>
+                                        <option value="">-- Chọn khách hàng --</option>
+                                        @foreach (var c in customers)
+                                        {
+                                            <option value="@c.CustomerId">@c.CompanyName (@c.Representative)</option>
+                                        }
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4">
+                                    <i class="bi bi-download me-1"></i> Xuất PDF
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="list-group-item px-0 py-3 border-0">
+                            <form action="@Url.Action("ExportProjectPdf", "Report")" method="get" class="d-flex align-items-center w-100">
+                                <div class="flex-grow-1 me-3">
+                                    <label class="form-label mb-1">Báo cáo Dự án</label>
+                                    <select name="id" class="form-select form-select-sm" required>
+                                        <option value="">-- Chọn dự án --</option>
+                                        @foreach (var p in projects)
+                                        {
+                                            <option value="@p.ProjectId">@p.ProjectName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4">
+                                    <i class="bi bi-download me-1"></i> Xuất PDF
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="list-group-item px-0 py-3 border-0">
+                            <form action="@Url.Action("ExportContractPdf", "Report")" method="get" class="d-flex align-items-center w-100">
+                                <div class="flex-grow-1 me-3">
+                                    <label class="form-label mb-1">Báo cáo Hợp đồng</label>
+                                    <select name="id" class="form-select form-select-sm" required>
+                                        <option value="">-- Chọn hợp đồng --</option>
+                                        @foreach (var hd in contracts)
+                                        {
+                                            <option value="@hd.ContractId">@hd.ContractName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4">
+                                    <i class="bi bi-download me-1"></i> Xuất PDF
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="list-group-item px-0 py-3 border-0">
+                            <form action="@Url.Action("ExportProgressPdf", "Report")" method="get" class="d-flex align-items-center w-100">
+                                <div class="flex-grow-1 me-3">
+                                    <label class="form-label mb-1">Báo cáo Tiến độ (chọn Dự án)</label>
+                                    <select name="id" class="form-select form-select-sm" required>
+                                        <option value="">-- Chọn dự án --</option>
+                                        @foreach (var p in projects)
+                                        {
+                                            <option value="@p.ProjectId">@p.ProjectName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4">
+                                    <i class="bi bi-download me-1"></i> Xuất PDF
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div>
 </div>
