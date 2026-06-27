@@ -134,22 +134,90 @@
         </div>
     </div>
 </div>
+<!-- Additional Charts Row -->
+<div class="row g-4 mt-1">
+    <!-- Chart 1: Doughnut -->
+    <div class="col-12 col-md-4">
+        <div class="glass-card p-4 h-100">
+            <h6 class="fw-bold mb-4">Trạng thái Dự án</h6>
+            <div style="position: relative; height: 250px; width: 100%;">
+                <canvas id="projectStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chart 2: Bar -->
+    <div class="col-12 col-md-4">
+        <div class="glass-card p-4 h-100">
+            <h6 class="fw-bold mb-4">Top Hợp đồng Giá trị cao</h6>
+            <div style="position: relative; height: 250px; width: 100%;">
+                <canvas id="contractValueChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chart 3: Polar Area -->
+    <div class="col-12 col-md-4">
+        <div class="glass-card p-4 h-100">
+            <h6 class="fw-bold mb-4">Phân bổ Nhân sự</h6>
+            <div style="position: relative; height: 250px; width: 100%;">
+                <canvas id="employeeAllocationChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const ctx = document.getElementById('revenueChart').getContext('2d');
+        // Data from server
+        const revenueLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(((System.Collections.Generic.Dictionary<string, decimal>)ViewBag.RevenueData).Keys));
+        const revenueValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(((System.Collections.Generic.Dictionary<string, decimal>)ViewBag.RevenueData).Values));
         
-        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        const projectStatusLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(((System.Collections.Generic.Dictionary<string, int>)ViewBag.ProjectStatusData).Keys));
+        const projectStatusValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(((System.Collections.Generic.Dictionary<string, int>)ViewBag.ProjectStatusData).Values));
+
+        const topContractLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(((System.Collections.Generic.Dictionary<string, decimal>)ViewBag.TopContractsData).Keys));
+        const topContractValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(((System.Collections.Generic.Dictionary<string, decimal>)ViewBag.TopContractsData).Values));
+
+        const employeeLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(((System.Collections.Generic.Dictionary<string, int>)ViewBag.EmployeeAllocationData).Keys));
+        const employeeValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(((System.Collections.Generic.Dictionary<string, int>)ViewBag.EmployeeAllocationData).Values));
+
+        // Common Options
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { family: "'Inter', sans-serif", size: 12 },
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    padding: 12,
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleFont: { size: 13, family: "'Inter', sans-serif" },
+                    bodyFont: { size: 14, family: "'Inter', sans-serif" },
+                    cornerRadius: 8,
+                }
+            }
+        };
+
+        // 1. Line Chart: Revenue
+        const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+        let gradient = ctxRevenue.createLinearGradient(0, 0, 0, 400);
         gradient.addColorStop(0, 'rgba(79, 70, 229, 0.4)');
         gradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
 
-        new Chart(ctx, {
+        new Chart(ctxRevenue, {
             type: 'line',
             data: {
-                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
+                labels: revenueLabels.reverse(), // reverse to show from oldest to newest
                 datasets: [{
                     label: 'Doanh thu (Triệu VNĐ)',
-                    data: [120, 190, 150, 280, 220, 350],
+                    data: revenueValues.reverse(),
                     borderColor: '#4f46e5',
                     backgroundColor: gradient,
                     borderWidth: 3,
@@ -165,42 +233,103 @@
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        padding: 12,
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                        titleFont: { size: 13, family: "'Inter', sans-serif" },
-                        bodyFont: { size: 14, family: "'Inter', sans-serif" },
-                        cornerRadius: 8,
-                    }
+                    legend: { display: false },
+                    tooltip: commonOptions.plugins.tooltip
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)',
-                            drawBorder: false,
-                        },
-                        ticks: {
-                            font: { family: "'Inter', sans-serif" }
-                        }
+                        grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
+                        ticks: { font: { family: "'Inter', sans-serif" } }
                     },
                     x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false,
-                        },
-                        ticks: {
-                            font: { family: "'Inter', sans-serif" }
-                        }
+                        grid: { display: false, drawBorder: false },
+                        ticks: { font: { family: "'Inter', sans-serif" } }
                     }
                 },
-                interaction: {
-                    intersect: false,
-                    mode: 'index',
+                interaction: { intersect: false, mode: 'index' },
+            }
+        });
+
+        // 2. Doughnut Chart: Project Status
+        const ctxProject = document.getElementById('projectStatusChart').getContext('2d');
+        new Chart(ctxProject, {
+            type: 'doughnut',
+            data: {
+                labels: projectStatusLabels.length > 0 ? projectStatusLabels : ['Chưa có DL'],
+                datasets: [{
+                    data: projectStatusValues.length > 0 ? projectStatusValues : [1],
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ef4444', '#8b5cf6'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                ...commonOptions,
+                cutout: '70%',
+            }
+        });
+
+        // 3. Bar Chart: Contracts Value
+        const ctxContract = document.getElementById('contractValueChart').getContext('2d');
+        new Chart(ctxContract, {
+            type: 'bar',
+            data: {
+                labels: topContractLabels.length > 0 ? topContractLabels : ['Chưa có DL'],
+                datasets: [{
+                    label: 'Giá trị (Tỷ VNĐ)',
+                    data: topContractValues.length > 0 ? topContractValues : [0],
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderRadius: 6,
+                    barThickness: 25
+                }]
+            },
+            options: {
+                ...commonOptions,
+                plugins: {
+                    ...commonOptions.plugins,
+                    legend: { display: false }
                 },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { family: "'Inter', sans-serif", size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: "'Inter', sans-serif", size: 11 } }
+                    }
+                }
+            }
+        });
+
+        // 4. Polar Area Chart: Employee Allocation
+        const ctxEmployee = document.getElementById('employeeAllocationChart').getContext('2d');
+        new Chart(ctxEmployee, {
+            type: 'polarArea',
+            data: {
+                labels: employeeLabels.length > 0 ? employeeLabels : ['Chưa có DL'],
+                datasets: [{
+                    data: employeeValues.length > 0 ? employeeValues : [1],
+                    backgroundColor: [
+                        'rgba(99, 102, 241, 0.7)',
+                        'rgba(236, 72, 153, 0.7)',
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(59, 130, 246, 0.7)'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    r: {
+                        ticks: { display: false }
+                    }
+                }
             }
         });
     </script>

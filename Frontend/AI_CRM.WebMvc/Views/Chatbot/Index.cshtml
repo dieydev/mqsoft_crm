@@ -19,6 +19,7 @@
                     <th class="py-3 fw-bold border-bottom-0">Câu hỏi</th>
                     <th class="py-3 fw-bold border-bottom-0">AI Trả lời</th>
                     <th class="py-3 fw-bold border-bottom-0">Thời gian</th>
+                    <th class="py-3 fw-bold border-bottom-0 text-end">Thao tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,7 +28,7 @@
                     foreach (var item in Model)
                     {
                         <tr>
-                            <td class="ps-4 py-3 fw-bold text-primary">@(item.NguoiDung?.Username ?? "Unknown")</td>
+                            <td class="ps-4 py-3 fw-bold text-primary">@(item.NguoiDung?.Username ?? "Tài khoản tạm")</td>
                             <td class="py-3 text-dark fw-medium" style="max-width: 300px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="@item.Question">
                                 <i class="fa-solid fa-user me-2 text-muted"></i>@item.Question
                             </td>
@@ -35,13 +36,18 @@
                                 <i class="fa-solid fa-robot me-2" style="color: #ec4899;"></i>@item.Answer
                             </td>
                             <td class="py-3 text-muted small">@item.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="py-3 text-end">
+                                <form asp-action="DeleteHistory" asp-route-id="@item.ChatHistoryId" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa lịch sử này?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash-can"></i> Xóa</button>
+                                </form>
+                            </td>
                         </tr>
                     }
                 }
                 else
                 {
                     <tr>
-                        <td colspan="4" class="text-center py-5 text-muted">
+                        <td colspan="5" class="text-center py-5 text-muted">
                             <i class="fa-solid fa-comment-slash fs-1 mb-3 opacity-50"></i>
                             <p class="mb-0 fs-5">Chưa có lịch sử chat với AI.</p>
                         </td>

@@ -30,7 +30,7 @@ builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = "Cookies";
         options.DefaultSignInScheme = "ExternalCookie";
-        // Do not set DefaultChallengeScheme here so we can support both Cookie and Google
+        options.DefaultChallengeScheme = "Cookies";
     })
     .AddCookie("Cookies", options =>
     {

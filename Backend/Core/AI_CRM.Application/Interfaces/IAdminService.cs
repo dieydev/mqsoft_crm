@@ -8,5 +8,10 @@ namespace AI_CRM.Application.Interfaces
         Task<int> GetActiveProjectsAsync();
         Task<int> GetTotalContractsAsync();
         Task<int> GetTotalChatbotQueriesAsync();
+        
+        Task<System.Collections.Generic.Dictionary<string, decimal>> GetRevenueByMonthAsync();
+        Task<System.Collections.Generic.Dictionary<string, int>> GetProjectStatusDistributionAsync();
+        Task<System.Collections.Generic.Dictionary<string, decimal>> GetTopContractsAsync();
+        Task<System.Collections.Generic.Dictionary<string, int>> GetEmployeeAllocationAsync();
     }
 }

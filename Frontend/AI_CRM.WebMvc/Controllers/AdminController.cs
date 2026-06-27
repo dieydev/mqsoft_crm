@@ -36,6 +36,11 @@ public class AdminController : Controller
         ViewBag.ActiveProjects = await _adminService.GetActiveProjectsAsync();
         ViewBag.TotalContracts = await _adminService.GetTotalContractsAsync();
         ViewBag.ChatbotQueries = await _adminService.GetTotalChatbotQueriesAsync();
+        
+        ViewBag.RevenueData = await _adminService.GetRevenueByMonthAsync();
+        ViewBag.ProjectStatusData = await _adminService.GetProjectStatusDistributionAsync();
+        ViewBag.TopContractsData = await _adminService.GetTopContractsAsync();
+        ViewBag.EmployeeAllocationData = await _adminService.GetEmployeeAllocationAsync();
 
         return View();
     }

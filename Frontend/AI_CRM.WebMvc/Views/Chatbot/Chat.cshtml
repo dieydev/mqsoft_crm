@@ -1,3 +1,4 @@
+@model IEnumerable<AI_CRM.Domain.Entities.LichSuHoiDap>
 @{
     ViewData["Title"] = "Trợ lý AI";
 }
@@ -8,49 +9,75 @@
         <h3 class="fw-bold mb-0 text-dark">
             <i class="fa-solid fa-wand-magic-sparkles me-2" style="color: #ec4899;"></i> MQSoft AI Assistant
         </h3>
-        <span class="badge rounded-pill bg-success-light"><i class="fa-solid fa-circle text-success me-1" style="font-size:8px;"></i> AI is ready</span>
+        <div>
+            <form asp-action="ClearAll" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử trò chuyện này?');">
+                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill me-2">
+                    <i class="fa-solid fa-trash-can"></i> Xóa lịch sử
+                </button>
+            </form>
+            <span class="badge rounded-pill bg-success-light"><i class="fa-solid fa-circle text-success me-1" style="font-size:8px;"></i> AI is ready</span>
+        </div>
     </div>
 
     <!-- Chat Box -->
     <div class="glass-card flex-grow-1 border-0 shadow-sm rounded-4 bg-white d-flex flex-column overflow-hidden">
         <!-- Messages Area -->
-        <div class="chat-messages p-4 flex-grow-1 overflow-auto bg-light" style="max-height: 60vh;">
+        <div id="chatMessages" class="chat-messages p-4 flex-grow-1 overflow-auto bg-light" style="max-height: 60vh;">
             
             <!-- AI Welcome Message -->
             <div class="d-flex gap-3 mb-4">
-                <div class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
+                <div class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; flex-shrink: 0;">
                     <i class="fa-solid fa-robot" style="color: #ec4899;"></i>
                 </div>
                 <div class="p-3 rounded-4 bg-white shadow-sm" style="max-width: 80%; border-top-left-radius: 0 !important;">
-                    <p class="mb-0 text-dark fw-medium">Xin chào! Tôi là Trợ lý ảo của MQSoft CRM. Tôi đã đọc toàn bộ tài liệu nội bộ và dự án.</p>
-                    <p class="mb-0 text-dark fw-medium mt-1">Bạn cần tôi tra cứu hợp đồng, tiến độ dự án hay quy trình nào hôm nay?</p>
+                    <p class="mb-0 text-dark fw-medium">Xin chào! Tôi là Trợ lý ảo của MQSoft CRM. Tôi đã được cung cấp dữ liệu dự án.</p>
+                    <p class="mb-0 text-dark fw-medium mt-1">Bạn có thể hỏi tôi bất cứ điều gì về danh sách khách hàng, dự án, hợp đồng, tài liệu và cách sử dụng hệ thống.</p>
                 </div>
             </div>
 
-            <!-- User Message Placeholder -->
-            <div class="d-flex gap-3 mb-4 flex-row-reverse">
-                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
-                    <i class="fa-regular fa-user"></i>
-                </div>
-                <div class="p-3 rounded-4 bg-primary text-white shadow-sm" style="max-width: 80%; border-top-right-radius: 0 !important;">
-                    <p class="mb-0 fw-medium">Cho tôi biết quy trình ký hợp đồng mới gồm những bước nào?</p>
-                </div>
-            </div>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <!-- User Message -->
+                    <div class="d-flex gap-3 mb-4 flex-row-reverse">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; flex-shrink: 0;">
+                            <i class="fa-regular fa-user"></i>
+                        </div>
+                        <div class="p-3 rounded-4 bg-primary text-white shadow-sm" style="max-width: 80%; border-top-right-radius: 0 !important;">
+                            <p class="mb-0 fw-medium">@item.Question</p>
+                        </div>
+                    </div>
 
-            <!-- AI Response Placeholder -->
-            <div class="d-flex gap-3 mb-4">
-                <div class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
-                    <i class="fa-solid fa-robot" style="color: #ec4899;"></i>
-                </div>
-                <div class="p-3 rounded-4 bg-white shadow-sm" style="max-width: 80%; border-top-left-radius: 0 !important;">
-                    <p class="mb-0 text-dark fw-medium">Dựa theo tài liệu "Quy trình triển khai v2.pdf", quy trình ký hợp đồng mới gồm 3 bước:</p>
-                    <ul class="mb-0 mt-2 text-dark">
-                        <li>Bước 1: Lập báo giá và chốt scope với khách hàng.</li>
-                        <li>Bước 2: Soạn thảo hợp đồng theo mẫu HD-01.</li>
-                        <li>Bước 3: Trình Giám đốc ký và đóng dấu.</li>
-                    </ul>
-                </div>
-            </div>
+                    <!-- AI Message -->
+                    <div class="d-flex gap-3 mb-4">
+                        <div class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; flex-shrink: 0;">
+                            <i class="fa-solid fa-robot" style="color: #ec4899;"></i>
+                        </div>
+                        <div class="p-3 rounded-4 bg-white shadow-sm w-100" style="max-width: 80%; border-top-left-radius: 0 !important;">
+                            <div class="text-dark fw-medium ai-content past-ai-message" style="white-space: pre-wrap;">@item.Answer</div>
+                            
+                            @if (!item.DanhGiaCauTraLois.Any())
+                            {
+                                <div class="mt-2 pt-2 border-top border-light d-flex gap-2 ai-rating" data-id="@item.ChatHistoryId">
+                                    <small class="text-muted">Câu trả lời có hữu ích không?</small>
+                                    <button class="btn btn-sm btn-link text-success p-0 text-decoration-none btn-rate" data-helpful="true"><i class="fa-regular fa-thumbs-up"></i></button>
+                                    <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none btn-rate" data-helpful="false"><i class="fa-regular fa-thumbs-down"></i></button>
+                                </div>
+                            }
+                            else
+                            {
+                                var firstRate = item.DanhGiaCauTraLois.First();
+                                <div class="mt-2 pt-2 border-top border-light">
+                                    <small class="@(firstRate.IsHelpful ? "text-success" : "text-danger")">
+                                        <i class="fa-solid @(firstRate.IsHelpful ? "fa-check" : "fa-xmark")"></i> Đã đánh giá
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
 
         </div>
 
@@ -60,14 +87,153 @@
                 <button class="btn btn-light border-0 shadow-none text-muted px-3 rounded-start-pill" type="button">
                     <i class="fa-solid fa-paperclip"></i>
                 </button>
-                <input type="text" class="form-control bg-light border-0 shadow-none py-3" placeholder="Hỏi AI bất cứ điều gì về dữ liệu của bạn...">
-                <button class="btn btn-primary px-4 rounded-end-pill" type="button">
+                <input type="text" id="chatInput" class="form-control bg-light border-0 shadow-none py-3" placeholder="Hỏi AI bất cứ điều gì...">
+                <button id="btnSend" class="btn btn-primary px-4 rounded-end-pill" type="button">
                     <i class="fa-solid fa-paper-plane me-2"></i> Gửi
                 </button>
             </div>
             <div class="text-center mt-2">
-                <small class="text-muted" style="font-size: 0.75rem;">AI có thể đưa ra thông tin không chính xác. Vui lòng kiểm tra lại tài liệu gốc.</small>
+                <small class="text-muted" style="font-size: 0.75rem;">AI trả lời dựa trên kho tài liệu nội bộ. Vui lòng đánh giá câu trả lời để AI học hỏi thêm.</small>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            const chatMessages = $('#chatMessages');
+            const chatInput = $('#chatInput');
+            const btnSend = $('#btnSend');
+
+            // Render markdown cho các tin nhắn cũ
+            $('.past-ai-message').each(function() {
+                const rawText = $(this).text();
+                $(this).html(marked.parse(rawText));
+            });
+
+            function scrollToBottom() {
+                chatMessages.scrollTop(chatMessages[0].scrollHeight);
+            }
+            scrollToBottom(); // Cuộn xuống cuối khi vừa load trang
+
+            function appendUserMessage(text) {
+                const msgHtml = `
+                    <div class="d-flex gap-3 mb-4 flex-row-reverse">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; flex-shrink: 0;">
+                            <i class="fa-regular fa-user"></i>
+                        </div>
+                        <div class="p-3 rounded-4 bg-primary text-white shadow-sm" style="max-width: 80%; border-top-right-radius: 0 !important;">
+                            <p class="mb-0 fw-medium">${text}</p>
+                        </div>
+                    </div>`;
+                chatMessages.append(msgHtml);
+                scrollToBottom();
+            }
+
+            function appendAIMessage(text, historyId) {
+                // Parse markdown
+                const parsedText = marked.parse(text);
+
+                const rateHtml = historyId ? `
+                    <div class="mt-2 pt-2 border-top border-light d-flex gap-2 ai-rating" data-id="${historyId}">
+                        <small class="text-muted">Câu trả lời có hữu ích không?</small>
+                        <button class="btn btn-sm btn-link text-success p-0 text-decoration-none btn-rate" data-helpful="true"><i class="fa-regular fa-thumbs-up"></i></button>
+                        <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none btn-rate" data-helpful="false"><i class="fa-regular fa-thumbs-down"></i></button>
+                    </div>` : '';
+
+                const msgHtml = `
+                    <div class="d-flex gap-3 mb-4">
+                        <div class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; flex-shrink: 0;">
+                            <i class="fa-solid fa-robot" style="color: #ec4899;"></i>
+                        </div>
+                        <div class="p-3 rounded-4 bg-white shadow-sm w-100" style="max-width: 80%; border-top-left-radius: 0 !important;">
+                            <div class="text-dark fw-medium ai-content">${parsedText}</div>
+                            ${rateHtml}
+                        </div>
+                    </div>`;
+                chatMessages.append(msgHtml);
+                scrollToBottom();
+            }
+
+            function appendLoading() {
+                const id = 'loading-' + Date.now();
+                const msgHtml = `
+                    <div id="${id}" class="d-flex gap-3 mb-4">
+                        <div class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; flex-shrink: 0;">
+                            <i class="fa-solid fa-robot" style="color: #ec4899;"></i>
+                        </div>
+                        <div class="p-3 rounded-4 bg-white shadow-sm" style="max-width: 80%; border-top-left-radius: 0 !important;">
+                            <i class="fa-solid fa-circle-notch fa-spin text-muted"></i> Đang suy nghĩ...
+                        </div>
+                    </div>`;
+                chatMessages.append(msgHtml);
+                scrollToBottom();
+                return id;
+            }
+
+            btnSend.click(function () {
+                const question = chatInput.val().trim();
+                if (!question) return;
+
+                appendUserMessage(question);
+                chatInput.val('');
+                btnSend.prop('disabled', true);
+                
+                const loadingId = appendLoading();
+
+                $.ajax({
+                    url: '/Chatbot/Ask',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ Question: question }),
+                    success: function (res) {
+                        $('#' + loadingId).remove();
+                        btnSend.prop('disabled', false);
+
+                        if (res.success) {
+                            appendAIMessage(res.answer, res.historyId);
+                        } else {
+                            appendAIMessage("❌ Lỗi: " + res.message, null);
+                        }
+                    },
+                    error: function () {
+                        $('#' + loadingId).remove();
+                        btnSend.prop('disabled', false);
+                        appendAIMessage("❌ Không thể kết nối với máy chủ.", null);
+                    }
+                });
+            });
+
+            chatInput.keypress(function (e) {
+                if (e.which == 13) {
+                    btnSend.click();
+                }
+            });
+
+            $(document).on('click', '.btn-rate', function() {
+                const container = $(this).closest('.ai-rating');
+                const historyId = container.data('id');
+                const isHelpful = $(this).data('helpful');
+                
+                // Hiệu ứng loading nút
+                $(this).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+
+                $.ajax({
+                    url: '/Chatbot/Rate',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ HistoryId: historyId, IsHelpful: isHelpful, Comment: "" }),
+                    success: function(res) {
+                        if(res.success) {
+                            container.html('<small class="text-success"><i class="fa-solid fa-check"></i> Cảm ơn bạn đã đánh giá!</small>');
+                        } else {
+                            container.html('<small class="text-danger">Lỗi ghi nhận đánh giá.</small>');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}
