@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Backend\Infrastructure\AI_CRM.Infrastructure\AI_CRM.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\Backend\Infrastructure\AI_CRM.AI\AI_CRM.AI.csproj" />
-    <ProjectReference Include="..\..\Backend\Core\AI_CRM.Application\AI_CRM.Application.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\AI_CRM.Infrastructure\AI_CRM.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\AI_CRM.AI\AI_CRM.AI.csproj" />
+    <ProjectReference Include="..\..\Core\AI_CRM.Application\AI_CRM.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,7 +17,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aa2fadfb-2003-4af1-bc68-a092bd43960a</UserSecretsId>
   </PropertyGroup>

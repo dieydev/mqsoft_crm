@@ -1,6 +1,0 @@
-@AI_CRM.WebApi_HostAddress = http://localhost:5245
-
-GET {{AI_CRM.WebApi_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
