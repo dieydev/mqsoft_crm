@@ -160,7 +160,7 @@ namespace AI_CRM.Infrastructure.Services
                     page.Size(PageSizes.A4);
                     page.Margin(2, Unit.Centimetre);
                     page.PageColor(Colors.White);
-                    page.DefaultTextStyle(x => x.FontSize(12));
+                    page.DefaultTextStyle(x => x.FontSize(12).FontFamily("Arial"));
 
                     page.Header().Text("BÁO CÁO CHI TIẾT KHÁCH HÀNG")
                         .SemiBold().FontSize(20).FontColor(Colors.Blue.Darken2);
@@ -230,7 +230,7 @@ namespace AI_CRM.Infrastructure.Services
                     page.Size(PageSizes.A4);
                     page.Margin(2, Unit.Centimetre);
                     page.PageColor(Colors.White);
-                    page.DefaultTextStyle(x => x.FontSize(12));
+                    page.DefaultTextStyle(x => x.FontSize(12).FontFamily("Arial"));
 
                     page.Header().Text("BÁO CÁO DỰ ÁN")
                         .SemiBold().FontSize(20).FontColor(Colors.Green.Darken2);
@@ -280,7 +280,7 @@ namespace AI_CRM.Infrastructure.Services
                     page.Size(PageSizes.A4);
                     page.Margin(2, Unit.Centimetre);
                     page.PageColor(Colors.White);
-                    page.DefaultTextStyle(x => x.FontSize(12));
+                    page.DefaultTextStyle(x => x.FontSize(12).FontFamily("Arial"));
 
                     page.Header().Text("BÁO CÁO HỢP ĐỒNG")
                         .SemiBold().FontSize(20).FontColor(Colors.Purple.Darken2);
@@ -317,7 +317,7 @@ namespace AI_CRM.Infrastructure.Services
                     page.Size(PageSizes.A4);
                     page.Margin(2, Unit.Centimetre);
                     page.PageColor(Colors.White);
-                    page.DefaultTextStyle(x => x.FontSize(12));
+                    page.DefaultTextStyle(x => x.FontSize(12).FontFamily("Arial"));
 
                     page.Header().Text($"BÁO CÁO TIẾN ĐỘ: {project.ProjectName}")
                         .SemiBold().FontSize(20).FontColor(Colors.Orange.Darken2);

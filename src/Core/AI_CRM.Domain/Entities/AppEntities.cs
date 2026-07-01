@@ -54,6 +54,9 @@ namespace AI_CRM.Domain.Entities
         public string ITContactPhone { get; set; } // SĐT IT
         public string ITContactEmail { get; set; } // Email IT
 
+        // --- PHÂN LOẠI HÌNH THỨC SỞ HỮU ---
+        public string OwnershipType { get; set; } // "Công lập" hoặc "Tư nhân"
+
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public bool IsDeleted { get; set; } = false;
 

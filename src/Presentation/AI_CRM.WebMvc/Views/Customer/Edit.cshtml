@@ -49,10 +49,18 @@
                         <label asp-for="TaxCode" class="form-label fw-bold text-muted small text-uppercase">Mã số thuế</label>
                         <input asp-for="TaxCode" class="form-control bg-light border-0 shadow-none rounded-3 py-2" placeholder="Nhập MST..." />
                     </div>
-                    <div class="col-md-12">
+                    <div class="col-md-8">
                         <label asp-for="CompanyName" class="form-label fw-bold text-muted small text-uppercase">Tên Bệnh viện / Phòng khám <span class="text-danger">*</span></label>
                         <input asp-for="CompanyName" class="form-control bg-light border-0 shadow-none rounded-3 py-2" placeholder="Ví dụ: Bệnh viện Đa khoa tỉnh..." required />
                         <span asp-validation-for="CompanyName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="OwnershipType" class="form-label fw-bold text-muted small text-uppercase">Loại hình sở hữu</label>
+                        <select asp-for="OwnershipType" class="form-select bg-light border-0 shadow-none rounded-3 py-2">
+                            <option value="">-- Chọn loại hình --</option>
+                            <option value="Công lập">Công lập (Nhà nước)</option>
+                            <option value="Tư nhân">Tư nhân</option>
+                        </select>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="Representative" class="form-label fw-bold text-muted small text-uppercase">Ban Giám đốc (Người đại diện)</label>

@@ -44,6 +44,7 @@
             <thead class="bg-light text-muted" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
                 <tr>
                     <th class="ps-4 py-3 fw-bold border-bottom-0">Tên doanh nghiệp</th>
+                    <th class="py-3 fw-bold border-bottom-0">Loại hình</th>
                     <th class="py-3 fw-bold border-bottom-0">Người đại diện</th>
                     <th class="py-3 fw-bold border-bottom-0">Email</th>
                     <th class="py-3 fw-bold border-bottom-0">Điện thoại</th>
@@ -76,6 +77,20 @@
                                     </div>
                                 </div>
                             </td>
+                            <td class="py-3">
+                                @if (item.OwnershipType == "Công lập")
+                                {
+                                    <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #dbeafe; color: #1e40af;">Công lập</span>
+                                }
+                                else if (item.OwnershipType == "Tư nhân")
+                                {
+                                    <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #fef3c7; color: #92400e;">Tư nhân</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
                             <td class="py-3 fw-medium">@(string.IsNullOrEmpty(item.Representative) ? "-" : item.Representative)</td>
                             <td class="py-3 text-muted">@(string.IsNullOrEmpty(item.Email) ? "-" : item.Email)</td>
                             <td class="py-3 fw-medium">@(string.IsNullOrEmpty(item.Phone) ? "-" : item.Phone)</td>
@@ -95,7 +110,7 @@
                 else
                 {
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">
+                        <td colspan="7" class="text-center py-4 text-muted">
                             <i class="fa-solid fa-folder-open fs-2 mb-2"></i>
                             <p class="mb-0">Chưa có dữ liệu khách hàng. Hãy thêm khách hàng mới!</p>
                         </td>

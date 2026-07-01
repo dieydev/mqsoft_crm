@@ -26,6 +26,15 @@
             </div>
 
             <div class="col-md-6">
+                <label asp-for="OwnershipType" class="form-label fw-bold text-muted small text-uppercase">Loại hình sở hữu</label>
+                <select asp-for="OwnershipType" class="form-select form-select-lg bg-light border-0 shadow-none rounded-3">
+                    <option value="">-- Chọn loại hình --</option>
+                    <option value="Công lập">Công lập (Nhà nước)</option>
+                    <option value="Tư nhân">Tư nhân</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
                 <label asp-for="Representative" class="form-label fw-bold text-muted small text-uppercase">Người đại diện</label>
                 <input asp-for="Representative" class="form-control form-control-lg bg-light border-0 shadow-none rounded-3" placeholder="Nhập họ tên người đại diện" />
             </div>
