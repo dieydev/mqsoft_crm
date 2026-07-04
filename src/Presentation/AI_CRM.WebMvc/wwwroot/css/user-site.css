@@ -749,3 +749,178 @@ h1, h2, h3, h4, h5, h6 {
 .step-modern:hover .step-num-modern {
     opacity: 1;
 }
+
+/* Recruitment / Job Cards */
+.job-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.job-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 0;
+    background: linear-gradient(180deg, var(--primary), var(--secondary));
+    transition: height 0.4s ease;
+    border-radius: 0 0 4px 0;
+}
+
+.job-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 50px rgba(67, 97, 238, 0.12);
+    border-color: rgba(67, 97, 238, 0.1);
+}
+
+.job-card:hover::before {
+    height: 100%;
+}
+
+.job-list {
+    padding-left: 1.2rem;
+    margin-bottom: 0;
+}
+
+.job-list li {
+    margin-bottom: 0.4rem;
+    line-height: 1.6;
+}
+
+.job-list li::marker {
+    color: var(--primary);
+}
+
+.icon-box {
+    flex-shrink: 0;
+}
+
+/* Pricing Detail Table */
+.pricing-table-wrapper {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.pricing-detail-table {
+    margin-bottom: 0;
+    font-size: 0.92rem;
+}
+
+.pricing-detail-table thead th {
+    background: linear-gradient(135deg, var(--dark), #1e293b);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.82rem;
+    padding: 1rem 1.2rem;
+    border: none;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.pricing-detail-table thead th.col-stt {
+    width: 70px;
+    text-align: center;
+}
+
+.pricing-detail-table thead th.col-type {
+    min-width: 280px;
+}
+
+.pricing-detail-table thead th.col-price {
+    width: 140px;
+    text-align: center;
+}
+
+.pricing-detail-table tbody td {
+    padding: 0.75rem 1.2rem;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    color: var(--text-main);
+    transition: all 0.2s ease;
+}
+
+.pricing-category-row {
+    background: linear-gradient(90deg, rgba(67, 97, 238, 0.06), rgba(76, 201, 240, 0.04)) !important;
+    border-left: 4px solid var(--primary) !important;
+}
+
+.pricing-category-row td {
+    padding: 0.85rem 1.2rem !important;
+    color: var(--dark) !important;
+    font-size: 0.9rem;
+}
+
+.pricing-detail-row td:first-child {
+    text-align: center;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.pricing-detail-row td:nth-child(3),
+.pricing-detail-row td:nth-child(4),
+.pricing-detail-row td:nth-child(5) {
+    text-align: center;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.pricing-detail-row:hover {
+    background: rgba(67, 97, 238, 0.03);
+}
+
+.pricing-detail-row:hover td {
+    color: var(--primary);
+}
+
+.pricing-detail-row:hover td:nth-child(3),
+.pricing-detail-row:hover td:nth-child(4),
+.pricing-detail-row:hover td:nth-child(5) {
+    color: var(--primary);
+}
+
+/* Pricing Note */
+.pricing-note {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    border: 1px solid rgba(255, 193, 7, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+/* Responsive adjustments for pricing table */
+@media (max-width: 768px) {
+    .pricing-detail-table {
+        font-size: 0.82rem;
+    }
+
+    .pricing-detail-table thead th {
+        font-size: 0.75rem;
+        padding: 0.75rem 0.8rem;
+    }
+
+    .pricing-detail-table tbody td {
+        padding: 0.6rem 0.8rem;
+    }
+
+    .pricing-detail-table thead th.col-type {
+        min-width: 200px;
+    }
+
+    .pricing-detail-table thead th.col-price {
+        width: 100px;
+    }
+}
