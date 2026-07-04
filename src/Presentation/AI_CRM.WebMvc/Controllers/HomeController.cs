@@ -19,6 +19,31 @@ public class HomeController : Controller
         return View();
     }
 
+    public IActionResult About()
+    {
+        return View();
+    }
+
+    public IActionResult HIS()
+    {
+        return View();
+    }
+
+    public IActionResult RISPACS()
+    {
+        return View();
+    }
+
+    public IActionResult LIS()
+    {
+        return View();
+    }
+
+    public IActionResult EMR()
+    {
+        return View();
+    }
+
     public IActionResult Privacy()
     {
         return View();

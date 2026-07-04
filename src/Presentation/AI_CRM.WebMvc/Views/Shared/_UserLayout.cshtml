@@ -29,7 +29,7 @@
         <nav class="navbar navbar-expand-lg navbar-light fixed-top transition-all" id="mainNav">
             <div class="container py-2">
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/images/logo.png" alt="MQSoft Logo" style="max-height: 50px; object-fit: contain;" />
+                    <img src="~/images/logo.png" alt="MQSoft Logo" style="max-height: 80px; object-fit: contain;" />
                 </a>
                 <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPublic" aria-controls="navbarPublic"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@
                             <a class="nav-link" href="#about">Về MQSoft</a>
                         </li>
                         <li class="nav-item px-2">
-                            <a class="nav-link" href="#team">Khách Hàng</a>
+                            <a class="nav-link" href="#clients-partners">Khách Hàng</a>
                         </li>
                         <li class="nav-item px-2">
                             <a class="nav-link" href="#recruitment">Tuyển Dụng</a>
@@ -77,7 +77,7 @@
             <div class="row g-5 mb-5">
                 <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
                     <a class="navbar-brand d-flex align-items-center mb-4 text-decoration-none" href="#">
-                        <img src="~/images/logo.png" alt="MQSoft Logo" style="max-height: 55px; object-fit: contain;" />
+                        <img src="~/images/logo.png" alt="MQSoft Logo" style="max-height: 90px; object-fit: contain;" />
                     </a>
                     <p class="text-muted pe-4 mb-4 lh-lg">
                         Tiên phong nghiên cứu và ứng dụng công nghệ 4.0 vào y tế. "Tư Duy - Sáng Tạo - Đột Phá" để nâng cao chất lượng phục vụ sức khỏe cộng đồng.
@@ -96,7 +96,7 @@
                         <li><a href="#">Trang chủ</a></li>
                         <li><a href="#about">Về MQSoft</a></li>
                         <li><a href="#services">Giải pháp y tế</a></li>
-                        <li><a href="#team">Báo giá</a></li>
+                        <li><a href="#pricing">Báo giá</a></li>
                         <li><a href="#recruitment">Tuyển dụng</a></li>
                     </ul>
                 </div>
@@ -104,11 +104,11 @@
                 <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
                     <h5 class="text-dark fw-bold mb-4">Giải Pháp</h5>
                     <ul class="list-unstyled footer-links">
-                        <li><a href="#">Quản lý bệnh viện (HIS)</a></li>
-                        <li><a href="#">Truyền tải ảnh (RIS-PACS)</a></li>
-                        <li><a href="#">Bệnh án điện tử (EMR)</a></li>
-                        <li><a href="#">Hệ thống xét nghiệm (LIS)</a></li>
-                        <li><a href="#">Khám chữa bệnh từ xa</a></li>
+                        <li><a asp-controller="Home" asp-action="HIS">Quản lý bệnh viện (HIS)</a></li>
+                        <li><a asp-controller="Home" asp-action="RISPACS">Truyền tải ảnh (RIS-PACS)</a></li>
+                        <li><a asp-controller="Home" asp-action="EMR">Bệnh án điện tử (EMR)</a></li>
+                        <li><a asp-controller="Home" asp-action="LIS">Hệ thống xét nghiệm (LIS)</a></li>
+                        <li><a href="#services">Khám chữa bệnh từ xa</a></li>
                     </ul>
                 </div>
                 
