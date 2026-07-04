@@ -53,6 +53,22 @@ namespace AI_CRM.WebMvc.Controllers
             {
                 if (pdfFile != null && pdfFile.Length > 0)
                 {
+                    var ext = System.IO.Path.GetExtension(pdfFile.FileName).ToLowerInvariant();
+                    if (ext != ".pdf")
+                    {
+                        ModelState.AddModelError("FilePath", "Chỉ cho phép upload file định dạng PDF.");
+                        ViewBag.CustomerId = new SelectList(await _contractService.GetActiveCustomersAsync(), "CustomerId", "CompanyName", hopDong.CustomerId);
+                        ViewBag.StatusId = new SelectList(await _contractService.GetStatusesAsync(), "StatusId", "StatusName", hopDong.StatusId);
+                        return View(hopDong);
+                    }
+                    if (pdfFile.Length > 50 * 1024 * 1024)
+                    {
+                        ModelState.AddModelError("FilePath", "Dung lượng file không được vượt quá 50MB.");
+                        ViewBag.CustomerId = new SelectList(await _contractService.GetActiveCustomersAsync(), "CustomerId", "CompanyName", hopDong.CustomerId);
+                        ViewBag.StatusId = new SelectList(await _contractService.GetStatusesAsync(), "StatusId", "StatusName", hopDong.StatusId);
+                        return View(hopDong);
+                    }
+
                     using (var stream = pdfFile.OpenReadStream())
                     {
                         hopDong.FilePath = await _contractService.SaveFileAsync(stream, pdfFile.FileName, _env.WebRootPath);
@@ -94,6 +110,22 @@ namespace AI_CRM.WebMvc.Controllers
             {
                 if (pdfFile != null && pdfFile.Length > 0)
                 {
+                    var ext = System.IO.Path.GetExtension(pdfFile.FileName).ToLowerInvariant();
+                    if (ext != ".pdf")
+                    {
+                        ModelState.AddModelError("FilePath", "Chỉ cho phép upload file định dạng PDF.");
+                        ViewBag.CustomerId = new SelectList(await _contractService.GetActiveCustomersAsync(), "CustomerId", "CompanyName", hopDong.CustomerId);
+                        ViewBag.StatusId = new SelectList(await _contractService.GetStatusesAsync(), "StatusId", "StatusName", hopDong.StatusId);
+                        return View(hopDong);
+                    }
+                    if (pdfFile.Length > 50 * 1024 * 1024)
+                    {
+                        ModelState.AddModelError("FilePath", "Dung lượng file không được vượt quá 50MB.");
+                        ViewBag.CustomerId = new SelectList(await _contractService.GetActiveCustomersAsync(), "CustomerId", "CompanyName", hopDong.CustomerId);
+                        ViewBag.StatusId = new SelectList(await _contractService.GetStatusesAsync(), "StatusId", "StatusName", hopDong.StatusId);
+                        return View(hopDong);
+                    }
+
                     using (var stream = pdfFile.OpenReadStream())
                     {
                         hopDong.FilePath = await _contractService.SaveFileAsync(stream, pdfFile.FileName, _env.WebRootPath);

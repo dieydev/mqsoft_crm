@@ -44,10 +44,12 @@ namespace AI_CRM.Infrastructure.Services
             var builder = new System.Text.StringBuilder();
             builder.AppendLine("Mã KH,Tên doanh nghiệp,Người đại diện,Điện thoại,Email,Địa chỉ,Trạng thái");
 
+            string Escape(string s) => string.IsNullOrEmpty(s) ? "" : (s.StartsWith("=") || s.StartsWith("+") || s.StartsWith("-") || s.StartsWith("@") ? "'" + s : s).Replace("\"", "\"\"");
+
             foreach (var cus in customers)
             {
                 var status = cus.IsDeleted ? "Ngừng hoạt động" : "Hoạt động";
-                builder.AppendLine($"\"{cus.CustomerCode}\",\"{cus.CompanyName}\",\"{cus.Representative}\",\"{cus.Phone}\",\"{cus.Email}\",\"{cus.Address}\",\"{status}\"");
+                builder.AppendLine($"\"{Escape(cus.CustomerCode)}\",\"{Escape(cus.CompanyName)}\",\"{Escape(cus.Representative)}\",\"{Escape(cus.Phone)}\",\"{Escape(cus.Email)}\",\"{Escape(cus.Address)}\",\"{Escape(status)}\"");
             }
 
             return System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(builder.ToString())).ToArray();

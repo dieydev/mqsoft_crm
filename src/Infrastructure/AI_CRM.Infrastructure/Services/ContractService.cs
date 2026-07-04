@@ -138,6 +138,8 @@ namespace AI_CRM.Infrastructure.Services
             var builder = new System.Text.StringBuilder();
             builder.AppendLine("Số hợp đồng,Khách hàng,Tên hợp đồng,Giá trị (VNĐ),Ngày ký,Hết hạn,Trạng thái");
 
+            string Escape(string s) => string.IsNullOrEmpty(s) ? "" : (s.StartsWith("=") || s.StartsWith("+") || s.StartsWith("-") || s.StartsWith("@") ? "'" + s : s).Replace("\"", "\"\"");
+
             foreach (var h in contracts)
             {
                 var signDate = h.SignDate?.ToString("dd/MM/yyyy") ?? "";
@@ -145,7 +147,7 @@ namespace AI_CRM.Infrastructure.Services
                 var status = h.TrangThaiHopDong?.StatusName ?? "";
                 var val = h.ContractValue?.ToString("N0") ?? "0";
                 
-                builder.AppendLine($"\"{h.ContractNumber}\",\"{h.KhachHang?.CompanyName}\",\"{h.ContractName}\",\"{val}\",\"{signDate}\",\"{expDate}\",\"{status}\"");
+                builder.AppendLine($"\"{Escape(h.ContractNumber)}\",\"{Escape(h.KhachHang?.CompanyName)}\",\"{Escape(h.ContractName)}\",\"{val}\",\"{signDate}\",\"{expDate}\",\"{Escape(status)}\"");
             }
 
             return System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(builder.ToString())).ToArray();

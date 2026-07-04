@@ -120,6 +120,8 @@ namespace AI_CRM.Infrastructure.Services
             var builder = new System.Text.StringBuilder();
             builder.AppendLine("Tên dự án,Khách hàng,Hợp đồng,Ngày bắt đầu,Deadline,Ngân sách (VNĐ),Trạng thái");
 
+            string Escape(string s) => string.IsNullOrEmpty(s) ? "" : (s.StartsWith("=") || s.StartsWith("+") || s.StartsWith("-") || s.StartsWith("@") ? "'" + s : s).Replace("\"", "\"\"");
+
             foreach (var d in projects)
             {
                 var startDate = d.StartDate?.ToString("dd/MM/yyyy") ?? "";
@@ -127,7 +129,7 @@ namespace AI_CRM.Infrastructure.Services
                 var status = d.TrangThaiDuAn?.StatusName ?? "";
                 var budget = d.Budget?.ToString("N0") ?? "0";
                 
-                builder.AppendLine($"\"{d.ProjectName}\",\"{d.KhachHang?.CompanyName}\",\"{d.HopDong?.ContractNumber}\",\"{startDate}\",\"{deadline}\",\"{budget}\",\"{status}\"");
+                builder.AppendLine($"\"{Escape(d.ProjectName)}\",\"{Escape(d.KhachHang?.CompanyName)}\",\"{Escape(d.HopDong?.ContractNumber)}\",\"{startDate}\",\"{deadline}\",\"{budget}\",\"{Escape(status)}\"");
             }
 
             return System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(builder.ToString())).ToArray();
