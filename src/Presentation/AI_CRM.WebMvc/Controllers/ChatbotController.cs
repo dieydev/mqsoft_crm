@@ -7,7 +7,7 @@ using System;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Employee")]
     public class ChatbotController : Controller
     {
         private readonly IChatbotService _chatbotService;

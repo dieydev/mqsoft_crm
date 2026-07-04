@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Employee")]
     public class ProjectController : Controller
     {
         private readonly IProjectService _projectService;

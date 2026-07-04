@@ -10,7 +10,7 @@ using System.IO;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Employee")]
     public class ContractController : Controller
     {
         private readonly IContractService _contractService;
