@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using AI_CRM.Application.Interfaces;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace AI_CRM.WebMvc.Controllers
 {
@@ -9,10 +10,31 @@ namespace AI_CRM.WebMvc.Controllers
     public class DocumentController : Controller
     {
         private readonly IDocumentService _documentService;
+        private readonly IEmployeeService _employeeService;
 
-        public DocumentController(IDocumentService documentService)
+        // Whitelist file extensions được phép upload
+        private static readonly string[] AllowedExtensions = { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".png", ".jpg", ".jpeg", ".zip", ".rar" };
+        private const long MaxFileSize = 50 * 1024 * 1024; // 50MB
+
+        public DocumentController(IDocumentService documentService, IEmployeeService employeeService)
         {
             _documentService = documentService;
+            _employeeService = employeeService;
+        }
+
+        /// <summary>
+        /// Lấy EmployeeId từ Claims của user đang đăng nhập
+        /// </summary>
+        private async Task<int> GetCurrentEmployeeIdAsync()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(userIdStr, out int userId))
+            {
+                var employees = await _employeeService.GetEmployeesAsync(null);
+                var employee = employees.FirstOrDefault(e => e.UserId == userId);
+                if (employee != null) return employee.EmployeeId;
+            }
+            return 1; // Fallback nếu không tìm thấy
         }
 
         public async Task<IActionResult> Index(string searchString, int? categoryId)
@@ -45,13 +67,30 @@ namespace AI_CRM.WebMvc.Controllers
             {
                 if (uploadFile != null && uploadFile.Length > 0)
                 {
+                    // Validate file extension (chống upload file nguy hiểm)
+                    var ext = System.IO.Path.GetExtension(uploadFile.FileName).ToLowerInvariant();
+                    if (!AllowedExtensions.Contains(ext))
+                    {
+                        ModelState.AddModelError("FilePath", $"Định dạng file '{ext}' không được phép. Chỉ chấp nhận: {string.Join(", ", AllowedExtensions)}");
+                        ViewBag.CategoryId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(await _documentService.GetCategoriesAsync(), "CategoryId", "CategoryName", document.CategoryId);
+                        return View(document);
+                    }
+
+                    // Validate file size
+                    if (uploadFile.Length > MaxFileSize)
+                    {
+                        ModelState.AddModelError("FilePath", "Dung lượng file không được vượt quá 50MB.");
+                        ViewBag.CategoryId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(await _documentService.GetCategoriesAsync(), "CategoryId", "CategoryName", document.CategoryId);
+                        return View(document);
+                    }
+
                     var uploadsFolder = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "uploads", "documents");
                     if (!System.IO.Directory.Exists(uploadsFolder))
                     {
                         System.IO.Directory.CreateDirectory(uploadsFolder);
                     }
 
-                    var uniqueFileName = System.Guid.NewGuid().ToString() + "_" + System.IO.Path.GetFileName(uploadFile.FileName);
+                    var uniqueFileName = System.Guid.NewGuid().ToString() + ext;
                     var filePath = System.IO.Path.Combine(uploadsFolder, uniqueFileName);
 
                     using (var fileStream = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
@@ -68,10 +107,8 @@ namespace AI_CRM.WebMvc.Controllers
                     return View(document);
                 }
 
-                // Temporary logic: get current employee ID. Since we don't have a reliable way to get current EmployeeId from Claims easily right now without joining, let's assume 1 or handle it.
-                // In a real app, we'd lookup EmployeeId by User.Identity.Name.
-                // For now, let's set UploadedBy = 1 (assuming Admin has EmployeeId 1).
-                document.UploadedBy = 1; 
+                // Lấy EmployeeId thực tế từ user đang đăng nhập
+                document.UploadedBy = await GetCurrentEmployeeIdAsync();
 
                 var tagsList = TagsInput?.Split(new[] { ',', ';' }, System.StringSplitOptions.RemoveEmptyEntries);
 
@@ -112,13 +149,30 @@ namespace AI_CRM.WebMvc.Controllers
             {
                 if (uploadFile != null && uploadFile.Length > 0)
                 {
+                    // Validate file extension
+                    var ext = System.IO.Path.GetExtension(uploadFile.FileName).ToLowerInvariant();
+                    if (!AllowedExtensions.Contains(ext))
+                    {
+                        ModelState.AddModelError("FilePath", $"Định dạng file '{ext}' không được phép.");
+                        ViewBag.CategoryId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(await _documentService.GetCategoriesAsync(), "CategoryId", "CategoryName", document.CategoryId);
+                        return View(document);
+                    }
+
+                    // Validate file size
+                    if (uploadFile.Length > MaxFileSize)
+                    {
+                        ModelState.AddModelError("FilePath", "Dung lượng file không được vượt quá 50MB.");
+                        ViewBag.CategoryId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(await _documentService.GetCategoriesAsync(), "CategoryId", "CategoryName", document.CategoryId);
+                        return View(document);
+                    }
+
                     var uploadsFolder = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "uploads", "documents");
                     if (!System.IO.Directory.Exists(uploadsFolder))
                     {
                         System.IO.Directory.CreateDirectory(uploadsFolder);
                     }
 
-                    var uniqueFileName = System.Guid.NewGuid().ToString() + "_" + System.IO.Path.GetFileName(uploadFile.FileName);
+                    var uniqueFileName = System.Guid.NewGuid().ToString() + ext;
                     var filePath = System.IO.Path.Combine(uploadsFolder, uniqueFileName);
 
                     using (var fileStream = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
@@ -159,18 +213,29 @@ namespace AI_CRM.WebMvc.Controllers
             var doc = await _documentService.GetDocumentByIdAsync(id);
             if (doc == null || doc.IsDeleted || string.IsNullOrEmpty(doc.FilePath)) return NotFound();
 
+            // Chống path traversal: validate đường dẫn không chứa ".."
+            if (doc.FilePath.Contains("..") || doc.FilePath.Contains("~"))
+                return BadRequest("Đường dẫn file không hợp lệ.");
+
             var filePath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", doc.FilePath.TrimStart('/'));
-            if (!System.IO.File.Exists(filePath)) return NotFound();
+            
+            // Đảm bảo file nằm trong thư mục uploads
+            var fullPath = System.IO.Path.GetFullPath(filePath);
+            var uploadsRoot = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
+            if (!fullPath.StartsWith(uploadsRoot))
+                return BadRequest("Truy cập file không hợp lệ.");
+
+            if (!System.IO.File.Exists(fullPath)) return NotFound();
 
             var memory = new System.IO.MemoryStream();
-            using (var stream = new System.IO.FileStream(filePath, System.IO.FileMode.Open))
+            using (var stream = new System.IO.FileStream(fullPath, System.IO.FileMode.Open))
             {
                 await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
 
             var contentType = "application/octet-stream";
-            var fileName = System.IO.Path.GetFileName(filePath);
+            var fileName = System.IO.Path.GetFileName(fullPath);
 
             return File(memory, contentType, fileName);
         }

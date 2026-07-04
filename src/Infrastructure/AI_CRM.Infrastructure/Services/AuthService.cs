@@ -30,7 +30,8 @@ namespace AI_CRM.Infrastructure.Services
                 }
                 catch (Exception)
                 {
-                    isValidPassword = (user.PasswordHash == password);
+                    // Hash không hợp lệ → từ chối đăng nhập (không fallback plaintext)
+                    isValidPassword = false;
                 }
 
                 if (isValidPassword)

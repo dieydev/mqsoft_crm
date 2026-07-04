@@ -176,7 +176,8 @@ namespace AI_CRM.Infrastructure.Services
             }
             catch
             {
-                isValidOldPassword = (user.PasswordHash == currentPassword);
+                // Hash không hợp lệ → từ chối (không fallback plaintext)
+                isValidOldPassword = false;
             }
 
             if (!isValidOldPassword)
