@@ -86,42 +86,6 @@ namespace AI_CRM.WebMvc.Controllers
                     }
                 }
 
-                // If login fails, check if it's admin/admin as a fallback (for development)
-                if (model.Username == "admin" && model.Password == "admin")
-                {
-                    var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, "admin"),
-                        new Claim(ClaimTypes.NameIdentifier, "0"),
-                        new Claim(ClaimTypes.Role, "Admin")
-                    };
-
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity));
-
-                    return RedirectToAction("Index", "Admin");
-                }
-                
-                // Fallback for user/user
-                if (model.Username == "user" && model.Password == "user")
-                {
-                    var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, "user"),
-                        new Claim(ClaimTypes.NameIdentifier, "1"),
-                        new Claim(ClaimTypes.Role, "User")
-                    };
-
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity));
-
-                    return RedirectToAction("Index", "Home");
-                }
-
                 ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không đúng.");
             }
 
