@@ -48,7 +48,7 @@ namespace AI_CRM.Infrastructure.Services
                 throw new Exception($"Vui lòng đợi {remain} giây nữa trước khi gửi câu hỏi tiếp theo.");
             }
 
-            string answer = await GenerateAnswerAsync(question);
+            string answer = await GenerateAnswerAsync(userId, question);
 
             var chatHistory = new LichSuHoiDap
             {
@@ -64,7 +64,7 @@ namespace AI_CRM.Infrastructure.Services
             return chatHistory;
         }
 
-        private async Task<string> GenerateAnswerAsync(string question)
+        private async Task<string> GenerateAnswerAsync(int userId, string question)
         {
             var q = question.ToLower();
             
@@ -133,7 +133,27 @@ namespace AI_CRM.Infrastructure.Services
                 return "Xin lỗi, API Key của Gemini chưa được cấu hình. Hệ thống không thể xử lý dữ liệu lớn này.";
             }
 
-            string prompt = $"Bạn là trợ lý AI thông minh của phần mềm MQSoft CRM. Nhiệm vụ của bạn là hỗ trợ nhân viên/khách hàng. Trả lời bằng tiếng Việt, lịch sự, chuyên nghiệp. Dưới đây là câu hỏi của người dùng:\n\n{question}\n\n{contextText}";
+            string prompt = $"Bạn là trợ lý AI thông minh của phần mềm MQSoft CRM. Nhiệm vụ của bạn là hỗ trợ nhân viên/khách hàng. Trả lời bằng tiếng Việt, lịch sự, chuyên nghiệp. Trả lời ngắn gọn nếu có thể. Dưới đây là câu hỏi mới nhất:\n\n{question}\n\n{contextText}";
+
+            // Lấy 5 tin nhắn gần nhất làm bộ nhớ ngữ cảnh (Memory)
+            var history = await _context.LichSuHoiDaps
+                .Where(c => c.UserId == userId)
+                .OrderByDescending(c => c.CreatedDate)
+                .Take(5)
+                .ToListAsync();
+            history.Reverse(); // Đảo ngược để theo thứ tự thời gian từ cũ đến mới
+
+            var contentsList = new List<object>();
+            
+            // Đổ lịch sử vào (role: user, role: model)
+            foreach(var h in history)
+            {
+                contentsList.Add(new { role = "user", parts = new[] { new { text = h.Question } } });
+                contentsList.Add(new { role = "model", parts = new[] { new { text = h.Answer } } });
+            }
+            
+            // Câu hỏi hiện tại
+            contentsList.Add(new { role = "user", parts = new[] { new { text = prompt } } });
 
             // Danh sách các model fallback (Dùng bản Flash để tiết kiệm Quota cho Free Tier)
             string[] models = new[] { 
@@ -144,13 +164,7 @@ namespace AI_CRM.Infrastructure.Services
             };
 
             var requestBody = new {
-                contents = new[] {
-                    new {
-                        parts = new[] {
-                            new { text = prompt }
-                        }
-                    }
-                }
+                contents = contentsList
             };
             var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
 
