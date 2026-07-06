@@ -122,14 +122,25 @@ namespace AI_CRM.WebMvc.Controllers
             {
                 var emailClaim = googleAuth.Principal.FindFirst(ClaimTypes.Email)?.Value;
                 var roleName = "User"; // Mặc định khách vãng lai
+                var userId = 0;
 
                 if (!string.IsNullOrEmpty(emailClaim))
                 {
-                    roleName = await _authService.GetUserRoleByEmailAsync(emailClaim);
+                    var result = await _authService.GetUserRoleByEmailAsync(emailClaim);
+                    roleName = result.RoleName;
+                    userId = result.UserId;
                 }
 
                 var claims = googleAuth.Principal.Claims.ToList();
+                
+                // Xóa ID ảo của Google để tránh xung đột lịch sử chat
+                claims.RemoveAll(c => c.Type == ClaimTypes.NameIdentifier);
+                
                 claims.Add(new Claim(ClaimTypes.Role, roleName));
+                if (userId > 0)
+                {
+                    claims.Add(new Claim(ClaimTypes.NameIdentifier, userId.ToString()));
+                }
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 // Xóa ExternalCookie

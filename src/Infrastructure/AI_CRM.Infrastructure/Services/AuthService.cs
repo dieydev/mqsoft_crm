@@ -43,7 +43,7 @@ namespace AI_CRM.Infrastructure.Services
             return (false, string.Empty, 0);
         }
 
-        public async Task<string> GetUserRoleByEmailAsync(string email)
+        public async Task<(string RoleName, int UserId)> GetUserRoleByEmailAsync(string email)
         {
             var nhanVien = await _context.NhanVienPhuTrachs
                 .Include(nv => nv.NguoiDung)
@@ -52,10 +52,10 @@ namespace AI_CRM.Infrastructure.Services
 
             if (nhanVien != null && nhanVien.NguoiDung != null)
             {
-                return nhanVien.NguoiDung.VaiTro?.RoleName ?? "Employee";
+                return (nhanVien.NguoiDung.VaiTro?.RoleName ?? "Employee", nhanVien.NguoiDung.UserId);
             }
 
-            return "User";
+            return ("User", 0);
         }
     }
 }
