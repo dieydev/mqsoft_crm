@@ -56,6 +56,13 @@ namespace AI_CRM.WebMvc.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> ExportUsersExcel()
+        {
+            var content = await _reportService.ExportUsersToExcelAsync();
+            return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "DanhSachNguoiDung.xlsx");
+        }
+
+        [HttpGet]
         public async Task<IActionResult> ExportCustomerPdf(int id)
         {
             try

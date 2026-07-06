@@ -8,6 +8,7 @@ namespace AI_CRM.Application.Interfaces
         Task<byte[]> ExportCustomersToExcelAsync();
         Task<byte[]> ExportProjectsToExcelAsync();
         Task<byte[]> ExportContractsToExcelAsync();
+        Task<byte[]> ExportUsersToExcelAsync();
         
         Task<byte[]> ExportCustomerReportToPdfAsync(int customerId);
         Task<byte[]> ExportProjectReportToPdfAsync(int projectId);

@@ -9,7 +9,7 @@
 <div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-12">
-            <h2 class="mb-0 text-primary"><i class="bi bi-file-earmark-bar-graph me-2"></i>Trung tâm Báo cáo</h2>
+            <h2 class="mb-0 text-primary"><i class="fa-solid fa-chart-bar me-2"></i>Trung tâm Báo cáo</h2>
             <p class="text-muted">Xuất dữ liệu hệ thống ra định dạng Excel và PDF</p>
         </div>
     </div>
@@ -17,7 +17,7 @@
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <i class="fa-solid fa-triangle-exclamation me-2"></i> @TempData["ErrorMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
@@ -27,7 +27,7 @@
         <div class="col-12 col-xl-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-success text-white border-0 py-3">
-                    <h5 class="card-title mb-0"><i class="bi bi-file-earmark-excel me-2"></i>Xuất Excel (Danh sách)</h5>
+                    <h5 class="card-title mb-0"><i class="fa-solid fa-file-excel me-2"></i>Xuất Excel (Danh sách)</h5>
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
@@ -36,8 +36,8 @@
                                 <h6 class="mb-1">Danh sách Khách hàng</h6>
                                 <small class="text-muted">Xuất toàn bộ thông tin khách hàng đang quản lý</small>
                             </div>
-                            <a href="@Url.Action("ExportCustomersExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4">
-                                <i class="bi bi-download me-1"></i> Tải về
+                            <a href="@Url.Action("ExportCustomersExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4 text-nowrap">
+                                <i class="fa-solid fa-download me-1"></i> Tải về
                             </a>
                         </div>
                         <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
@@ -45,17 +45,26 @@
                                 <h6 class="mb-1">Danh sách Dự án</h6>
                                 <small class="text-muted">Xuất thông tin tất cả các dự án và trạng thái</small>
                             </div>
-                            <a href="@Url.Action("ExportProjectsExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4">
-                                <i class="bi bi-download me-1"></i> Tải về
+                            <a href="@Url.Action("ExportProjectsExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4 text-nowrap">
+                                <i class="fa-solid fa-download me-1"></i> Tải về
                             </a>
                         </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom-0">
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
                             <div>
                                 <h6 class="mb-1">Danh sách Hợp đồng</h6>
                                 <small class="text-muted">Xuất thông tin tất cả hợp đồng và giá trị</small>
                             </div>
-                            <a href="@Url.Action("ExportContractsExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4">
-                                <i class="bi bi-download me-1"></i> Tải về
+                            <a href="@Url.Action("ExportContractsExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4 text-nowrap">
+                                <i class="fa-solid fa-download me-1"></i> Tải về
+                            </a>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom-0">
+                            <div>
+                                <h6 class="mb-1">Danh sách Người dùng</h6>
+                                <small class="text-muted">Xuất thông tin tài khoản và phân quyền</small>
+                            </div>
+                            <a href="@Url.Action("ExportUsersExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4 text-nowrap">
+                                <i class="fa-solid fa-download me-1"></i> Tải về
                             </a>
                         </div>
                     </div>
@@ -67,7 +76,7 @@
         <div class="col-12 col-xl-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-danger text-white border-0 py-3">
-                    <h5 class="card-title mb-0"><i class="bi bi-file-earmark-pdf me-2"></i>Xuất PDF (Chi tiết)</h5>
+                    <h5 class="card-title mb-0"><i class="fa-solid fa-file-pdf me-2"></i>Xuất PDF (Chi tiết)</h5>
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
@@ -84,8 +93,8 @@
                                         }
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4">
-                                    <i class="bi bi-download me-1"></i> Xuất PDF
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4 text-nowrap">
+                                    <i class="fa-solid fa-download me-1"></i> Xuất PDF
                                 </button>
                             </form>
                         </div>
@@ -102,8 +111,8 @@
                                         }
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4">
-                                    <i class="bi bi-download me-1"></i> Xuất PDF
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4 text-nowrap">
+                                    <i class="fa-solid fa-download me-1"></i> Xuất PDF
                                 </button>
                             </form>
                         </div>
@@ -120,8 +129,8 @@
                                         }
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4">
-                                    <i class="bi bi-download me-1"></i> Xuất PDF
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4 text-nowrap">
+                                    <i class="fa-solid fa-download me-1"></i> Xuất PDF
                                 </button>
                             </form>
                         </div>
@@ -138,8 +147,8 @@
                                         }
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4">
-                                    <i class="bi bi-download me-1"></i> Xuất PDF
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4 text-nowrap">
+                                    <i class="fa-solid fa-download me-1"></i> Xuất PDF
                                 </button>
                             </form>
                         </div>

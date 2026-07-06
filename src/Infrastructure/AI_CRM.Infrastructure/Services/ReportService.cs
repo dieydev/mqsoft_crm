@@ -156,6 +156,42 @@ namespace AI_CRM.Infrastructure.Services
             return stream.ToArray();
         }
 
+        public async Task<byte[]> ExportUsersToExcelAsync()
+        {
+            var users = await _context.NguoiDungs
+                .Include(u => u.VaiTro)
+                .ToListAsync();
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("DanhSachNguoiDung");
+
+            worksheet.Cell(1, 1).Value = "ID";
+            worksheet.Cell(1, 2).Value = "Tên đăng nhập";
+            worksheet.Cell(1, 3).Value = "Vai trò";
+            worksheet.Cell(1, 4).Value = "Trạng thái";
+            worksheet.Cell(1, 5).Value = "Ngày tạo";
+
+            worksheet.Row(1).Style.Font.Bold = true;
+            worksheet.Row(1).Style.Fill.BackgroundColor = XLColor.LightGray;
+
+            for (int i = 0; i < users.Count; i++)
+            {
+                var row = i + 2;
+                var user = users[i];
+                worksheet.Cell(row, 1).Value = user.UserId.ToString();
+                worksheet.Cell(row, 2).Value = user.Username;
+                worksheet.Cell(row, 3).Value = user.VaiTro?.RoleName ?? "Chưa phân quyền";
+                worksheet.Cell(row, 4).Value = user.IsActive ? "Đang hoạt động" : "Đã khóa";
+                worksheet.Cell(row, 5).Value = user.CreatedDate.ToString("dd/MM/yyyy HH:mm");
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
+        }
+
         public async Task<byte[]> ExportCustomerReportToPdfAsync(int customerId)
         {
             var customer = await _context.KhachHangs
