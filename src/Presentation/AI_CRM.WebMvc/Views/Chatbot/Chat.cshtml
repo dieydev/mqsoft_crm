@@ -87,7 +87,10 @@
                 <button class="btn btn-light border-0 shadow-none text-muted px-3 rounded-start-pill" type="button">
                     <i class="fa-solid fa-paperclip"></i>
                 </button>
-                <input type="text" id="chatInput" class="form-control bg-light border-0 shadow-none py-3" placeholder="Hỏi AI bất cứ điều gì...">
+                <input type="text" id="chatInput" class="form-control bg-light border-0 shadow-none py-3" placeholder="Hỏi AI hoặc nhập bằng giọng nói...">
+                <button id="btnMic" class="btn btn-light border-0 shadow-none text-danger px-3" type="button" title="Nhập bằng giọng nói">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
                 <button id="btnSend" class="btn btn-primary px-4 rounded-end-pill" type="button">
                     <i class="fa-solid fa-paper-plane me-2"></i> Gửi
                 </button>
@@ -106,6 +109,52 @@
             const chatMessages = $('#chatMessages');
             const chatInput = $('#chatInput');
             const btnSend = $('#btnSend');
+            const btnMic = $('#btnMic');
+
+            // Web Speech API cho tính năng Nhập giọng nói
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'vi-VN';
+                recognition.interimResults = false;
+                
+                let isRecording = false;
+
+                btnMic.click(function() {
+                    if (isRecording) {
+                        recognition.stop();
+                    } else {
+                        recognition.start();
+                    }
+                });
+
+                recognition.onstart = function() {
+                    isRecording = true;
+                    btnMic.html('<i class="fa-solid fa-microphone-lines fa-fade text-danger"></i>');
+                    chatInput.attr('placeholder', 'Đang lắng nghe giọng nói của bạn...');
+                };
+
+                recognition.onresult = function(event) {
+                    const text = event.results[0][0].transcript;
+                    const currentVal = chatInput.val();
+                    chatInput.val((currentVal ? currentVal + ' ' : '') + text);
+                };
+
+                recognition.onend = function() {
+                    isRecording = false;
+                    btnMic.html('<i class="fa-solid fa-microphone"></i>');
+                    chatInput.attr('placeholder', 'Hỏi AI hoặc nhập bằng giọng nói...');
+                    chatInput.focus();
+                };
+
+                recognition.onerror = function(event) {
+                    isRecording = false;
+                    btnMic.html('<i class="fa-solid fa-microphone"></i>');
+                    chatInput.attr('placeholder', 'Hỏi AI hoặc nhập bằng giọng nói...');
+                };
+            } else {
+                btnMic.hide(); // Ẩn mic nếu trình duyệt không hỗ trợ
+            }
 
             // Render markdown cho các tin nhắn cũ
             $('.past-ai-message').each(function() {
