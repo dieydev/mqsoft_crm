@@ -94,39 +94,58 @@ namespace AI_CRM.Infrastructure.Services
                 }
             }
 
-            // 2. LẤY TOÀN BỘ DATA TỪ DB (Khách hàng, Dự án, Hợp đồng, Nhân viên)
-            var customers = await _context.KhachHangs.Where(k => !k.IsDeleted)
-                .Select(k => new { k.CompanyName, k.Representative, k.Phone }).ToListAsync();
-            var projects = await _context.DuAns.Include(d => d.TrangThaiDuAn).Where(d => !d.IsDeleted)
-                .Select(d => new { d.ProjectName, Status = d.TrangThaiDuAn.StatusName, d.Budget }).ToListAsync();
-            var contracts = await _context.HopDongs.Include(h => h.KhachHang).Where(h => !h.IsDeleted)
-                .Select(h => new { h.ContractName, Customer = h.KhachHang.CompanyName, h.ContractValue }).ToListAsync();
-            var employees = await _context.NhanVienPhuTrachs.Where(e => e.IsActive)
-                .Select(e => new { e.FullName, e.Department, e.Position }).ToListAsync();
+            // 2. TỐI ƯU HÓA: TRÍCH XUẤT DỮ LIỆU ĐỘNG (RAG)
+            contextText += "\n--- DỮ LIỆU CƠ SỞ CHỌN LỌC ---\n";
+            bool hasDbData = false;
 
-            contextText += "\n--- DỮ LIỆU CƠ SỞ (DATABASE SUMMARY) ---\n";
-            contextText += $"Khách hàng: {JsonSerializer.Serialize(customers)}\n";
-            contextText += $"Dự án: {JsonSerializer.Serialize(projects)}\n";
-            contextText += $"Hợp đồng: {JsonSerializer.Serialize(contracts)}\n";
-            contextText += $"Nhân sự: {JsonSerializer.Serialize(employees)}\n";
+            if (q.Contains("khách") || q.Contains("công ty"))
+            {
+                var customers = await _context.KhachHangs.Where(k => !k.IsDeleted)
+                    .OrderByDescending(k => k.CreatedDate)
+                    .Select(k => new { k.CustomerCode, k.CompanyName, k.Representative, k.Phone }).Take(20).ToListAsync();
+                var total = await _context.KhachHangs.CountAsync(k => !k.IsDeleted);
+                contextText += $"Tổng Khách hàng: {total}. Danh sách (Top 20 mới nhất): {JsonSerializer.Serialize(customers)}\n";
+                hasDbData = true;
+            }
 
-            // 3. LẤY TOÀN BỘ CẤU TRÚC HTML (CSHTML FILES) ĐỂ HỖ TRỢ UI
-            string htmlContext = "";
-            try {
-                var viewsPath = @"d:\DATT\MQ_AICRM\Frontend\AI_CRM.WebMvc\Views";
-                if (System.IO.Directory.Exists(viewsPath)) {
-                    var files = System.IO.Directory.GetFiles(viewsPath, "*.cshtml", System.IO.SearchOption.AllDirectories);
-                    foreach(var file in files) {
-                        var contentHtml = await System.IO.File.ReadAllTextAsync(file);
-                        htmlContext += $"\nFile: {System.IO.Path.GetFileName(file)}\nContent:\n{contentHtml}\n";
-                    }
-                    if (htmlContext.Length > 10000) {
-                        htmlContext = htmlContext.Substring(0, 10000); // Giảm kích thước xuống 10,000 để không vượt quá Quota Free Tier
-                    }
-                }
-            } catch { }
+            if (q.Contains("dự án") || q.Contains("project"))
+            {
+                var projects = await _context.DuAns.Include(d => d.TrangThaiDuAn).Where(d => !d.IsDeleted)
+                    .OrderByDescending(d => d.CreatedDate)
+                    .Select(d => new { d.ProjectName, Status = d.TrangThaiDuAn.StatusName, d.Budget, d.StartDate }).Take(20).ToListAsync();
+                var total = await _context.DuAns.CountAsync(d => !d.IsDeleted);
+                contextText += $"Tổng Dự án: {total}. Danh sách (Top 20 mới nhất): {JsonSerializer.Serialize(projects)}\n";
+                hasDbData = true;
+            }
 
-            contextText += $"\n--- CẤU TRÚC GIAO DIỆN PROJECT (HTML/CSHTML) ---\n{htmlContext}\n";
+            if (q.Contains("hợp đồng") || q.Contains("contract"))
+            {
+                var contracts = await _context.HopDongs.Include(h => h.KhachHang).Where(h => !h.IsDeleted)
+                    .OrderByDescending(h => h.CreatedDate)
+                    .Select(h => new { h.ContractName, Customer = h.KhachHang.CompanyName, h.ContractValue, h.SignDate }).Take(20).ToListAsync();
+                var total = await _context.HopDongs.CountAsync(h => !h.IsDeleted);
+                contextText += $"Tổng Hợp đồng: {total}. Danh sách (Top 20 mới nhất): {JsonSerializer.Serialize(contracts)}\n";
+                hasDbData = true;
+            }
+
+            if (q.Contains("nhân sự") || q.Contains("nhân viên") || q.Contains("người"))
+            {
+                var employees = await _context.NhanVienPhuTrachs.Where(e => e.IsActive)
+                    .Select(e => new { e.FullName, e.Department, e.Position }).Take(20).ToListAsync();
+                var total = await _context.NhanVienPhuTrachs.CountAsync(e => e.IsActive);
+                contextText += $"Tổng Nhân sự: {total}. Danh sách (Top 20): {JsonSerializer.Serialize(employees)}\n";
+                hasDbData = true;
+            }
+
+            if (!hasDbData)
+            {
+                var totalCus = await _context.KhachHangs.CountAsync(k => !k.IsDeleted);
+                var totalProj = await _context.DuAns.CountAsync(d => !d.IsDeleted);
+                var totalCont = await _context.HopDongs.CountAsync(h => !h.IsDeleted);
+                contextText += $"Thống kê tổng quan: {totalCus} Khách hàng, {totalProj} Dự án, {totalCont} Hợp đồng.\n";
+            }
+            
+            // Đã gỡ bỏ phần nạp mã nguồn HTML (CSHTML) vì không cần thiết và tốn token.
 
             if (string.IsNullOrEmpty(_geminiApiKey) || _geminiApiKey == "YOUR_GEMINI_API_KEY_HERE")
             {
