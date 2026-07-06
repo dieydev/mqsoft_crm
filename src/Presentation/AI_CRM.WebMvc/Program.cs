@@ -2,6 +2,8 @@ using AI_CRM.Domain.Entities;
 using AI_CRM.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using AI_CRM.WebMvc.Services;
+using AI_CRM.WebMvc.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +28,16 @@ builder.Services.AddScoped<AI_CRM.Application.Interfaces.IAuthService, AI_CRM.In
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.IEmployeeService, AI_CRM.Infrastructure.Services.EmployeeService>();
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.IReportService, AI_CRM.Infrastructure.Services.ReportService>();
 
+// Cấu hình giới hạn file upload tối đa lên 50MB (mặc định của Kestrel chỉ là 28.6MB)
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 52428800; // 50MB
+});
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 52428800; // 50MB
+});
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = "Cookies";
@@ -46,7 +58,15 @@ builder.Services.AddAuthentication(options =>
         options.CallbackPath = "/signin-google";
     });
 
-builder.Services.AddControllersWithViews();
+
+
+// Đăng ký Activity Service (Singleton để lưu data trên RAM)
+builder.Services.AddSingleton<IUserActivityService, UserActivityService>();
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<UserActivityFilter>();
+});
 
 var app = builder.Build();
 

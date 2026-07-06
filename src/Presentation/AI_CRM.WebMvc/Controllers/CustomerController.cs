@@ -3,10 +3,11 @@ using AI_CRM.Application.Interfaces;
 using AI_CRM.Domain.Entities;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using AI_CRM.WebMvc.Models;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    [Authorize(Roles = "Admin,Employee")]
+    [Authorize(Roles = "Admin,Manager,NhanVien")]
     public class CustomerController : Controller
     {
         private readonly ICustomerService _customerService;
@@ -16,13 +17,17 @@ namespace AI_CRM.WebMvc.Controllers
             _customerService = customerService;
         }
 
-        public async Task<IActionResult> Index(string searchString, int? statusFilter)
+        public async Task<IActionResult> Index(string searchString, int? statusFilter, int? pageNumber)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentStatus"] = statusFilter;
 
             var customers = await _customerService.GetCustomersAsync(searchString, statusFilter);
-            return View(customers);
+            
+            int pageSize = 10;
+            var paginatedCustomers = PaginatedList<KhachHang>.Create(customers, pageNumber ?? 1, pageSize);
+
+            return View(paginatedCustomers);
         }
 
         public async Task<IActionResult> ExportExcel(string searchString, int? statusFilter)
@@ -80,7 +85,10 @@ namespace AI_CRM.WebMvc.Controllers
             return View(customer);
         }
 
+
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             await _customerService.DeleteCustomerAsync(id);

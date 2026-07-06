@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AI_CRM.WebMvc.Controllers;
 
-[Authorize(Roles = "Admin,Employee")]
+[Authorize(Roles = "Admin,Manager,NhanVien")]
 public class AdminController : Controller
 {
     private readonly ILogger<AdminController> _logger;

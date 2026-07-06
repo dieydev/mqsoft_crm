@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    [Authorize(Roles = "Admin,Employee")]
+    [Authorize(Roles = "Admin,Manager,NhanVien")]
     public class DocumentController : Controller
     {
         private readonly IDocumentService _documentService;

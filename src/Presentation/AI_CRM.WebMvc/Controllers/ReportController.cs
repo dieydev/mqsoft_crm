@@ -6,7 +6,7 @@ using System;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    [Authorize(Roles = "Admin,Employee")]
+    [Authorize(Roles = "Admin,Manager,NhanVien")]
     public class ReportController : Controller
     {
         private readonly IReportService _reportService;

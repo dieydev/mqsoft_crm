@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    [Authorize(Roles = "Admin,Employee")]
+    [Authorize(Roles = "Admin,Manager,NhanVien")]
     public class EmployeeController : Controller
     {
         private readonly IEmployeeService _employeeService;

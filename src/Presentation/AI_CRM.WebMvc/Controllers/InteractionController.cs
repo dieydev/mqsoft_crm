@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace AI_CRM.WebMvc.Controllers
 {
-    [Authorize(Roles = "Admin,Employee")]
+    [Authorize(Roles = "Admin,Manager,NhanVien")]
     public class InteractionController : Controller
     {
         private readonly IInteractionService _interactionService;

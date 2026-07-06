@@ -32,7 +32,7 @@ namespace AI_CRM.WebMvc.Controllers
         }
 
         // GET: /User/Create - Form tạo tài khoản mới
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Create()
         {
             ViewBag.Roles = await _userService.GetRolesAsync();
@@ -42,7 +42,7 @@ namespace AI_CRM.WebMvc.Controllers
         // POST: /User/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Create(CreateUserViewModel model)
         {
             if (ModelState.IsValid)
@@ -72,7 +72,7 @@ namespace AI_CRM.WebMvc.Controllers
         }
 
         // GET: /User/Edit/5 - Form sửa tài khoản
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -96,7 +96,7 @@ namespace AI_CRM.WebMvc.Controllers
         // POST: /User/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Edit(int id, EditUserViewModel model)
         {
             if (id != model.UserId) return NotFound();
@@ -133,7 +133,7 @@ namespace AI_CRM.WebMvc.Controllers
 
         // POST: /User/ToggleStatus/5 - Khóa/Mở khóa tài khoản
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> ToggleStatus(int id)
         {
             var result = await _userService.ToggleUserStatusAsync(id);
@@ -151,7 +151,7 @@ namespace AI_CRM.WebMvc.Controllers
 
         // POST: /User/Delete/5 - Xóa tài khoản (chỉ Admin)
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Delete(int id)
         {
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -172,7 +172,7 @@ namespace AI_CRM.WebMvc.Controllers
         // POST: /User/ChangeRole - Thay đổi vai trò (phân quyền)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> ChangeRole(ChangeRoleViewModel model)
         {
             var result = await _userService.ChangeUserRoleAsync(model.UserId, model.NewRoleId);
@@ -192,7 +192,7 @@ namespace AI_CRM.WebMvc.Controllers
         // POST: /User/ResetPassword - Admin reset mật khẩu cho user
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             if (ModelState.IsValid)

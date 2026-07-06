@@ -21,6 +21,18 @@ namespace AI_CRM.Infrastructure.Services
             _context = context;
             // Set QuestPDF license to Community
             QuestPDF.Settings.License = LicenseType.Community;
+            
+            // Đăng ký font Arial để hỗ trợ tiếng Việt trơn tru (tránh crash SkiaSharp)
+            try 
+            {
+                var fontPath = @"C:\Windows\Fonts\arial.ttf";
+                if (File.Exists(fontPath))
+                {
+                    using var stream = File.OpenRead(fontPath);
+                    QuestPDF.Drawing.FontManager.RegisterFont(stream);
+                }
+            } 
+            catch { }
         }
 
         public async Task<byte[]> ExportCustomersToExcelAsync()

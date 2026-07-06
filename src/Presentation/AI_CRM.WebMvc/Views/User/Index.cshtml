@@ -1,11 +1,12 @@
 @model IEnumerable<AI_CRM.Domain.Entities.NguoiDung>
+@inject AI_CRM.WebMvc.Services.IUserActivityService UserActivityService
 @{
     ViewData["Title"] = "Quản lý người dùng";
     var roles = ViewBag.Roles as List<AI_CRM.Domain.Entities.VaiTro> ?? new List<AI_CRM.Domain.Entities.VaiTro>();
     var currentFilter = ViewData["CurrentFilter"]?.ToString() ?? "";
     var currentRole = ViewData["CurrentRole"]?.ToString() ?? "";
     var currentStatus = ViewData["CurrentStatus"]?.ToString() ?? "";
-    var isAdmin = User.IsInRole("Admin");
+    var isAdmin = User.IsInRole("Admin") || User.IsInRole("Manager");
 }
 
 <!-- Thông báo -->
@@ -56,8 +57,8 @@
             <div class="d-flex align-items-center gap-3">
                 <div class="stat-icon bg-success-light"><i class="fa-solid fa-user-check"></i></div>
                 <div>
-                    <div class="text-muted small fw-medium">Đang hoạt động</div>
-                    <div class="fw-bold fs-5 text-success">@(Model?.Count(u => u.IsActive) ?? 0)</div>
+                    <div class="text-muted small fw-medium">Đang online</div>
+                    <div class="fw-bold fs-5 text-success">@UserActivityService.GetOnlineUsersCount()</div>
                 </div>
             </div>
         </div>
@@ -156,7 +157,13 @@
                                 <div class="d-flex align-items-center">
                                     <img src="https://ui-avatars.com/api/?name=@item.Username&background=random&bold=true" class="rounded-circle me-3 shadow-sm" style="width: 42px; height: 42px;" />
                                     <div>
-                                        <h6 class="mb-0 fw-bold text-dark">@item.Username</h6>
+                                        <h6 class="mb-0 fw-bold text-dark">
+                                            @item.Username
+                                            @if (UserActivityService.IsUserOnline(item.UserId))
+                                            {
+                                                <i class="fa-solid fa-circle text-success ms-1" style="font-size: 8px; vertical-align: middle;" title="Đang online"></i>
+                                            }
+                                        </h6>
                                         <small class="text-muted">ID: #@item.UserId</small>
                                     </div>
                                 </div>
@@ -178,16 +185,22 @@
                                 </span>
                             </td>
                             <td class="py-3">
-                                @if (item.IsActive)
+                                @if (!item.IsActive)
                                 {
-                                    <span class="badge bg-success-light text-success px-3 py-2 rounded-pill">
-                                        <i class="fa-solid fa-check-circle me-1"></i>Đang hoạt động
+                                    <span class="badge bg-danger-light text-danger px-3 py-2 rounded-pill">
+                                        <i class="fa-solid fa-lock me-1"></i>Đã khóa
+                                    </span>
+                                }
+                                else if (UserActivityService.IsUserOnline(item.UserId))
+                                {
+                                    <span class="badge bg-success-light text-success px-3 py-2 rounded-pill shadow-sm border border-success">
+                                        <i class="fa-solid fa-wifi me-1"></i>Đang hoạt động
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-danger-light text-danger px-3 py-2 rounded-pill">
-                                        <i class="fa-solid fa-ban me-1"></i>Đã khóa
+                                    <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill">
+                                        <i class="fa-solid fa-moon me-1"></i>Ngoại tuyến
                                     </span>
                                 }
                             </td>
