@@ -47,8 +47,16 @@ namespace AI_CRM.WebMvc.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _customerService.CreateCustomerAsync(model);
-                return RedirectToAction(nameof(Index));
+                try 
+                {
+                    await _customerService.CreateCustomerAsync(model);
+                    TempData["SuccessMessage"] = "Thêm mới khách hàng thành công!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (System.Exception ex)
+                {
+                    ModelState.AddModelError("", "Lỗi hệ thống khi lưu dữ liệu: " + ex.Message);
+                }
             }
             return View(model);
         }
@@ -69,9 +77,18 @@ namespace AI_CRM.WebMvc.Controllers
 
             if (ModelState.IsValid)
             {
-                var success = await _customerService.UpdateCustomerAsync(model);
-                if (!success) return NotFound();
-                return RedirectToAction(nameof(Index));
+                try 
+                {
+                    var success = await _customerService.UpdateCustomerAsync(model);
+                    if (!success) return NotFound();
+                    
+                    TempData["SuccessMessage"] = "Cập nhật khách hàng thành công!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (System.Exception ex)
+                {
+                    ModelState.AddModelError("", "Lỗi hệ thống khi cập nhật dữ liệu: " + ex.Message);
+                }
             }
             return View(model);
         }
@@ -91,7 +108,15 @@ namespace AI_CRM.WebMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            await _customerService.DeleteCustomerAsync(id);
+            try
+            {
+                await _customerService.DeleteCustomerAsync(id);
+                TempData["SuccessMessage"] = "Xóa khách hàng thành công!";
+            }
+            catch (System.Exception ex)
+            {
+                TempData["ErrorMessage"] = "Không thể xóa khách hàng này. Lỗi: " + ex.Message;
+            }
             return RedirectToAction(nameof(Index));
         }
     }

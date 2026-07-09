@@ -49,9 +49,21 @@ public class HomeController : Controller
         return View();
     }
 
+    [Route("Home/Error/{statusCode?}")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    public IActionResult Error(int? statusCode)
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        if (statusCode.HasValue)
+        {
+            if (statusCode.Value == 404)
+            {
+                return View("Error404");
+            }
+            else if (statusCode.Value == 403)
+            {
+                return View("Error403");
+            }
+        }
+        return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
