@@ -47,9 +47,16 @@ namespace AI_CRM.WebMvc.Controllers
 
             if (ModelState.IsValid)
             {
-                await _projectService.CreateProjectAsync(project);
-                TempData["SuccessMessage"] = "Thêm dự án thành công!";
-                return RedirectToAction(nameof(Index));
+                try 
+                {
+                    await _projectService.CreateProjectAsync(project);
+                    TempData["SuccessMessage"] = "Thêm dự án thành công!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (System.Exception ex)
+                {
+                    ModelState.AddModelError("", "Lỗi hệ thống khi lưu dữ liệu: " + ex.Message);
+                }
             }
             
             ViewBag.CustomerId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(await _projectService.GetActiveCustomersAsync(), "CustomerId", "CompanyName", project.CustomerId);
@@ -85,11 +92,18 @@ namespace AI_CRM.WebMvc.Controllers
 
             if (ModelState.IsValid)
             {
-                var success = await _projectService.UpdateProjectAsync(project);
-                if (!success) return NotFound();
+                try 
+                {
+                    var success = await _projectService.UpdateProjectAsync(project);
+                    if (!success) return NotFound();
 
-                TempData["SuccessMessage"] = "Cập nhật dự án thành công!";
-                return RedirectToAction(nameof(Index));
+                    TempData["SuccessMessage"] = "Cập nhật dự án thành công!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (System.Exception ex)
+                {
+                    ModelState.AddModelError("", "Lỗi hệ thống khi cập nhật dữ liệu: " + ex.Message);
+                }
             }
             
             ViewBag.CustomerId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(await _projectService.GetActiveCustomersAsync(), "CustomerId", "CompanyName", project.CustomerId);
@@ -102,10 +116,15 @@ namespace AI_CRM.WebMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var success = await _projectService.DeleteProjectAsync(id);
-            if (success)
+            try 
             {
-                TempData["SuccessMessage"] = "Xóa dự án thành công!";
+                var success = await _projectService.DeleteProjectAsync(id);
+                if (success) TempData["SuccessMessage"] = "Xóa dự án thành công!";
+                else TempData["ErrorMessage"] = "Không tìm thấy dự án hoặc không thể xóa.";
+            }
+            catch (System.Exception ex)
+            {
+                TempData["ErrorMessage"] = "Lỗi hệ thống khi xóa dự án: " + ex.Message;
             }
             return RedirectToAction(nameof(Index));
         }
@@ -131,14 +150,15 @@ namespace AI_CRM.WebMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignMember(int projectId, int employeeId, string projectRole)
         {
-            var success = await _projectService.AssignMemberAsync(projectId, employeeId, projectRole);
-            if (success)
+            try 
             {
-                TempData["SuccessMessage"] = "Đã thêm nhân sự vào dự án.";
+                var success = await _projectService.AssignMemberAsync(projectId, employeeId, projectRole);
+                if (success) TempData["SuccessMessage"] = "Đã thêm nhân sự vào dự án.";
+                else TempData["ErrorMessage"] = "Có lỗi xảy ra hoặc nhân sự đã nằm trong dự án.";
             }
-            else
+            catch (System.Exception ex)
             {
-                TempData["ErrorMessage"] = "Có lỗi xảy ra hoặc nhân sự đã nằm trong dự án.";
+                TempData["ErrorMessage"] = "Lỗi hệ thống: " + ex.Message;
             }
             return RedirectToAction(nameof(Details), new { id = projectId });
         }
@@ -147,14 +167,15 @@ namespace AI_CRM.WebMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveMember(int projectId, int assignmentId)
         {
-            var success = await _projectService.RemoveMemberAsync(assignmentId);
-            if (success)
+            try 
             {
-                TempData["SuccessMessage"] = "Đã xóa nhân sự khỏi dự án.";
+                var success = await _projectService.RemoveMemberAsync(assignmentId);
+                if (success) TempData["SuccessMessage"] = "Đã xóa nhân sự khỏi dự án.";
+                else TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa nhân sự.";
             }
-            else
+            catch (System.Exception ex)
             {
-                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa nhân sự.";
+                TempData["ErrorMessage"] = "Lỗi hệ thống: " + ex.Message;
             }
             return RedirectToAction(nameof(Details), new { id = projectId });
         }
