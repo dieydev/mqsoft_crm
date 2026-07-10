@@ -98,46 +98,7 @@
                 <button id="themeToggleBtn" class="btn btn-link text-secondary position-relative p-0 shadow-none border-0">
                     <i id="themeIcon" class="fa-solid fa-moon fs-5"></i>
                 </button>
-                <div class="dropdown">
-                    <a href="#" class="text-secondary position-relative ms-2" data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo">
-                        <i class="fa-solid fa-bell fs-5"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                            <span class="visually-hidden">New alerts</span>
-                        </span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 p-0" style="width: 320px; border-radius: 12px; overflow: hidden;">
-                        <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
-                            <h6 class="mb-0 fw-bold text-dark"><i class="fa-regular fa-bell me-2"></i>Thông báo</h6>
-                            <span class="badge bg-danger rounded-pill">3 Mới</span>
-                        </div>
-                        <div class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto;">
-                            <a href="#" class="list-group-item list-group-item-action p-3 border-bottom-0 border-light-subtle">
-                                <div class="d-flex w-100 justify-content-between mb-1">
-                                    <h6 class="mb-0 text-primary fw-bold" style="font-size: 0.9rem;"><i class="fa-solid fa-shield-halved me-1"></i> Cảnh báo bảo mật</h6>
-                                    <small class="text-muted" style="font-size: 0.75rem;">Vừa xong</small>
-                                </div>
-                                <p class="mb-0 small text-muted">Phát hiện lượt đăng nhập mới vào hệ thống từ thiết bị của bạn.</p>
-                            </a>
-                            <a href="#" class="list-group-item list-group-item-action p-3 border-bottom-0 border-light-subtle bg-light bg-opacity-50">
-                                <div class="d-flex w-100 justify-content-between mb-1">
-                                    <h6 class="mb-0 text-success fw-bold" style="font-size: 0.9rem;"><i class="fa-solid fa-check-circle me-1"></i> Hệ thống</h6>
-                                    <small class="text-muted" style="font-size: 0.75rem;">1 giờ trước</small>
-                                </div>
-                                <p class="mb-0 small text-muted">Đã sao lưu dữ liệu CRM thành công lúc 02:00 AM.</p>
-                            </a>
-                            <a href="#" class="list-group-item list-group-item-action p-3 border-bottom-0">
-                                <div class="d-flex w-100 justify-content-between mb-1">
-                                    <h6 class="mb-0 text-warning fw-bold" style="font-size: 0.9rem;"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> AI Trợ lý</h6>
-                                    <small class="text-muted" style="font-size: 0.75rem;">Hôm qua</small>
-                                </div>
-                                <p class="mb-0 small text-muted">Bản vá lỗi chống ảo giác (Anti-Hallucination) đã được áp dụng.</p>
-                            </a>
-                        </div>
-                        <div class="p-2 border-top text-center bg-light">
-                            <a href="#" class="text-decoration-none small fw-bold text-primary">Xem tất cả thông báo</a>
-                        </div>
-                    </div>
-                </div>
+                @await Component.InvokeAsync("Notification")
                 <div class="dropdown">
                     <div class="user-profile d-flex align-items-center gap-2" style="cursor:pointer" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(User.Identity.Name ?? "User"))&background=4f46e5&color=fff" alt="User" class="rounded-circle" style="width: 35px; height: 35px;">

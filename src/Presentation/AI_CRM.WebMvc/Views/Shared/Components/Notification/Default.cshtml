@@ -1,0 +1,66 @@
+@model List<AI_CRM.Domain.Entities.NhatKyHeThong>
+@{
+    int newCount = ViewBag.NewCount ?? 0;
+}
+<div class="dropdown">
+    <a href="#" class="text-secondary position-relative ms-2" data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo">
+        <i class="fa-solid fa-bell fs-5"></i>
+        @if (newCount > 0)
+        {
+            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                <span class="visually-hidden">New alerts</span>
+            </span>
+        }
+    </a>
+    <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 p-0" style="width: 340px; border-radius: 12px; overflow: hidden;">
+        <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+            <h6 class="mb-0 fw-bold text-dark"><i class="fa-regular fa-bell me-2"></i>Thông báo</h6>
+            @if (newCount > 0)
+            {
+                <span class="badge bg-danger rounded-pill">@newCount Mới</span>
+            }
+        </div>
+        <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var log in Model)
+                {
+                    bool isNew = (DateTime.Now - log.Timestamp).TotalHours <= 24;
+                    string bgClass = isNew ? "bg-light bg-opacity-50" : "";
+                    
+                    // Xử lý icon theo hành động
+                    string iconClass = "fa-circle-info text-primary";
+                    if (log.Action.Contains("Thêm") || log.Action.Contains("Tạo")) iconClass = "fa-plus-circle text-success";
+                    else if (log.Action.Contains("Sửa") || log.Action.Contains("Cập nhật")) iconClass = "fa-pen-to-square text-warning";
+                    else if (log.Action.Contains("Xóa") || log.Action.Contains("Lỗi")) iconClass = "fa-trash-can text-danger";
+                    else if (log.Action.Contains("Đăng nhập")) iconClass = "fa-right-to-bracket text-info";
+
+                    <a href="#" class="list-group-item list-group-item-action p-3 border-bottom-0 border-light-subtle @bgClass">
+                        <div class="d-flex w-100 justify-content-between mb-1">
+                            <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.85rem;"><i class="fa-solid @iconClass me-2"></i>@log.Action</h6>
+                            <small class="text-muted text-nowrap ms-2" style="font-size: 0.75rem;">@log.Timestamp.ToString("dd/MM HH:mm")</small>
+                        </div>
+                        <p class="mb-1 small text-muted" style="line-height: 1.4;">@log.Details</p>
+                        @if (log.NguoiDung != null)
+                        {
+                            <div class="d-flex align-items-center mt-1">
+                                <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(log.NguoiDung.Username))&background=random&color=fff&size=16" class="rounded-circle me-1" alt="avatar" />
+                                <small class="text-secondary" style="font-size: 0.7rem;">@log.NguoiDung.Username</small>
+                            </div>
+                        }
+                    </a>
+                }
+            }
+            else
+            {
+                <div class="p-4 text-center text-muted">
+                    <i class="fa-regular fa-bell-slash fs-3 mb-2"></i>
+                    <p class="mb-0 small">Không có thông báo nào.</p>
+                </div>
+            }
+        </div>
+        <div class="p-2 border-top text-center bg-light">
+            <a href="#" class="text-decoration-none small fw-bold text-primary">Xem tất cả nhật ký</a>
+        </div>
+    </div>
+</div>
