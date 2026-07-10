@@ -68,7 +68,12 @@
                         <tr>
                             <td class="ps-4">
                                 <div class="d-flex align-items-center">
-                                    <img src="https://ui-avatars.com/api/?name=@item.FullName&background=random" class="rounded-circle me-3" style="width: 40px; height: 40px;" />
+                                    @{
+                                        var empAvatarUrl = item.UserId.HasValue 
+                                            ? $"/uploads/avatars/avatar_{item.UserId.Value}.jpg" 
+                                            : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(item.FullName)}&background=random";
+                                    }
+                                    <img src="@empAvatarUrl" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(item.FullName))&background=random';" class="rounded-circle me-3 shadow-sm" style="width: 40px; height: 40px; object-fit: cover;" />
                                     <div class="fw-bold text-dark">@item.FullName</div>
                                 </div>
                             </td>

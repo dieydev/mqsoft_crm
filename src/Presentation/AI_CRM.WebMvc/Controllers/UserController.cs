@@ -233,6 +233,56 @@ namespace AI_CRM.WebMvc.Controllers
             }
         }
 
+        // POST: /User/UpdateAvatar - Cập nhật ảnh đại diện
+        [HttpPost]
+        public async Task<IActionResult> UpdateAvatar(Microsoft.AspNetCore.Http.IFormFile avatar)
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
+            {
+                TempData["ErrorMessage"] = "Bạn chưa đăng nhập hoặc phiên làm việc đã hết hạn.";
+                return RedirectToAction("Profile");
+            }
+
+            if (avatar != null && avatar.Length > 0)
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var extension = System.IO.Path.GetExtension(avatar.FileName).ToLowerInvariant();
+                
+                if (!System.Linq.Enumerable.Contains(allowedExtensions, extension))
+                {
+                    TempData["ErrorMessage"] = "Chỉ hỗ trợ file ảnh định dạng .jpg, .jpeg, .png, .gif";
+                    return RedirectToAction("Profile");
+                }
+                
+                if (avatar.Length > 5 * 1024 * 1024)
+                {
+                    TempData["ErrorMessage"] = "Kích thước ảnh không được vượt quá 5MB";
+                    return RedirectToAction("Profile");
+                }
+
+                var uploadsFolder = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
+                if (!System.IO.Directory.Exists(uploadsFolder))
+                {
+                    System.IO.Directory.CreateDirectory(uploadsFolder);
+                }
+
+                // Luôn lưu thành avatar_{userId}.jpg để không phải lưu thêm thông tin vào database
+                var fileName = $"avatar_{userId}.jpg";
+                var filePath = System.IO.Path.Combine(uploadsFolder, fileName);
+                
+                using (var stream = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
+                {
+                    await avatar.CopyToAsync(stream);
+                }
+                
+                TempData["AvatarVersion"] = DateTime.Now.Ticks.ToString();
+                TempData["SuccessMessage"] = "Cập nhật ảnh đại diện thành công!";
+            }
+            
+            return RedirectToAction("Profile");
+        }
+
         // GET: /User/ChangePassword - Form đổi mật khẩu
         public IActionResult ChangePassword()
         {

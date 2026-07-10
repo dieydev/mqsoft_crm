@@ -155,7 +155,10 @@
                         <tr>
                             <td class="ps-4 py-3">
                                 <div class="d-flex align-items-center">
-                                    <img src="https://ui-avatars.com/api/?name=@item.Username&background=random&bold=true" class="rounded-circle me-3 shadow-sm" style="width: 42px; height: 42px;" />
+                                    @{
+                                        var userAvatarUrl = $"/uploads/avatars/avatar_{item.UserId}.jpg";
+                                    }
+                                    <img src="@userAvatarUrl" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(item.Username))&background=random&bold=true';" class="rounded-circle me-3 shadow-sm" style="width: 42px; height: 42px; object-fit: cover;" />
                                     <div>
                                         <h6 class="mb-0 fw-bold text-dark">
                                             @item.Username

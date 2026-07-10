@@ -45,7 +45,10 @@
                         @if (log.NguoiDung != null)
                         {
                             <div class="d-flex align-items-center mt-1">
-                                <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(log.NguoiDung.Username))&background=random&color=fff&size=16" class="rounded-circle me-1" alt="avatar" />
+                                @{
+                                    var notifAvatarUrl = $"/uploads/avatars/avatar_{log.UserId}.jpg";
+                                }
+                                <img src="@notifAvatarUrl" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(log.NguoiDung.Username))&background=random&color=fff&size=16';" class="rounded-circle me-1" alt="avatar" style="width: 16px; height: 16px; object-fit: cover;" />
                                 <small class="text-secondary" style="font-size: 0.7rem;">@log.NguoiDung.Username</small>
                             </div>
                         }
