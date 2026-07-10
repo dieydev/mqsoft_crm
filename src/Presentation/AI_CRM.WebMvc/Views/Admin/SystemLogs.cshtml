@@ -1,0 +1,96 @@
+@model List<AI_CRM.Domain.Entities.NhatKyHeThong>
+@{
+    ViewData["Title"] = "Nhật ký hệ thống";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1 text-dark">Lịch sử Hoạt động</h3>
+        <p class="text-muted mb-0">Theo dõi chi tiết mọi thay đổi trên hệ thống CRM</p>
+    </div>
+    <a href="@Url.Action("Index", "Admin")" class="btn btn-outline-secondary rounded-pill px-4">
+        <i class="fa-solid fa-arrow-left me-2"></i>Quay lại Dashboard
+    </a>
+</div>
+
+<div class="glass-card p-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="systemLogsTable">
+            <thead class="table-light text-muted" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                <tr>
+                    <th class="text-uppercase fw-bold border-0 rounded-start">Thời gian</th>
+                    <th class="text-uppercase fw-bold border-0">Người dùng</th>
+                    <th class="text-uppercase fw-bold border-0">Hành động</th>
+                    <th class="text-uppercase fw-bold border-0">Bảng / Module</th>
+                    <th class="text-uppercase fw-bold border-0 rounded-end">Chi tiết</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var log in Model)
+                    {
+                        var actionUpper = log.Action?.ToUpper() ?? "";
+                        string badgeClass = "bg-secondary";
+                        if (actionUpper.Contains("THÊM") || actionUpper.Contains("TẠO") || actionUpper.Contains("INSERT")) badgeClass = "bg-success";
+                        else if (actionUpper.Contains("SỬA") || actionUpper.Contains("CẬP NHẬT") || actionUpper.Contains("UPDATE")) badgeClass = "bg-warning text-dark";
+                        else if (actionUpper.Contains("XÓA") || actionUpper.Contains("LỖI") || actionUpper.Contains("DELETE")) badgeClass = "bg-danger";
+                        else if (actionUpper.Contains("ĐĂNG NHẬP") || actionUpper.Contains("LOGIN")) badgeClass = "bg-info text-dark";
+
+                        <tr>
+                            <td class="text-muted small" style="white-space: nowrap;">
+                                <i class="fa-regular fa-clock me-1"></i>@log.Timestamp.ToString("dd/MM/yyyy HH:mm:ss")
+                            </td>
+                            <td>
+                                @if (log.NguoiDung != null)
+                                {
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(log.NguoiDung.Username))&background=random&color=fff&size=24" class="rounded-circle me-2 shadow-sm" alt="avatar" />
+                                        <span class="fw-medium text-dark">@log.NguoiDung.Username</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle"><i class="fa-solid fa-robot me-1"></i>Hệ thống</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge @badgeClass shadow-sm" style="font-size: 0.75rem;">@log.Action</span>
+                            </td>
+                            <td>
+                                <span class="text-secondary fw-medium small">@(string.IsNullOrEmpty(log.TableName) ? "N/A" : log.TableName)</span>
+                            </td>
+                            <td class="text-muted small" style="max-width: 300px;">
+                                @log.Details
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="fa-regular fa-folder-open fs-1 mb-3 text-secondary opacity-50"></i>
+                            <p class="mb-0">Chưa có dữ liệu nhật ký hệ thống.</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#systemLogsTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json"
+                },
+                "pageLength": 15,
+                "lengthMenu": [15, 30, 50, 100],
+                "ordering": false // Đã sort từ server
+            });
+        });
+    </script>
+}

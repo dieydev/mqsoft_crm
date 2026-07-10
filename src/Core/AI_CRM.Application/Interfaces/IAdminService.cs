@@ -14,5 +14,6 @@ namespace AI_CRM.Application.Interfaces
         Task<System.Collections.Generic.Dictionary<string, decimal>> GetTopContractsAsync();
         Task<System.Collections.Generic.Dictionary<string, int>> GetEmployeeAllocationAsync();
         Task<System.Collections.Generic.List<AI_CRM.Domain.Entities.NhatKyHeThong>> GetRecentActivitiesAsync(int count);
+        Task<System.Collections.Generic.List<AI_CRM.Domain.Entities.NhatKyHeThong>> GetAllSystemLogsAsync(int limit = 500);
     }
 }

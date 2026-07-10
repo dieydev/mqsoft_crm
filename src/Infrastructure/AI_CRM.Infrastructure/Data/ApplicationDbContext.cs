@@ -5,8 +5,62 @@ namespace AI_CRM.Infrastructure.Data;
 
 public class ApplicationDbContext : DbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    private readonly AI_CRM.Application.Interfaces.ICurrentUserService _currentUserService;
+
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, AI_CRM.Application.Interfaces.ICurrentUserService currentUserService = null) : base(options)
     {
+        _currentUserService = currentUserService;
+    }
+
+    public override async System.Threading.Tasks.Task<int> SaveChangesAsync(System.Threading.CancellationToken cancellationToken = default)
+    {
+        var entries = ChangeTracker.Entries()
+            .Where(e => e.Entity is not NhatKyHeThong && 
+                        e.Entity is not LichSuHoiDap && 
+                        e.Entity is not DanhGiaCauTraLoi &&
+                        e.Entity is not LichSuLamViec &&
+                        e.Entity is not TienDoDuAn &&
+                        (e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted))
+            .ToList();
+
+        if (entries.Any())
+        {
+            int? userId = _currentUserService?.UserId;
+
+            foreach (var entry in entries)
+            {
+                string action = entry.State switch
+                {
+                    EntityState.Added => "INSERT",
+                    EntityState.Modified => "UPDATE",
+                    EntityState.Deleted => "DELETE",
+                    _ => "UNKNOWN"
+                };
+
+                var tableName = entry.Entity.GetType().Name;
+                var details = $"Hệ thống tự động ghi nhận: {action} dữ liệu ở bảng {tableName}";
+
+                int? recordId = null;
+                var keyProperty = entry.Properties.FirstOrDefault(p => p.Metadata.IsPrimaryKey());
+                if (keyProperty != null && keyProperty.CurrentValue is int idVal)
+                {
+                    recordId = idVal;
+                    details += $" (Mã bản ghi: {recordId})";
+                }
+
+                NhatKyHeThongs.Add(new NhatKyHeThong
+                {
+                    UserId = userId,
+                    Action = action,
+                    TableName = tableName,
+                    RecordId = recordId,
+                    Details = details,
+                    Timestamp = System.DateTime.Now
+                });
+            }
+        }
+
+        return await base.SaveChangesAsync(cancellationToken);
     }
 
     public DbSet<VaiTro> VaiTros { get; set; }

@@ -14,10 +14,12 @@ namespace AI_CRM.WebMvc.Controllers
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
+        private readonly AI_CRM.Infrastructure.Data.ApplicationDbContext _context;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, AI_CRM.Infrastructure.Data.ApplicationDbContext context)
         {
             _authService = authService;
+            _context = context;
         }
 
         [HttpGet]
@@ -69,6 +71,19 @@ namespace AI_CRM.WebMvc.Controllers
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity),
                         authProperties);
+
+                    // Ghi log đăng nhập
+                    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
+                    _context.NhatKyHeThongs.Add(new AI_CRM.Domain.Entities.NhatKyHeThong
+                    {
+                        UserId = userId,
+                        Action = "LOGIN",
+                        TableName = "NguoiDung",
+                        RecordId = userId,
+                        Details = $"Đăng nhập tài khoản nội bộ thành công từ IP {ipAddress}",
+                        Timestamp = DateTime.Now
+                    });
+                    await _context.SaveChangesAsync();
 
                     // Phân quyền chuyển trang
                     if (roleName != "User")
@@ -157,6 +172,20 @@ namespace AI_CRM.WebMvc.Controllers
                     {
                         return LocalRedirect(returnUrl);
                     }
+                    
+                    // Ghi log đăng nhập Google
+                    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
+                    _context.NhatKyHeThongs.Add(new AI_CRM.Domain.Entities.NhatKyHeThong
+                    {
+                        UserId = userId,
+                        Action = "LOGIN",
+                        TableName = "NguoiDung",
+                        RecordId = userId,
+                        Details = $"Đăng nhập bằng Google thành công từ IP {ipAddress}",
+                        Timestamp = DateTime.Now
+                    });
+                    await _context.SaveChangesAsync();
+
                     return RedirectToAction("Index", "Admin");
                 }
                 else

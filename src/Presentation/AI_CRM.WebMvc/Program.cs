@@ -61,6 +61,8 @@ builder.Services.AddAuthentication(options =>
 
 
 // Đăng ký Activity Service (Singleton để lưu data trên RAM)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.ICurrentUserService, AI_CRM.WebMvc.Services.CurrentUserService>();
 builder.Services.AddSingleton<IUserActivityService, UserActivityService>();
 
 builder.Services.AddControllersWithViews(options =>

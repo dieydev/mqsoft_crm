@@ -109,5 +109,23 @@ namespace AI_CRM.Infrastructure.Services
             }
             return dict;
         }
+
+        public async Task<System.Collections.Generic.List<AI_CRM.Domain.Entities.NhatKyHeThong>> GetRecentActivitiesAsync(int count)
+        {
+            return await _context.NhatKyHeThongs
+                .Include(n => n.NguoiDung)
+                .OrderByDescending(n => n.Timestamp)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<System.Collections.Generic.List<AI_CRM.Domain.Entities.NhatKyHeThong>> GetAllSystemLogsAsync(int limit = 500)
+        {
+            return await _context.NhatKyHeThongs
+                .Include(n => n.NguoiDung)
+                .OrderByDescending(n => n.Timestamp)
+                .Take(limit)
+                .ToListAsync();
+        }
     }
 }

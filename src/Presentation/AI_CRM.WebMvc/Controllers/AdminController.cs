@@ -45,4 +45,10 @@ public class AdminController : Controller
 
         return View();
     }
+
+    public async Task<IActionResult> SystemLogs()
+    {
+        var logs = await _adminService.GetAllSystemLogsAsync(500);
+        return View(logs);
+    }
 }

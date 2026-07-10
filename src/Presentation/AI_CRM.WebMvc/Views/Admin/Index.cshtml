@@ -94,10 +94,11 @@
                 {
                     string iconClass = "fa-circle-info text-primary";
                     string bgClass = "bg-primary-light";
-                    if (activity.Action.Contains("Thêm") || activity.Action.Contains("Tạo")) { iconClass = "fa-plus-circle text-success"; bgClass = "bg-success-light"; }
-                    else if (activity.Action.Contains("Sửa") || activity.Action.Contains("Cập nhật")) { iconClass = "fa-pen-to-square text-warning"; bgClass = "bg-warning-light"; }
-                    else if (activity.Action.Contains("Xóa") || activity.Action.Contains("Lỗi")) { iconClass = "fa-triangle-exclamation text-danger"; bgClass = "bg-danger-light"; }
-                    else if (activity.Action.Contains("Đăng nhập")) { iconClass = "fa-right-to-bracket text-info"; bgClass = "bg-info-light"; }
+                    var actionUpper = activity.Action.ToUpper();
+                    if (actionUpper.Contains("THÊM") || actionUpper.Contains("TẠO") || actionUpper.Contains("INSERT")) { iconClass = "fa-plus-circle text-success"; bgClass = "bg-success-light"; }
+                    else if (actionUpper.Contains("SỬA") || actionUpper.Contains("CẬP NHẬT") || actionUpper.Contains("UPDATE")) { iconClass = "fa-pen-to-square text-warning"; bgClass = "bg-warning-light"; }
+                    else if (actionUpper.Contains("XÓA") || actionUpper.Contains("LỖI") || actionUpper.Contains("DELETE")) { iconClass = "fa-triangle-exclamation text-danger"; bgClass = "bg-danger-light"; }
+                    else if (actionUpper.Contains("ĐĂNG NHẬP") || actionUpper.Contains("LOGIN")) { iconClass = "fa-right-to-bracket text-info"; bgClass = "bg-info-light"; }
 
                     // Time formatting
                     var timeSpan = DateTime.Now - activity.Timestamp;
@@ -121,7 +122,7 @@
             }
             
             <div class="mt-auto pt-3">
-                <button class="btn btn-light text-primary fw-medium w-100 rounded-pill">Xem tất cả hoạt động</button>
+                <a href="@Url.Action("SystemLogs", "Admin")" class="btn btn-light text-primary fw-medium w-100 rounded-pill">Xem tất cả hoạt động</a>
             </div>
         </div>
     </div>
