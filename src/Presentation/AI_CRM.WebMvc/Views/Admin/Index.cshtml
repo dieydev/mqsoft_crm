@@ -88,45 +88,37 @@
         <div class="glass-card p-4 h-100 d-flex flex-column">
             <h5 class="fw-bold mb-4">Hoạt động gần đây</h5>
             
-            <div class="d-flex gap-3 mb-4">
-                <div class="stat-icon bg-primary-light shadow-sm" style="width: 45px; height: 45px; font-size: 1.1rem; flex-shrink: 0;">
-                    <i class="fa-solid fa-file-arrow-up"></i>
-                </div>
-                <div>
-                    <h6 class="mb-1 fw-bold text-dark">Tài liệu Quy trình triển khai v2.pdf</h6>
-                    <p class="text-muted small mb-0">Nguyễn Văn A đã tải lên • 2 giờ trước</p>
-                </div>
-            </div>
-            
-            <div class="d-flex gap-3 mb-4">
-                <div class="stat-icon bg-success-light shadow-sm" style="width: 45px; height: 45px; font-size: 1.1rem; flex-shrink: 0;">
-                    <i class="fa-solid fa-check-double"></i>
-                </div>
-                <div>
-                    <h6 class="mb-1 fw-bold text-dark">Dự án CRM Phase 1 hoàn thành</h6>
-                    <p class="text-muted small mb-0">Hệ thống ghi nhận • 5 giờ trước</p>
-                </div>
-            </div>
-            
-            <div class="d-flex gap-3 mb-4">
-                <div class="stat-icon bg-warning-light shadow-sm" style="width: 45px; height: 45px; font-size: 1.1rem; flex-shrink: 0;">
-                    <i class="fa-solid fa-phone"></i>
-                </div>
-                <div>
-                    <h6 class="mb-1 fw-bold text-dark">Gọi điện KH: FPT Software</h6>
-                    <p class="text-muted small mb-0">Trần Thị B • 1 ngày trước</p>
-                </div>
-            </div>
+            @if (ViewBag.RecentActivities != null)
+            {
+                foreach (var activity in (List<AI_CRM.Domain.Entities.NhatKyHeThong>)ViewBag.RecentActivities)
+                {
+                    string iconClass = "fa-circle-info text-primary";
+                    string bgClass = "bg-primary-light";
+                    if (activity.Action.Contains("Thêm") || activity.Action.Contains("Tạo")) { iconClass = "fa-plus-circle text-success"; bgClass = "bg-success-light"; }
+                    else if (activity.Action.Contains("Sửa") || activity.Action.Contains("Cập nhật")) { iconClass = "fa-pen-to-square text-warning"; bgClass = "bg-warning-light"; }
+                    else if (activity.Action.Contains("Xóa") || activity.Action.Contains("Lỗi")) { iconClass = "fa-triangle-exclamation text-danger"; bgClass = "bg-danger-light"; }
+                    else if (activity.Action.Contains("Đăng nhập")) { iconClass = "fa-right-to-bracket text-info"; bgClass = "bg-info-light"; }
 
-            <div class="d-flex gap-3 mb-4">
-                <div class="stat-icon bg-danger-light shadow-sm" style="width: 45px; height: 45px; font-size: 1.1rem; flex-shrink: 0;">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <div>
-                    <h6 class="mb-1 fw-bold text-dark">Hợp đồng #HD-102 sắp hết hạn</h6>
-                    <p class="text-muted small mb-0">Hệ thống cảnh báo • 2 ngày trước</p>
-                </div>
-            </div>
+                    // Time formatting
+                    var timeSpan = DateTime.Now - activity.Timestamp;
+                    string timeStr = timeSpan.TotalMinutes < 60 ? $"{(int)timeSpan.TotalMinutes} phút trước" : 
+                                     timeSpan.TotalHours < 24 ? $"{(int)timeSpan.TotalHours} giờ trước" : 
+                                     $"{(int)timeSpan.TotalDays} ngày trước";
+
+                    <div class="d-flex gap-3 mb-4">
+                        <div class="stat-icon @bgClass shadow-sm" style="width: 45px; height: 45px; font-size: 1.1rem; flex-shrink: 0;">
+                            <i class="fa-solid @iconClass"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.95rem;">@activity.Action</h6>
+                            <p class="text-muted small mb-0 text-truncate" style="max-width: 200px;" title="@activity.Details">@activity.Details</p>
+                            <p class="text-secondary mb-0" style="font-size: 0.75rem;">
+                                @(activity.NguoiDung?.Username ?? "Hệ thống") • @timeStr
+                            </p>
+                        </div>
+                    </div>
+                }
+            }
             
             <div class="mt-auto pt-3">
                 <button class="btn btn-light text-primary fw-medium w-100 rounded-pill">Xem tất cả hoạt động</button>

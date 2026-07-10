@@ -41,6 +41,7 @@ public class AdminController : Controller
         ViewBag.ProjectStatusData = await _adminService.GetProjectStatusDistributionAsync();
         ViewBag.TopContractsData = await _adminService.GetTopContractsAsync();
         ViewBag.EmployeeAllocationData = await _adminService.GetEmployeeAllocationAsync();
+        ViewBag.RecentActivities = await _adminService.GetRecentActivitiesAsync(5);
 
         return View();
     }
