@@ -17,6 +17,7 @@ namespace AI_CRM.Application.Interfaces
         Task<(bool Success, VaiTro? NewRole)> ChangeUserRoleAsync(int userId, int newRoleId);
         Task<bool> ResetUserPasswordAsync(int userId, string newPassword);
         Task<NhanVienPhuTrach?> GetUserProfileByEmailAsync(string email);
+        Task<NhanVienPhuTrach?> GetUserProfileByUserIdAsync(int userId);
         Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
     }
 }

@@ -25,22 +25,42 @@ namespace AI_CRM.Infrastructure.Data
             // 1. Seed Khách hàng
             var customers = new[]
             {
-                new KhachHang { TenKhachHang = "Bệnh viện Chợ Rẫy", NguoiLienHe = "Nguyễn Văn A", SoDienThoai = "0901234567", Email = "contact@choray.vn", DiaChi = "201B Nguyễn Chí Thanh, Q5", LoaiKhachHang = "Bệnh viện công", NgayTao = DateTime.Now.AddMonths(-5) },
-                new KhachHang { TenKhachHang = "BV Đại học Y Dược", NguoiLienHe = "Trần Thị B", SoDienThoai = "0912345678", Email = "info@ump.edu.vn", DiaChi = "215 Hồng Bàng, Q5", LoaiKhachHang = "Bệnh viện công", NgayTao = DateTime.Now.AddMonths(-4) },
-                new KhachHang { TenKhachHang = "Phòng khám Hoàn Mỹ", NguoiLienHe = "Lê Hoàng C", SoDienThoai = "0923456789", Email = "contact@hoanmy.com", DiaChi = "Phú Nhuận, HCM", LoaiKhachHang = "Tư nhân", NgayTao = DateTime.Now.AddMonths(-3) },
-                new KhachHang { TenKhachHang = "BV Tâm Anh", NguoiLienHe = "Phạm D", SoDienThoai = "0934567890", Email = "info@tamanhhospital.vn", DiaChi = "Tân Bình, HCM", LoaiKhachHang = "Tư nhân", NgayTao = DateTime.Now.AddMonths(-2) },
-                new KhachHang { TenKhachHang = "Sở Y Tế HCM", NguoiLienHe = "Võ E", SoDienThoai = "0945678901", Email = "syt@tphcm.gov.vn", DiaChi = "Q3, HCM", LoaiKhachHang = "Cơ quan nhà nước", NgayTao = DateTime.Now.AddMonths(-1) }
+                new KhachHang { CustomerCode = "KH001", CompanyName = "Bệnh viện Chợ Rẫy", Representative = "Nguyễn Văn A", Phone = "0901234567", Email = "contact@choray.vn", Address = "201B Nguyễn Chí Thanh, Q5", OwnershipType = "Công lập", CreatedDate = DateTime.Now.AddMonths(-5) },
+                new KhachHang { CustomerCode = "KH002", CompanyName = "BV Đại học Y Dược", Representative = "Trần Thị B", Phone = "0912345678", Email = "info@ump.edu.vn", Address = "215 Hồng Bàng, Q5", OwnershipType = "Công lập", CreatedDate = DateTime.Now.AddMonths(-4) },
+                new KhachHang { CustomerCode = "KH003", CompanyName = "Phòng khám Hoàn Mỹ", Representative = "Lê Hoàng C", Phone = "0923456789", Email = "contact@hoanmy.com", Address = "Phú Nhuận, HCM", OwnershipType = "Tư nhân", CreatedDate = DateTime.Now.AddMonths(-3) },
+                new KhachHang { CustomerCode = "KH004", CompanyName = "BV Tâm Anh", Representative = "Phạm D", Phone = "0934567890", Email = "info@tamanhhospital.vn", Address = "Tân Bình, HCM", OwnershipType = "Tư nhân", CreatedDate = DateTime.Now.AddMonths(-2) },
+                new KhachHang { CustomerCode = "KH005", CompanyName = "Sở Y Tế HCM", Representative = "Võ E", Phone = "0945678901", Email = "syt@tphcm.gov.vn", Address = "Q3, HCM", OwnershipType = "Công lập", CreatedDate = DateTime.Now.AddMonths(-1) }
             };
             context.KhachHangs.AddRange(customers);
+            context.SaveChanges();
+
+            // Seed Trạng thái dự án
+            var projectStatuses = new[]
+            {
+                new TrangThaiDuAn { StatusName = "Mới tạo", Description = "Dự án vừa khởi tạo" },
+                new TrangThaiDuAn { StatusName = "Đang thực hiện", Description = "Đang trong quá trình code" },
+                new TrangThaiDuAn { StatusName = "Hoàn thành", Description = "Đã bàn giao" }
+            };
+            context.TrangThaiDuAns.AddRange(projectStatuses);
+            context.SaveChanges();
+
+            // Seed Trạng thái hợp đồng
+            var contractStatuses = new[]
+            {
+                new TrangThaiHopDong { StatusName = "Mới ký", Description = "Hợp đồng mới" },
+                new TrangThaiHopDong { StatusName = "Đang hiệu lực", Description = "Đang thực hiện" },
+                new TrangThaiHopDong { StatusName = "Đã thanh lý", Description = "Đã kết thúc" }
+            };
+            context.TrangThaiHopDongs.AddRange(contractStatuses);
             context.SaveChanges();
 
             // 2. Seed Dự án
             var projects = new[]
             {
-                new DuAn { TenDuAn = "Triển khai HIS 2.0", MoTa = "Nâng cấp hệ thống quản lý bệnh viện", NgayBatDau = DateTime.Now.AddMonths(-4), TrangThai = "Đang thực hiện", CustomerId = customers[0].CustomerId },
-                new DuAn { TenDuAn = "Hệ thống PACS", MoTa = "Quản lý hình ảnh y tế", NgayBatDau = DateTime.Now.AddMonths(-3), TrangThai = "Hoàn thành", CustomerId = customers[1].CustomerId },
-                new DuAn { TenDuAn = "Phần mềm Quản lý Phòng khám", MoTa = "HIS cho tư nhân", NgayBatDau = DateTime.Now.AddMonths(-1), TrangThai = "Mới tạo", CustomerId = customers[2].CustomerId },
-                new DuAn { TenDuAn = "Bảo trì LIS", MoTa = "Bảo trì hệ thống xét nghiệm", NgayBatDau = DateTime.Now.AddMonths(-2), TrangThai = "Đang thực hiện", CustomerId = customers[3].CustomerId }
+                new DuAn { ProjectName = "Triển khai HIS 2.0", Description = "Nâng cấp hệ thống quản lý bệnh viện", StartDate = DateTime.Now.AddMonths(-4), StatusId = projectStatuses[1].StatusId, CustomerId = customers[0].CustomerId },
+                new DuAn { ProjectName = "Hệ thống PACS", Description = "Quản lý hình ảnh y tế", StartDate = DateTime.Now.AddMonths(-3), StatusId = projectStatuses[2].StatusId, CustomerId = customers[1].CustomerId },
+                new DuAn { ProjectName = "Phần mềm Quản lý Phòng khám", Description = "HIS cho tư nhân", StartDate = DateTime.Now.AddMonths(-1), StatusId = projectStatuses[0].StatusId, CustomerId = customers[2].CustomerId },
+                new DuAn { ProjectName = "Bảo trì LIS", Description = "Bảo trì hệ thống xét nghiệm", StartDate = DateTime.Now.AddMonths(-2), StatusId = projectStatuses[1].StatusId, CustomerId = customers[3].CustomerId }
             };
             context.DuAns.AddRange(projects);
             context.SaveChanges();
@@ -48,10 +68,10 @@ namespace AI_CRM.Infrastructure.Data
             // 3. Seed Hợp đồng
             var contracts = new[]
             {
-                new HopDong { TenHopDong = "HĐ HIS Chợ Rẫy", GiaTri = 1500000000, NgayKy = DateTime.Now.AddMonths(-4), TrangThai = "Đang hiệu lực", ProjectId = projects[0].ProjectId },
-                new HopDong { TenHopDong = "HĐ PACS Y Dược", GiaTri = 2000000000, NgayKy = DateTime.Now.AddMonths(-3), TrangThai = "Đã thanh lý", ProjectId = projects[1].ProjectId },
-                new HopDong { TenHopDong = "HĐ Phần mềm Hoàn Mỹ", GiaTri = 500000000, NgayKy = DateTime.Now.AddMonths(-1), TrangThai = "Mới ký", ProjectId = projects[2].ProjectId },
-                new HopDong { TenHopDong = "HĐ Bảo trì Tâm Anh", GiaTri = 300000000, NgayKy = DateTime.Now.AddMonths(-2), TrangThai = "Đang hiệu lực", ProjectId = projects[3].ProjectId }
+                new HopDong { ContractNumber = "HD-001", ContractName = "HĐ HIS Chợ Rẫy", ContractValue = 1500000000, SignDate = DateTime.Now.AddMonths(-4), StatusId = contractStatuses[1].StatusId, CustomerId = customers[0].CustomerId },
+                new HopDong { ContractNumber = "HD-002", ContractName = "HĐ PACS Y Dược", ContractValue = 2000000000, SignDate = DateTime.Now.AddMonths(-3), StatusId = contractStatuses[2].StatusId, CustomerId = customers[1].CustomerId },
+                new HopDong { ContractNumber = "HD-003", ContractName = "HĐ Phần mềm Hoàn Mỹ", ContractValue = 500000000, SignDate = DateTime.Now.AddMonths(-1), StatusId = contractStatuses[0].StatusId, CustomerId = customers[2].CustomerId },
+                new HopDong { ContractNumber = "HD-004", ContractName = "HĐ Bảo trì Tâm Anh", ContractValue = 300000000, SignDate = DateTime.Now.AddMonths(-2), StatusId = contractStatuses[1].StatusId, CustomerId = customers[3].CustomerId }
             };
             context.HopDongs.AddRange(contracts);
             context.SaveChanges();
@@ -59,11 +79,11 @@ namespace AI_CRM.Infrastructure.Data
             // 4. Seed Employee
             var employees = new[]
             {
-                new NhanVien { TenNhanVien = "Trần Văn Dev", Email = "dev1@mq.vn", ChucVu = "Developer", PhongBan = "Kỹ thuật" },
-                new NhanVien { TenNhanVien = "Lê Thị Sale", Email = "sale1@mq.vn", ChucVu = "Sales", PhongBan = "Kinh doanh" },
-                new NhanVien { TenNhanVien = "Nguyễn Văn BA", Email = "ba1@mq.vn", ChucVu = "Business Analyst", PhongBan = "Phân tích" }
+                new NhanVienPhuTrach { FullName = "Trần Văn Dev", Email = "dev1@mq.vn", Position = "Developer", Department = "Kỹ thuật", Phone = "0111222333" },
+                new NhanVienPhuTrach { FullName = "Lê Thị Sale", Email = "sale1@mq.vn", Position = "Sales", Department = "Kinh doanh", Phone = "0222333444" },
+                new NhanVienPhuTrach { FullName = "Nguyễn Văn BA", Email = "ba1@mq.vn", Position = "Business Analyst", Department = "Phân tích", Phone = "0333444555" }
             };
-            context.NhanViens.AddRange(employees);
+            context.NhanVienPhuTrachs.AddRange(employees);
             context.SaveChanges();
         }
     }

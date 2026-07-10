@@ -151,7 +151,7 @@ namespace AI_CRM.WebMvc.Controllers
 
         // POST: /User/Delete/5 - Xóa tài khoản (chỉ Admin)
         [HttpPost]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -172,7 +172,7 @@ namespace AI_CRM.WebMvc.Controllers
         // POST: /User/ChangeRole - Thay đổi vai trò (phân quyền)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ChangeRole(ChangeRoleViewModel model)
         {
             var result = await _userService.ChangeUserRoleAsync(model.UserId, model.NewRoleId);
@@ -192,7 +192,7 @@ namespace AI_CRM.WebMvc.Controllers
         // POST: /User/ResetPassword - Admin reset mật khẩu cho user
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             if (ModelState.IsValid)
@@ -216,11 +216,21 @@ namespace AI_CRM.WebMvc.Controllers
         // GET: /User/Profile - Hồ sơ cá nhân
         public async Task<IActionResult> Profile()
         {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            if (string.IsNullOrEmpty(email)) return RedirectToAction("Index", "Admin");
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
+            {
+                var nhanVien = await _userService.GetUserProfileByUserIdAsync(userId);
+                return View(nhanVien);
+            }
+            else
+            {
+                // Fallback for Google login without linked user ID
+                var email = User.FindFirst(ClaimTypes.Email)?.Value;
+                if (string.IsNullOrEmpty(email)) return RedirectToAction("Index", "Admin");
 
-            var nhanVien = await _userService.GetUserProfileByEmailAsync(email);
-            return View(nhanVien);
+                var nhanVien = await _userService.GetUserProfileByEmailAsync(email);
+                return View(nhanVien);
+            }
         }
 
         // GET: /User/ChangePassword - Form đổi mật khẩu

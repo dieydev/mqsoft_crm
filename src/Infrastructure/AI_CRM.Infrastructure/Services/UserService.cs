@@ -164,6 +164,14 @@ namespace AI_CRM.Infrastructure.Services
                 .FirstOrDefaultAsync(nv => nv.Email == email);
         }
 
+        public async Task<NhanVienPhuTrach?> GetUserProfileByUserIdAsync(int userId)
+        {
+            return await _context.NhanVienPhuTrachs
+                .Include(nv => nv.NguoiDung)
+                .ThenInclude(nd => nd.VaiTro)
+                .FirstOrDefaultAsync(nv => nv.UserId == userId);
+        }
+
         public async Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
         {
             var user = await _context.NguoiDungs.FindAsync(userId);
