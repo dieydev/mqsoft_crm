@@ -1,0 +1,81 @@
+@model AI_CRM.Domain.Entities.Ticket
+@using AI_CRM.Domain.Entities
+@{
+    ViewData["Title"] = "Tạo mới Ticket Sự cố Y tế";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1 text-dark">
+                    <i class="fa-solid fa-plus-circle text-primary me-2"></i>Tiếp nhận Sự cố Mới
+                </h3>
+                <p class="text-muted small mb-0">Tạo phiếu hỗ trợ kỹ thuật và cam kết chỉ số thời gian dịch vụ (SLA) với bệnh viện.</p>
+            </div>
+            <a asp-action="Index" class="btn btn-light rounded-pill px-3 border shadow-sm text-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
+            </a>
+        </div>
+
+        <div class="glass-card p-4 border-0 shadow-sm rounded-4 bg-white">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- Tiêu đề -->
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label fw-bold text-dark">Tiêu đề sự cố <span class="text-danger">*</span></label>
+                    <input asp-for="Title" class="form-control py-2 shadow-none" placeholder="VD: Lỗi mất kết nối máy xét nghiệm AU680 với LIS..." required />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <!-- Cơ sở y tế -->
+                    <div class="col-12 col-md-6">
+                        <label asp-for="CustomerId" class="form-label fw-bold text-dark">Bệnh viện / Cơ sở y tế <span class="text-danger">*</span></label>
+                        <select asp-for="CustomerId" class="form-select py-2 shadow-none" asp-items="ViewBag.CustomerId" required>
+                            <option value="">-- Chọn bệnh viện báo sự cố --</option>
+                        </select>
+                        <span asp-validation-for="CustomerId" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Mức độ ưu tiên -->
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Priority" class="form-label fw-bold text-dark">Mức độ ưu tiên & SLA <span class="text-danger">*</span></label>
+                        <select asp-for="Priority" class="form-select py-2 shadow-none" required>
+                            <option value="@TicketPriority.Critical">🔴 Khẩn cấp - Critical (SLA cam kết: 4 Giờ)</option>
+                            <option value="@TicketPriority.High">🟠 Mức cao - High (SLA cam kết: 12 Giờ)</option>
+                            <option value="@TicketPriority.Medium" selected>🟡 Trung bình - Medium (SLA cam kết: 24 Giờ)</option>
+                            <option value="@TicketPriority.Low">🟢 Mức thấp - Low (SLA cam kết: 48 Giờ)</option>
+                        </select>
+                        <span asp-validation-for="Priority" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Kỹ thuật viên phụ trách -->
+                <div class="mb-3">
+                    <label asp-for="AssignedToEmployeeId" class="form-label fw-bold text-dark">Phân công Kỹ thuật viên xử lý</label>
+                    <select asp-for="AssignedToEmployeeId" class="form-select py-2 shadow-none" asp-items="ViewBag.AssignedToEmployeeId">
+                        <option value="">-- Chưa gán (Tiếp nhận trước) --</option>
+                    </select>
+                    <small class="text-muted">Có thể phân công kỹ sư sau khi phân loại lỗi.</small>
+                </div>
+
+                <!-- Mô tả chi tiết -->
+                <div class="mb-4">
+                    <label asp-for="Description" class="form-label fw-bold text-dark">Mô tả chi tiết sự cố & Hiện trạng <span class="text-danger">*</span></label>
+                    <textarea asp-for="Description" class="form-control shadow-none" rows="5" placeholder="Ghi nhận các triệu chứng lỗi: Bác sĩ khoa nào phản ánh? Lỗi ở bước nào của HIS/LIS/PACS? Ảnh hưởng bao nhiêu máy trạm?..." required></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a asp-action="Index" class="btn btn-light rounded-pill px-4 border">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm fw-medium">
+                        <i class="fa-solid fa-check me-2"></i> Lưu & Tạo Ticket
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -16,7 +16,136 @@ namespace AI_CRM.Infrastructure.Data
             // Đảm bảo DB đã được tạo
             context.Database.EnsureCreated();
 
-            // Nếu đã có khách hàng thì không seed nữa
+            // Đảm bảo bảng Ticket và TicketComment tồn tại (kể cả khi DB đã được tạo từ trước)
+            try
+            {
+                string createTicketTablesSql = @"
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Ticket')
+BEGIN
+    CREATE TABLE [Ticket] (
+        [Id] int NOT NULL IDENTITY,
+        [Title] nvarchar(max) NOT NULL,
+        [Description] nvarchar(max) NOT NULL,
+        [CustomerId] int NOT NULL,
+        [CreatedByUserId] int NULL,
+        [AssignedToEmployeeId] int NULL,
+        [Priority] int NOT NULL,
+        [Status] int NOT NULL,
+        [CreatedAt] datetime2 NOT NULL,
+        [ResolvedAt] datetime2 NULL,
+        [SlaDeadline] datetime2 NULL,
+        CONSTRAINT [PK_Ticket] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_Ticket_KhachHang_CustomerId] FOREIGN KEY ([CustomerId]) REFERENCES [KhachHang] ([CustomerId]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_Ticket_NguoiDung_CreatedByUserId] FOREIGN KEY ([CreatedByUserId]) REFERENCES [NguoiDung] ([UserId]) ON DELETE SET NULL,
+        CONSTRAINT [FK_Ticket_NhanVienPhuTrach_AssignedToEmployeeId] FOREIGN KEY ([AssignedToEmployeeId]) REFERENCES [NhanVienPhuTrach] ([EmployeeId]) ON DELETE SET NULL
+    );
+END
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'TicketComment')
+BEGIN
+    CREATE TABLE [TicketComment] (
+        [Id] int NOT NULL IDENTITY,
+        [TicketId] int NOT NULL,
+        [UserId] int NULL,
+        [Content] nvarchar(max) NOT NULL,
+        [CreatedAt] datetime2 NOT NULL,
+        CONSTRAINT [PK_TicketComment] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_TicketComment_Ticket_TicketId] FOREIGN KEY ([TicketId]) REFERENCES [Ticket] ([Id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_TicketComment_NguoiDung_UserId] FOREIGN KEY ([UserId]) REFERENCES [NguoiDung] ([UserId]) ON DELETE SET NULL
+    );
+END
+";
+                context.Database.ExecuteSqlRaw(createTicketTablesSql);
+
+                // Seed Tickets mẫu nếu chưa có
+                if (!context.Tickets.Any() && context.KhachHangs.Any())
+                {
+                    var existingCustomers = context.KhachHangs.Take(4).ToList();
+                    var existingEmp = context.NhanVienPhuTrachs.FirstOrDefault();
+                    int? empId = existingEmp?.EmployeeId;
+
+                    var sampleTickets = new[]
+                    {
+                        new Ticket
+                        {
+                            Title = "Lỗi kết nối máy xét nghiệm sinh hóa tự động AU680 với hệ thống LIS",
+                            Description = "Khoa Xét nghiệm Bệnh viện Chợ Rẫy báo máy AU680 không truyền được kết quả về hệ thống LIS từ 8h30 sáng nay, làm chậm trễ trả kết quả cho bệnh nhân ngoại trú.",
+                            CustomerId = existingCustomers[0].CustomerId,
+                            Priority = TicketPriority.Critical,
+                            Status = TicketStatus.InProgress,
+                            AssignedToEmployeeId = empId,
+                            CreatedAt = DateTime.Now.AddHours(-3),
+                            SlaDeadline = DateTime.Now.AddHours(1)
+                        },
+                        new Ticket
+                        {
+                            Title = "Máy trạm đọc ảnh PACS tại Khoa CĐHA không tải được ảnh chụp CT 128 lát",
+                            Description = "Bác sĩ phản ánh khi mở ca chụp CT Scanner 128 lát cắt thì ứng dụng PACS Viewer bị đơ và tải chậm quá 5 phút.",
+                            CustomerId = existingCustomers.Count > 1 ? existingCustomers[1].CustomerId : existingCustomers[0].CustomerId,
+                            Priority = TicketPriority.High,
+                            Status = TicketStatus.New,
+                            AssignedToEmployeeId = empId,
+                            CreatedAt = DateTime.Now.AddHours(-5),
+                            SlaDeadline = DateTime.Now.AddHours(7)
+                        },
+                        new Ticket
+                        {
+                            Title = "Không in được đơn thuốc BHYT mẫu mới theo Thông tư Bộ Y tế",
+                            Description = "Phòng khám báo mẫu in đơn thuốc BHYT ngoại trú bị lỗi nhảy dòng mã vạch và thiếu chữ ký số bác sĩ.",
+                            CustomerId = existingCustomers.Count > 2 ? existingCustomers[2].CustomerId : existingCustomers[0].CustomerId,
+                            Priority = TicketPriority.Medium,
+                            Status = TicketStatus.Resolved,
+                            AssignedToEmployeeId = empId,
+                            CreatedAt = DateTime.Now.AddDays(-1),
+                            ResolvedAt = DateTime.Now.AddHours(-2),
+                            SlaDeadline = DateTime.Now
+                        },
+                        new Ticket
+                        {
+                            Title = "Yêu cầu cấu hình thêm 5 tài khoản điều dưỡng Khoa Cấp cứu",
+                            Description = "Bệnh viện tiếp nhận thêm nhân sự mới cho khoa Cấp cứu, cần tạo tài khoản phân quyền ghi nhận bệnh án điện tử EMR.",
+                            CustomerId = existingCustomers.Count > 3 ? existingCustomers[3].CustomerId : existingCustomers[0].CustomerId,
+                            Priority = TicketPriority.Low,
+                            Status = TicketStatus.Closed,
+                            AssignedToEmployeeId = empId,
+                            CreatedAt = DateTime.Now.AddDays(-3),
+                            ResolvedAt = DateTime.Now.AddDays(-2),
+                            SlaDeadline = DateTime.Now.AddDays(-1)
+                        },
+                        new Ticket
+                        {
+                            Title = "Hệ thống HIS bị chậm giờ cao điểm tiếp đón bệnh nhân (7h30 - 8h30)",
+                            Description = "Khu tiếp đón bệnh nhân báo phần mềm phản hồi chậm khi quét thẻ BHYT có gắn chip VssID vào đầu giờ sáng.",
+                            CustomerId = existingCustomers[0].CustomerId,
+                            Priority = TicketPriority.Critical,
+                            Status = TicketStatus.InProgress,
+                            AssignedToEmployeeId = empId,
+                            CreatedAt = DateTime.Now.AddHours(-1),
+                            SlaDeadline = DateTime.Now.AddHours(3)
+                        }
+                    };
+
+                    context.Tickets.AddRange(sampleTickets);
+                    context.SaveChanges();
+
+                    context.TicketComments.Add(new TicketComment
+                    {
+                        TicketId = sampleTickets[0].Id,
+                        Content = "Kỹ sư đã liên hệ với phụ trách IT Bệnh viện, đang kiểm tra lại cổng COM và driver máy xét nghiệm Beckman Coulter.",
+                        CreatedAt = DateTime.Now.AddHours(-2)
+                    });
+                    context.TicketComments.Add(new TicketComment
+                    {
+                        TicketId = sampleTickets[0].Id,
+                        Content = "Đã tìm ra nguyên nhân: Xung đột địa chỉ IP tĩnh trên switch mạng tầng 2. Đang cấu hình lại gateway.",
+                        CreatedAt = DateTime.Now.AddMinutes(-30)
+                    });
+                    context.SaveChanges();
+                }
+            }
+            catch { }
+
+            // Nếu đã có khách hàng thì không seed dữ liệu CRM cũ nữa
             if (context.KhachHangs.Any())
             {
                 return;
@@ -85,6 +214,89 @@ namespace AI_CRM.Infrastructure.Data
             };
             context.NhanVienPhuTrachs.AddRange(employees);
             context.SaveChanges();
+
+            // 5. Seed Ticket Sự cố Y tế (Helpdesk)
+            if (!context.Tickets.Any())
+            {
+                var dev = employees[0];
+                var sampleTickets = new[]
+                {
+                    new Ticket
+                    {
+                        Title = "Lỗi kết nối máy xét nghiệm sinh hóa tự động AU680 với hệ thống LIS",
+                        Description = "Khoa Xét nghiệm Bệnh viện Chợ Rẫy báo máy AU680 không truyền được kết quả về hệ thống LIS từ 8h30 sáng nay, làm chậm trễ trả kết quả cho bệnh nhân ngoại trú.",
+                        CustomerId = customers[0].CustomerId,
+                        Priority = TicketPriority.Critical,
+                        Status = TicketStatus.InProgress,
+                        AssignedToEmployeeId = dev.EmployeeId,
+                        CreatedAt = DateTime.Now.AddHours(-3),
+                        SlaDeadline = DateTime.Now.AddHours(1)
+                    },
+                    new Ticket
+                    {
+                        Title = "Máy trạm đọc ảnh PACS tại Khoa CĐHA không tải được ảnh chụp CT 128 lát",
+                        Description = "Bác sĩ phản ánh khi mở ca chụp CT Scanner 128 lát cắt thì ứng dụng PACS Viewer bị đơ và tải chậm quá 5 phút.",
+                        CustomerId = customers[1].CustomerId,
+                        Priority = TicketPriority.High,
+                        Status = TicketStatus.New,
+                        AssignedToEmployeeId = dev.EmployeeId,
+                        CreatedAt = DateTime.Now.AddHours(-5),
+                        SlaDeadline = DateTime.Now.AddHours(7)
+                    },
+                    new Ticket
+                    {
+                        Title = "Không in được đơn thuốc BHYT mẫu mới theo Thông tư Bộ Y tế",
+                        Description = "Phòng khám báo mẫu in đơn thuốc BHYT ngoại trú bị lỗi nhảy dòng mã vạch và thiếu chữ ký số bác sĩ.",
+                        CustomerId = customers[2].CustomerId,
+                        Priority = TicketPriority.Medium,
+                        Status = TicketStatus.Resolved,
+                        AssignedToEmployeeId = dev.EmployeeId,
+                        CreatedAt = DateTime.Now.AddDays(-1),
+                        ResolvedAt = DateTime.Now.AddHours(-2),
+                        SlaDeadline = DateTime.Now
+                    },
+                    new Ticket
+                    {
+                        Title = "Yêu cầu cấu hình thêm 5 tài khoản điều dưỡng Khoa Cấp cứu",
+                        Description = "Bệnh viện tiếp nhận thêm nhân sự mới cho khoa Cấp cứu, cần tạo tài khoản phân quyền ghi nhận bệnh án điện tử EMR.",
+                        CustomerId = customers[3].CustomerId,
+                        Priority = TicketPriority.Low,
+                        Status = TicketStatus.Closed,
+                        AssignedToEmployeeId = dev.EmployeeId,
+                        CreatedAt = DateTime.Now.AddDays(-3),
+                        ResolvedAt = DateTime.Now.AddDays(-2),
+                        SlaDeadline = DateTime.Now.AddDays(-1)
+                    },
+                    new Ticket
+                    {
+                        Title = "Hệ thống HIS bị chậm giờ cao điểm tiếp đón bệnh nhân (7h30 - 8h30)",
+                        Description = "Khu tiếp đón bệnh nhân báo phần mềm phản hồi chậm khi quét thẻ BHYT có gắn chip VssID vào đầu giờ sáng.",
+                        CustomerId = customers[0].CustomerId,
+                        Priority = TicketPriority.Critical,
+                        Status = TicketStatus.InProgress,
+                        AssignedToEmployeeId = dev.EmployeeId,
+                        CreatedAt = DateTime.Now.AddHours(-1),
+                        SlaDeadline = DateTime.Now.AddHours(3)
+                    }
+                };
+
+                context.Tickets.AddRange(sampleTickets);
+                context.SaveChanges();
+
+                context.TicketComments.Add(new TicketComment
+                {
+                    TicketId = sampleTickets[0].Id,
+                    Content = "Kỹ sư đã liên hệ với phụ trách IT Bệnh viện Chợ Rẫy, đang kiểm tra lại cổng COM và driver máy xét nghiệm Beckman Coulter.",
+                    CreatedAt = DateTime.Now.AddHours(-2)
+                });
+                context.TicketComments.Add(new TicketComment
+                {
+                    TicketId = sampleTickets[0].Id,
+                    Content = "Đã tìm ra nguyên nhân: Xung đột địa chỉ IP tĩnh trên switch mạng tầng 2. Đang cấu hình lại gateway.",
+                    CreatedAt = DateTime.Now.AddMinutes(-30)
+                });
+                context.SaveChanges();
+            }
         }
     }
 }

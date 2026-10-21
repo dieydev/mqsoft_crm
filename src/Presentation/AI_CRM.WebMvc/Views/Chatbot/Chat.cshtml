@@ -81,6 +81,22 @@
 
         </div>
 
+        <!-- Suggested Quick Prompts -->
+        <div class="px-3 pt-2 bg-white d-flex gap-2 overflow-auto" style="white-space: nowrap;">
+            <button type="button" class="btn btn-sm btn-light rounded-pill border text-muted small prompt-chip">
+                <i class="fa-solid fa-hospital text-primary me-1"></i> Danh sách bệnh viện gần đây
+            </button>
+            <button type="button" class="btn btn-sm btn-light rounded-pill border text-muted small prompt-chip">
+                <i class="fa-solid fa-diagram-project text-warning me-1"></i> Dự án đang triển khai
+            </button>
+            <button type="button" class="btn btn-sm btn-light rounded-pill border text-muted small prompt-chip">
+                <i class="fa-solid fa-file-contract text-success me-1"></i> Hợp đồng giá trị lớn nhất
+            </button>
+            <button type="button" class="btn btn-sm btn-light rounded-pill border text-muted small prompt-chip">
+                <i class="fa-solid fa-book-medical text-info me-1"></i> Tài liệu hướng dẫn HIS & PACS
+            </button>
+        </div>
+
         <!-- Input Area -->
         <div class="p-3 bg-white border-top">
             <div class="input-group">
@@ -96,7 +112,7 @@
                 </button>
             </div>
             <div class="text-center mt-2">
-                <small class="text-muted" style="font-size: 0.75rem;">AI trả lời dựa trên kho tài liệu nội bộ. Vui lòng đánh giá câu trả lời để AI học hỏi thêm.</small>
+                <small class="text-muted" style="font-size: 0.75rem;">AI tra cứu dữ liệu thời gian thực từ hệ thống MQSoft CRM. Tích hợp cơ chế Fallback chống gián đoạn.</small>
             </div>
         </div>
     </div>
@@ -259,6 +275,12 @@
                 if (e.which == 13) {
                     btnSend.click();
                 }
+            });
+
+            $('.prompt-chip').click(function () {
+                const text = $(this).text().trim();
+                chatInput.val(text);
+                btnSend.click();
             });
 
             $(document).on('click', '.btn-rate', function() {

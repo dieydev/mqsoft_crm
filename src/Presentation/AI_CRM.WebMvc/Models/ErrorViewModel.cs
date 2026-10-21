@@ -1,3 +1,4 @@
+#nullable enable
 namespace AI_CRM.WebMvc.Models;
 
 public class ErrorViewModel

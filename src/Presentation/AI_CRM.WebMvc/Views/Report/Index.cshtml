@@ -1,162 +1,332 @@
 @{
-    ViewData["Title"] = "Báo cáo";
+    ViewData["Title"] = "Trung tâm Báo cáo & Trích xuất Dữ liệu";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var customers = ViewBag.Customers as IEnumerable<AI_CRM.Domain.Entities.KhachHang> ?? new List<AI_CRM.Domain.Entities.KhachHang>();
     var projects = ViewBag.Projects as IEnumerable<AI_CRM.Domain.Entities.DuAn> ?? new List<AI_CRM.Domain.Entities.DuAn>();
     var contracts = ViewBag.Contracts as IEnumerable<AI_CRM.Domain.Entities.HopDong> ?? new List<AI_CRM.Domain.Entities.HopDong>();
 }
 
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2 class="mb-0 text-primary"><i class="fa-solid fa-chart-bar me-2"></i>Trung tâm Báo cáo</h2>
-            <p class="text-muted">Xuất dữ liệu hệ thống ra định dạng Excel và PDF</p>
+<!-- Page Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1 small">
+                <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Index" class="text-decoration-none">Hệ thống</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Trung tâm Báo cáo</li>
+            </ol>
+        </nav>
+        <h3 class="fw-bold mb-1 text-dark">
+            <i class="fa-solid fa-file-invoice text-primary me-2"></i>Trung tâm Báo cáo & Trích xuất Dữ liệu
+        </h3>
+        <p class="text-muted small mb-0">
+            Hỗ trợ kết xuất bảng tính Excel (.xlsx) tốc độ cao và tạo lập hồ sơ in ấn chuẩn A4 PDF tự động.
+        </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <a asp-controller="Admin" asp-action="Index" class="btn btn-light rounded-pill px-3 py-2 border shadow-sm fw-medium text-secondary">
+            <i class="fa-solid fa-arrow-left me-1"></i> Quay lại Dashboard
+        </a>
+    </div>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- OVERVIEW METRICS STRIP -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="glass-card p-3 d-flex align-items-center gap-3">
+            <div class="stat-icon bg-primary-light" style="width: 48px; height: 48px; border-radius: 12px; font-size: 1.25rem;">
+                <i class="fa-solid fa-hospital-user"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-dark fs-5">@customers.Count() Cơ sở</div>
+                <small class="text-muted">Bệnh viện & Phòng khám sẵn sàng xuất</small>
+            </div>
         </div>
     </div>
-
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fa-solid fa-triangle-exclamation me-2"></i> @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="col-12 col-md-4">
+        <div class="glass-card p-3 d-flex align-items-center gap-3">
+            <div class="stat-icon bg-success-light" style="width: 48px; height: 48px; border-radius: 12px; font-size: 1.25rem;">
+                <i class="fa-solid fa-file-contract"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-dark fs-5">@contracts.Count() Hợp đồng</div>
+                <small class="text-muted">Dữ liệu tài chính & pháp lý được lưu trữ</small>
+            </div>
         </div>
-    }
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="glass-card p-3 d-flex align-items-center gap-3">
+            <div class="stat-icon bg-warning-light" style="width: 48px; height: 48px; border-radius: 12px; font-size: 1.25rem;">
+                <i class="fa-solid fa-laptop-medical"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-dark fs-5">@projects.Count() Dự án</div>
+                <small class="text-muted">Hệ thống HIS, LIS, PACS đang theo dõi</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 1: XUẤT EXCEL (MICROSOFT EXCEL SPREADSHEETS) -->
+<div class="mb-5">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                <span class="d-inline-flex align-items-center justify-content-center text-white" style="width: 28px; height: 28px; border-radius: 8px; background: #10b981; font-size: 0.85rem;">
+                    <i class="fa-solid fa-file-excel"></i>
+                </span>
+                Báo cáo Dữ liệu Tổng hợp (Excel .xlsx)
+            </h5>
+            <small class="text-muted">Xuất toàn bộ bảng ghi hệ thống ra định dạng bảng tính mở, tự động định dạng tiêu đề và độ rộng cột</small>
+        </div>
+        <span class="badge rounded-pill" style="background: rgba(16, 185, 129, 0.1); color: #059669; font-weight: 600; padding: 6px 12px;">
+            ClosedXML Engine
+        </span>
+    </div>
+
+    <div class="row g-3">
+        <!-- 1. Excel Khách hàng -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between border-0 shadow-sm" style="transition: transform 0.2s, box-shadow 0.2s;">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #ecfdf5; color: #059669; font-size: 1.3rem;">
+                            <i class="fa-solid fa-hospital"></i>
+                        </div>
+                        <span class="badge bg-light text-dark border">@customers.Count() bản ghi</span>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Danh sách Khách hàng</h6>
+                    <p class="text-muted small mb-3" style="font-size: 0.8rem; line-height: 1.4;">
+                        Mã CSKCB, Tên bệnh viện, Tuyến/Hạng, Số giường, Thông tin liên hệ Trưởng phòng IT.
+                    </p>
+                </div>
+                <a href="@Url.Action("ExportCustomersExcel", "Report")" class="btn btn-outline-success rounded-pill w-100 fw-medium d-flex align-items-center justify-content-center gap-2 py-2">
+                    <i class="fa-solid fa-download"></i> Tải file Excel
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. Excel Dự án -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between border-0 shadow-sm" style="transition: transform 0.2s, box-shadow 0.2s;">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #ecfdf5; color: #059669; font-size: 1.3rem;">
+                            <i class="fa-solid fa-diagram-project"></i>
+                        </div>
+                        <span class="badge bg-light text-dark border">@projects.Count() dự án</span>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Danh mục Dự án Triển khai</h6>
+                    <p class="text-muted small mb-3" style="font-size: 0.8rem; line-height: 1.4;">
+                        Hệ thống HIS 2.0, PACS, LIS, Khách hàng phụ trách, Ngân sách và Trạng thái hoàn thành.
+                    </p>
+                </div>
+                <a href="@Url.Action("ExportProjectsExcel", "Report")" class="btn btn-outline-success rounded-pill w-100 fw-medium d-flex align-items-center justify-content-center gap-2 py-2">
+                    <i class="fa-solid fa-download"></i> Tải file Excel
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. Excel Hợp đồng -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between border-0 shadow-sm" style="transition: transform 0.2s, box-shadow 0.2s;">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #ecfdf5; color: #059669; font-size: 1.3rem;">
+                            <i class="fa-solid fa-file-signature"></i>
+                        </div>
+                        <span class="badge bg-light text-dark border">@contracts.Count() hợp đồng</span>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Sổ Theo dõi Hợp đồng</h6>
+                    <p class="text-muted small mb-3" style="font-size: 0.8rem; line-height: 1.4;">
+                        Số hợp đồng, Giá trị (VNĐ), Ngày ký kết, Hạn bảo hành bảo trì, Tình trạng hiệu lực.
+                    </p>
+                </div>
+                <a href="@Url.Action("ExportContractsExcel", "Report")" class="btn btn-outline-success rounded-pill w-100 fw-medium d-flex align-items-center justify-content-center gap-2 py-2">
+                    <i class="fa-solid fa-download"></i> Tải file Excel
+                </a>
+            </div>
+        </div>
+
+        <!-- 4. Excel Người dùng -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between border-0 shadow-sm" style="transition: transform 0.2s, box-shadow 0.2s;">
+                <div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-3" style="width: 44px; height: 44px; background: #ecfdf5; color: #059669; font-size: 1.3rem;">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <span class="badge bg-light text-dark border">Toàn hệ thống</span>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Danh sách Tài khoản & Quyền</h6>
+                    <p class="text-muted small mb-3" style="font-size: 0.8rem; line-height: 1.4;">
+                        Danh sách tài khoản nội bộ, vai trò quản trị (Admin, Manager, Nhân viên), trạng thái kích hoạt.
+                    </p>
+                </div>
+                <a href="@Url.Action("ExportUsersExcel", "Report")" class="btn btn-outline-success rounded-pill w-100 fw-medium d-flex align-items-center justify-content-center gap-2 py-2">
+                    <i class="fa-solid fa-download"></i> Tải file Excel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 2: XUẤT PDF CHI TIẾT (QUESTPDF A4 PRINT-READY) -->
+<div class="mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                <span class="d-inline-flex align-items-center justify-content-center text-white" style="width: 28px; height: 28px; border-radius: 8px; background: #e11d48; font-size: 0.85rem;">
+                    <i class="fa-solid fa-file-pdf"></i>
+                </span>
+                Hồ sơ & Biên bản In ấn Chuyên sâu (PDF A4)
+            </h5>
+            <small class="text-muted">Chọn cụ thể đối tượng để kết xuất báo cáo hoàn chỉnh, định dạng trang A4 tiêu chuẩn có logo và bảng biểu sắc nét</small>
+        </div>
+        <span class="badge rounded-pill" style="background: rgba(225, 29, 72, 0.1); color: #be123c; font-weight: 600; padding: 6px 12px;">
+            QuestPDF Engine
+        </span>
+    </div>
 
     <div class="row g-4">
-        <!-- Xuất Danh sách Excel -->
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-success text-white border-0 py-3">
-                    <h5 class="card-title mb-0"><i class="fa-solid fa-file-excel me-2"></i>Xuất Excel (Danh sách)</h5>
-                </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-                            <div>
-                                <h6 class="mb-1">Danh sách Khách hàng</h6>
-                                <small class="text-muted">Xuất toàn bộ thông tin khách hàng đang quản lý</small>
-                            </div>
-                            <a href="@Url.Action("ExportCustomersExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4 text-nowrap">
-                                <i class="fa-solid fa-download me-1"></i> Tải về
-                            </a>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-                            <div>
-                                <h6 class="mb-1">Danh sách Dự án</h6>
-                                <small class="text-muted">Xuất thông tin tất cả các dự án và trạng thái</small>
-                            </div>
-                            <a href="@Url.Action("ExportProjectsExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4 text-nowrap">
-                                <i class="fa-solid fa-download me-1"></i> Tải về
-                            </a>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-                            <div>
-                                <h6 class="mb-1">Danh sách Hợp đồng</h6>
-                                <small class="text-muted">Xuất thông tin tất cả hợp đồng và giá trị</small>
-                            </div>
-                            <a href="@Url.Action("ExportContractsExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4 text-nowrap">
-                                <i class="fa-solid fa-download me-1"></i> Tải về
-                            </a>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom-0">
-                            <div>
-                                <h6 class="mb-1">Danh sách Người dùng</h6>
-                                <small class="text-muted">Xuất thông tin tài khoản và phân quyền</small>
-                            </div>
-                            <a href="@Url.Action("ExportUsersExcel", "Report")" class="btn btn-outline-success btn-sm rounded-pill px-4 text-nowrap">
-                                <i class="fa-solid fa-download me-1"></i> Tải về
-                            </a>
-                        </div>
+        <!-- 1. PDF Khách hàng -->
+        <div class="col-12 col-md-6">
+            <div class="glass-card p-4 border-0 shadow-sm h-100">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-3 flex-shrink-0" style="width: 42px; height: 42px; background: #fff1f2; color: #e11d48; font-size: 1.2rem;">
+                        <i class="fa-solid fa-hospital-user"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">Hồ sơ Cơ sở Y tế Toàn diện</h6>
+                        <small class="text-muted">In phiếu lý lịch bệnh viện, các hợp đồng và dự án liên quan</small>
                     </div>
                 </div>
+
+                <form action="@Url.Action("ExportCustomerPdf", "Report")" method="get">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Chọn bệnh viện / phòng khám:</label>
+                        <select name="id" class="form-select border shadow-none" required>
+                            <option value="">-- Chọn khách hàng y tế --</option>
+                            @foreach (var c in customers)
+                            {
+                                <option value="@c.CustomerId">@c.CompanyName (@(c.Representative ?? "Đầu mối N/A"))</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-outline-danger rounded-pill px-4 fw-medium d-inline-flex align-items-center gap-2">
+                        <i class="fa-solid fa-file-pdf"></i> Xuất Hồ sơ PDF
+                    </button>
+                </form>
             </div>
         </div>
 
-        <!-- Xuất Báo cáo PDF -->
-        <div class="col-12 col-xl-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-danger text-white border-0 py-3">
-                    <h5 class="card-title mb-0"><i class="fa-solid fa-file-pdf me-2"></i>Xuất PDF (Chi tiết)</h5>
-                </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        
-                        <div class="list-group-item px-0 py-3 border-0">
-                            <form action="@Url.Action("ExportCustomerPdf", "Report")" method="get" class="d-flex align-items-center w-100">
-                                <div class="flex-grow-1 me-3">
-                                    <label class="form-label mb-1">Báo cáo Khách hàng</label>
-                                    <select name="id" class="form-select form-select-sm" required>
-                                        <option value="">-- Chọn khách hàng --</option>
-                                        @foreach (var c in customers)
-                                        {
-                                            <option value="@c.CustomerId">@c.CompanyName (@c.Representative)</option>
-                                        }
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4 text-nowrap">
-                                    <i class="fa-solid fa-download me-1"></i> Xuất PDF
-                                </button>
-                            </form>
-                        </div>
-
-                        <div class="list-group-item px-0 py-3 border-0">
-                            <form action="@Url.Action("ExportProjectPdf", "Report")" method="get" class="d-flex align-items-center w-100">
-                                <div class="flex-grow-1 me-3">
-                                    <label class="form-label mb-1">Báo cáo Dự án</label>
-                                    <select name="id" class="form-select form-select-sm" required>
-                                        <option value="">-- Chọn dự án --</option>
-                                        @foreach (var p in projects)
-                                        {
-                                            <option value="@p.ProjectId">@p.ProjectName</option>
-                                        }
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4 text-nowrap">
-                                    <i class="fa-solid fa-download me-1"></i> Xuất PDF
-                                </button>
-                            </form>
-                        </div>
-
-                        <div class="list-group-item px-0 py-3 border-0">
-                            <form action="@Url.Action("ExportContractPdf", "Report")" method="get" class="d-flex align-items-center w-100">
-                                <div class="flex-grow-1 me-3">
-                                    <label class="form-label mb-1">Báo cáo Hợp đồng</label>
-                                    <select name="id" class="form-select form-select-sm" required>
-                                        <option value="">-- Chọn hợp đồng --</option>
-                                        @foreach (var hd in contracts)
-                                        {
-                                            <option value="@hd.ContractId">@hd.ContractName</option>
-                                        }
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4 text-nowrap">
-                                    <i class="fa-solid fa-download me-1"></i> Xuất PDF
-                                </button>
-                            </form>
-                        </div>
-
-                        <div class="list-group-item px-0 py-3 border-0">
-                            <form action="@Url.Action("ExportProgressPdf", "Report")" method="get" class="d-flex align-items-center w-100">
-                                <div class="flex-grow-1 me-3">
-                                    <label class="form-label mb-1">Báo cáo Tiến độ (chọn Dự án)</label>
-                                    <select name="id" class="form-select form-select-sm" required>
-                                        <option value="">-- Chọn dự án --</option>
-                                        @foreach (var p in projects)
-                                        {
-                                            <option value="@p.ProjectId">@p.ProjectName</option>
-                                        }
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 mt-4 text-nowrap">
-                                    <i class="fa-solid fa-download me-1"></i> Xuất PDF
-                                </button>
-                            </form>
-                        </div>
-
+        <!-- 2. PDF Dự án -->
+        <div class="col-12 col-md-6">
+            <div class="glass-card p-4 border-0 shadow-sm h-100">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-3 flex-shrink-0" style="width: 42px; height: 42px; background: #fff1f2; color: #e11d48; font-size: 1.2rem;">
+                        <i class="fa-solid fa-diagram-project"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">Báo cáo Nghiệm thu & Triển khai Dự án</h6>
+                        <small class="text-muted">In chi tiết tiến độ hệ thống HIS, LIS, PACS và phân bổ kỹ sư</small>
                     </div>
                 </div>
+
+                <form action="@Url.Action("ExportProjectPdf", "Report")" method="get">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Chọn dự án cần in báo cáo:</label>
+                        <select name="id" class="form-select border shadow-none" required>
+                            <option value="">-- Chọn dự án phần mềm --</option>
+                            @foreach (var p in projects)
+                            {
+                                <option value="@p.ProjectId">@p.ProjectName</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-outline-danger rounded-pill px-4 fw-medium d-inline-flex align-items-center gap-2">
+                        <i class="fa-solid fa-file-pdf"></i> Xuất Báo cáo PDF
+                    </button>
+                </form>
             </div>
         </div>
 
+        <!-- 3. PDF Hợp đồng -->
+        <div class="col-12 col-md-6">
+            <div class="glass-card p-4 border-0 shadow-sm h-100">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-3 flex-shrink-0" style="width: 42px; height: 42px; background: #fff1f2; color: #e11d48; font-size: 1.2rem;">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">Bản tóm tắt Hợp đồng & Giá trị Pháp lý</h6>
+                        <small class="text-muted">In thông tin điều khoản tài chính, ngày hiệu lực và các bên tham gia</small>
+                    </div>
+                </div>
+
+                <form action="@Url.Action("ExportContractPdf", "Report")" method="get">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Chọn hợp đồng:</label>
+                        <select name="id" class="form-select border shadow-none" required>
+                            <option value="">-- Chọn hợp đồng dịch vụ --</option>
+                            @foreach (var hd in contracts)
+                            {
+                                <option value="@hd.ContractId">@hd.ContractNumber - @hd.ContractName</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-outline-danger rounded-pill px-4 fw-medium d-inline-flex align-items-center gap-2">
+                        <i class="fa-solid fa-file-pdf"></i> Xuất Hồ sơ PDF
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 4. PDF Tiến độ -->
+        <div class="col-12 col-md-6">
+            <div class="glass-card p-4 border-0 shadow-sm h-100">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-3 flex-shrink-0" style="width: 42px; height: 42px; background: #fff1f2; color: #e11d48; font-size: 1.2rem;">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">Nhật ký Tiến độ & Biên bản Cột mốc</h6>
+                        <small class="text-muted">In toàn bộ nhật ký ghi nhận tiến trình cập nhật theo từng mốc %</small>
+                    </div>
+                </div>
+
+                <form action="@Url.Action("ExportProgressPdf", "Report")" method="get">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Chọn dự án cần in nhật ký tiến độ:</label>
+                        <select name="id" class="form-select border shadow-none" required>
+                            <option value="">-- Chọn dự án --</option>
+                            @foreach (var p in projects)
+                            {
+                                <option value="@p.ProjectId">@p.ProjectName</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-outline-danger rounded-pill px-4 fw-medium d-inline-flex align-items-center gap-2">
+                        <i class="fa-solid fa-file-pdf"></i> Xuất Tiến độ PDF
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
+</div>
+
+<!-- TECHNICAL NOTE -->
+<div class="p-3 rounded-4 bg-light text-muted small d-flex flex-wrap align-items-center justify-content-between gap-2 border">
+    <div class="d-flex align-items-center gap-2">
+        <i class="fa-solid fa-shield-halved text-primary"></i>
+        <span>Hệ thống áp dụng chuẩn mã hóa <strong>UTF-8</strong> tiếng Việt, font <strong>Arial</strong> chuẩn in ấn và tự động chèn dấu thời gian kết xuất để phục vụ thanh tra.</span>
+    </div>
+    <span class="text-secondary">MQSoft CRM Document Engine v2.0</span>
 </div>

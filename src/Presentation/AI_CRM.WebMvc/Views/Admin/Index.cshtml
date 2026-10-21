@@ -1,159 +1,464 @@
+@using Microsoft.EntityFrameworkCore
+@inject AI_CRM.Infrastructure.Data.ApplicationDbContext DbContext
 @{
     ViewData["Title"] = "Tổng quan (Dashboard)";
+    var today = DateTime.Today;
+
+    // 1. Cảnh báo Hợp đồng: Hợp đồng sắp hết hạn trong vòng 60 ngày hoặc đã hết hạn gần đây mà chưa thanh lý
+    var expiringContracts = await DbContext.HopDongs
+        .Include(h => h.KhachHang)
+        .Include(h => h.TrangThaiHopDong)
+        .Where(h => !h.IsDeleted && (h.TrangThaiHopDong == null || h.TrangThaiHopDong.StatusName != "Đã thanh lý"))
+        .OrderBy(h => h.ExpireDate.HasValue ? h.ExpireDate.Value : DateTime.MaxValue)
+        .Take(4)
+        .ToListAsync();
+
+    // 2. Cảnh báo Dự án: Dự án đang triển khai cần theo dõi tiến độ và deadline
+    var attentionProjects = await DbContext.DuAns
+        .Include(d => d.KhachHang)
+        .Include(d => d.TrangThaiDuAn)
+        .Include(d => d.TienDoDuAns)
+        .Where(d => !d.IsDeleted && (d.TrangThaiDuAn == null || d.TrangThaiDuAn.StatusName != "Hoàn thành"))
+        .OrderBy(d => d.Deadline.HasValue ? d.Deadline.Value : DateTime.MaxValue)
+        .Take(4)
+        .ToListAsync();
+
+    // 3. Doanh số lũy kế (VNĐ)
+    var totalContractRevenue = await DbContext.HopDongs
+        .Where(h => !h.IsDeleted)
+        .SumAsync(h => h.ContractValue ?? 0);
+    string revenueFormatted = totalContractRevenue >= 1000000000 
+        ? $"{(totalContractRevenue / 1000000000m):0.##} Tỷ" 
+        : $"{(totalContractRevenue / 1000000m):0.##} Tr";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="fw-bold mb-0">Tổng quan hệ thống</h3>
-    <button class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-medium">
-        <i class="fa-solid fa-plus me-2"></i>Dự án mới
-    </button>
+<!-- Top Header & Greeting -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold mb-1 text-dark">
+            <i class="fa-solid fa-chart-line text-primary me-2"></i>Bảng Điều Khiển Quản Trị
+        </h3>
+        <p class="text-muted small mb-0">
+            Hệ thống Quản lý Khách hàng Y tế & Tích hợp Trí tuệ Nhân tạo MQSoft • Hôm nay, @today.ToString("dd/MM/yyyy")
+        </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <a asp-controller="Chatbot" asp-action="Chat" class="btn rounded-pill px-3 py-2 text-white shadow-sm fw-medium d-flex align-items-center gap-2" style="background: linear-gradient(135deg, #6366f1, #ec4899); text-decoration: none;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Hỏi Trợ lý AI</span>
+        </a>
+        <a asp-controller="Report" asp-action="Index" class="btn btn-outline-secondary rounded-pill px-3 py-2 shadow-sm fw-medium">
+            <i class="fa-solid fa-file-excel me-1 text-success"></i> Xuất Báo cáo
+        </a>
+    </div>
 </div>
 
-<!-- Stats Row -->
+<!-- QUICK ACTIONS BAR -->
+<div class="mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="text-uppercase fw-bold text-muted small" style="letter-spacing: 0.5px;">
+            <i class="fa-solid fa-bolt text-warning me-1"></i>Thao tác nhanh
+        </span>
+    </div>
+    <div class="row g-2 g-md-3">
+        <div class="col-6 col-md-4 col-xl-2">
+            <a asp-controller="Customer" asp-action="Create" class="quick-action-btn h-100">
+                <div class="quick-action-icon bg-primary-light text-primary">
+                    <i class="fa-solid fa-hospital-user"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Thêm CSKCB</div>
+                    <small class="text-muted" style="font-size: 0.72rem;">Khách hàng y tế</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a asp-controller="Contract" asp-action="Create" class="quick-action-btn h-100">
+                <div class="quick-action-icon bg-success-light text-success">
+                    <i class="fa-solid fa-file-signature"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Ký Hợp đồng</div>
+                    <small class="text-muted" style="font-size: 0.72rem;">Hợp đồng dịch vụ</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a asp-controller="Project" asp-action="Create" class="quick-action-btn h-100">
+                <div class="quick-action-icon bg-warning-light text-warning">
+                    <i class="fa-solid fa-diagram-project"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Tạo Dự án</div>
+                    <small class="text-muted" style="font-size: 0.72rem;">HIS, LIS, PACS</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a asp-controller="Interaction" asp-action="Create" class="quick-action-btn h-100">
+                <div class="quick-action-icon" style="background-color: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Ghi nhận CSKH</div>
+                    <small class="text-muted" style="font-size: 0.72rem;">Lịch sử làm việc</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a asp-controller="Tickets" asp-action="Index" class="quick-action-btn h-100">
+                <div class="quick-action-icon bg-danger-light text-danger">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Sự cố & Ticket</div>
+                    <small class="text-muted" style="font-size: 0.72rem;">Helpdesk IT</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a asp-controller="Task" asp-action="Index" class="quick-action-btn h-100">
+                <div class="quick-action-icon" style="background-color: rgba(236, 72, 153, 0.1); color: #ec4899;">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">Tiến độ & Việc</div>
+                    <small class="text-muted" style="font-size: 0.72rem;">Theo dõi công việc</small>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- TOP KPI STATS ROW -->
 <div class="row g-4 mb-4">
+    <!-- Khách hàng y tế -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="glass-card p-4">
+        <div class="glass-card p-4 h-100">
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="text-muted mb-0 fw-bold text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">Tổng Khách hàng</h6>
+                <h6 class="text-muted mb-0 fw-bold text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Khách hàng Y tế</h6>
                 <div class="stat-icon bg-primary-light">
-                    <i class="fa-solid fa-building"></i>
+                    <i class="fa-solid fa-hospital"></i>
                 </div>
             </div>
-            <h3 class="fw-bold mb-1">@ViewBag.TotalCustomers</h3>
-            <span class="badge bg-success-light"><i class="fa-solid fa-arrow-up me-1"></i>12%</span>
-            <span class="text-muted small ms-1">so với tháng trước</span>
+            <h3 class="fw-bold mb-1 text-dark">@ViewBag.TotalCustomers</h3>
+            <div class="d-flex align-items-center gap-1">
+                <span class="badge bg-success-light"><i class="fa-solid fa-arrow-up me-1"></i>12%</span>
+                <span class="text-muted small">Cơ sở khám chữa bệnh</span>
+            </div>
         </div>
     </div>
     
+    <!-- Dự án đang chạy -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="glass-card p-4">
+        <div class="glass-card p-4 h-100">
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="text-muted mb-0 fw-bold text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">Dự án Đang chạy</h6>
+                <h6 class="text-muted mb-0 fw-bold text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Dự án Triển khai</h6>
                 <div class="stat-icon bg-warning-light">
                     <i class="fa-solid fa-spinner fa-spin-pulse"></i>
                 </div>
             </div>
-            <h3 class="fw-bold mb-1">@ViewBag.ActiveProjects</h3>
-            <span class="badge bg-danger-light"><i class="fa-solid fa-arrow-down me-1"></i>2</span>
-            <span class="text-muted small ms-1">chậm tiến độ</span>
+            <h3 class="fw-bold mb-1 text-dark">@ViewBag.ActiveProjects</h3>
+            <div class="d-flex align-items-center gap-1">
+                <span class="badge bg-primary-light text-primary"><i class="fa-solid fa-code-branch me-1"></i>HIS / LIS / PACS</span>
+                <span class="text-muted small">đang vận hành</span>
+            </div>
         </div>
     </div>
 
+    <!-- Doanh số hợp đồng -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="glass-card p-4">
+        <div class="glass-card p-4 h-100">
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="text-muted mb-0 fw-bold text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">Hợp đồng Mới</h6>
+                <h6 class="text-muted mb-0 fw-bold text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Doanh số Hợp đồng</h6>
                 <div class="stat-icon bg-success-light">
-                    <i class="fa-solid fa-file-signature"></i>
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
                 </div>
             </div>
-            <h3 class="fw-bold mb-1">@ViewBag.TotalContracts</h3>
-            <span class="badge bg-success-light"><i class="fa-solid fa-arrow-up me-1"></i>5%</span>
-            <span class="text-muted small ms-1">so với tháng trước</span>
+            <h3 class="fw-bold mb-1 text-dark">@revenueFormatted</h3>
+            <div class="d-flex align-items-center gap-1">
+                <span class="badge bg-success-light text-success fw-bold">@ViewBag.TotalContracts hợp đồng</span>
+                <span class="text-muted small">tổng tích lũy</span>
+            </div>
         </div>
     </div>
 
+    <!-- AI Engine -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="glass-card p-4">
+        <div class="glass-card p-4 h-100">
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="text-muted mb-0 fw-bold text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">Truy vấn Chatbot</h6>
-                <div class="stat-icon" style="background-color: rgba(236, 72, 153, 0.1); color: var(--secondary-color);">
+                <h6 class="text-muted mb-0 fw-bold text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Trợ lý AI (Gemini)</h6>
+                <div class="stat-icon" style="background-color: rgba(236, 72, 153, 0.1); color: #ec4899;">
                     <i class="fa-solid fa-robot"></i>
                 </div>
             </div>
-            <h3 class="fw-bold mb-1">@ViewBag.ChatbotQueries</h3>
-            <span class="text-muted small">tổng số câu hỏi tháng này</span>
+            <h3 class="fw-bold mb-1 text-dark">@ViewBag.ChatbotQueries</h3>
+            <div class="d-flex align-items-center gap-1">
+                <span class="pulse-dot pulse-success"></span>
+                <span class="text-success small fw-semibold">RAG Engine Sẵn sàng</span>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Charts & Tables Row -->
-<div class="row g-4">
-    <!-- Chart -->
+<!-- SMART ALERTS ROW: EXPIRING CONTRACTS & ATTENTION PROJECTS -->
+<div class="row g-4 mb-4">
+    <!-- Cảnh báo Hợp đồng & Bảo hành sắp hết hạn -->
+    <div class="col-12 col-lg-6">
+        <div class="glass-card p-4 h-100 border-0 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="stat-icon bg-danger-light" style="width: 34px; height: 34px; font-size: 1rem;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </span>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">Cảnh báo Hợp đồng & Bảo hành</h6>
+                        <small class="text-muted">Cần chú ý tái ký hoặc thu công nợ bảo trì</small>
+                    </div>
+                </div>
+                <a asp-controller="Contract" asp-action="Index" class="btn btn-sm btn-link text-primary text-decoration-none fw-medium">
+                    Xem tất cả <i class="fa-solid fa-chevron-right ms-1 small"></i>
+                </a>
+            </div>
+
+            @if (expiringContracts != null && expiringContracts.Any())
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var c in expiringContracts)
+                    {
+                        int daysRemaining = c.ExpireDate.HasValue ? (c.ExpireDate.Value.Date - today).Days : 999;
+                        string badgeClass = daysRemaining < 0 ? "urgent" : (daysRemaining <= 30 ? "urgent" : "warning");
+                        string pulseClass = daysRemaining <= 30 ? "pulse-danger" : "pulse-warning";
+                        string statusText = daysRemaining < 0 ? $"Quá hạn {Math.Abs(daysRemaining)} ngày" : (daysRemaining == 0 ? "Hết hạn hôm nay!" : $"Còn {daysRemaining} ngày");
+
+                        <div class="smart-alert-card p-3 @(daysRemaining <= 30 ? "alert-danger-accent" : "alert-warning-accent")">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="badge-countdown @badgeClass">
+                                            <span class="pulse-dot @pulseClass"></span>@statusText
+                                        </span>
+                                        <span class="badge bg-light text-dark fw-bold border">@(c.ContractNumber ?? "HĐ-N/A")</span>
+                                    </div>
+                                    <h6 class="fw-bold mb-1 text-dark" style="font-size: 0.95rem;">
+                                        @(c.KhachHang?.CompanyName ?? c.ContractName ?? "Khách hàng y tế")
+                                    </h6>
+                                    <div class="text-muted small d-flex flex-wrap align-items-center gap-3">
+                                        <span><i class="fa-regular fa-calendar-xmark me-1 text-danger"></i>Hết hạn: @(c.ExpireDate?.ToString("dd/MM/yyyy") ?? "Chưa rõ")</span>
+                                        @if (c.ContractValue.HasValue)
+                                        {
+                                            <span><i class="fa-solid fa-money-bill-wave me-1 text-success"></i>@((c.ContractValue.Value).ToString("N0")) VNĐ</span>
+                                        }
+                                    </div>
+                                </div>
+                                <a asp-controller="Contract" asp-action="Details" asp-route-id="@c.ContractId" class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-shrink-0">
+                                    Chi tiết
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="fa-solid fa-circle-check text-success fs-1 mb-2"></i>
+                    <p class="mb-0 fw-medium">Không có hợp đồng nào sắp hết hạn trong 60 ngày tới.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Cảnh báo Dự án cần chú ý / Tiến độ triển khai -->
+    <div class="col-12 col-lg-6">
+        <div class="glass-card p-4 h-100 border-0 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="stat-icon bg-warning-light" style="width: 34px; height: 34px; font-size: 1rem;">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </span>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">Tiến độ Dự án Cần Chú Ý</h6>
+                        <small class="text-muted">Theo dõi deadline và tiến độ triển khai thực tế</small>
+                    </div>
+                </div>
+                <a asp-controller="Project" asp-action="Index" class="btn btn-sm btn-link text-primary text-decoration-none fw-medium">
+                    Xem tất cả <i class="fa-solid fa-chevron-right ms-1 small"></i>
+                </a>
+            </div>
+
+            @if (attentionProjects != null && attentionProjects.Any())
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var p in attentionProjects)
+                    {
+                        var latestProgress = p.TienDoDuAns?.OrderByDescending(t => t.UpdateDate).FirstOrDefault()?.ProgressPercent ?? 0;
+                        bool isOverdue = p.Deadline.HasValue && p.Deadline.Value.Date < today && latestProgress < 100;
+                        int daysDiff = p.Deadline.HasValue ? (p.Deadline.Value.Date - today).Days : 999;
+                        
+                        string progressColor = latestProgress >= 80 ? "bg-success" : (latestProgress >= 50 ? "bg-primary" : (latestProgress >= 25 ? "bg-warning" : "bg-danger"));
+
+                        <div class="smart-alert-card p-3 @(isOverdue ? "alert-danger-accent" : "alert-info-accent")">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <div>
+                                    <h6 class="fw-bold mb-1 text-dark" style="font-size: 0.95rem;">
+                                        @p.ProjectName
+                                    </h6>
+                                    <div class="text-muted small">
+                                        <i class="fa-solid fa-hospital me-1 text-primary"></i>@(p.KhachHang?.CompanyName ?? "Chưa gán khách hàng")
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    @if (isOverdue)
+                                    {
+                                        <span class="badge-countdown urgent">
+                                            <span class="pulse-dot pulse-danger"></span>Trễ @Math.Abs(daysDiff) ngày
+                                        </span>
+                                    }
+                                    else if (daysDiff <= 14 && daysDiff >= 0)
+                                    {
+                                        <span class="badge-countdown warning">
+                                            <i class="fa-regular fa-clock me-1"></i>Hạn: @(p.Deadline?.ToString("dd/MM") ?? "N/A")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-secondary border">@(p.TrangThaiDuAn?.StatusName ?? "Đang chạy")</span>
+                                    }
+                                </div>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="d-flex align-items-center gap-2 mt-2">
+                                <div class="progress-custom flex-grow-1">
+                                    <div class="progress-bar @progressColor" role="progressbar" style="width: @latestProgress%;" aria-valuenow="@latestProgress" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <span class="fw-bold small text-dark" style="min-width: 40px; text-align: right;">@latestProgress%</span>
+                                <a asp-controller="Project" asp-action="Details" asp-route-id="@p.ProjectId" class="btn btn-sm btn-light border py-0 px-2 rounded-pill small ms-1" title="Chi tiết">
+                                    <i class="fa-solid fa-arrow-right text-muted"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="fa-solid fa-list-check text-primary fs-1 mb-2"></i>
+                    <p class="mb-0 fw-medium">Tất cả dự án đang hoàn thành đúng tiến độ đề ra.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- CHARTS & ACTIVITIES ROW -->
+<div class="row g-4 mb-4">
+    <!-- Chart: Revenue Trend -->
     <div class="col-12 col-lg-8">
         <div class="glass-card p-4 h-100">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold mb-0">Tiến độ Dự án & Doanh thu</h5>
-                <select class="form-select form-select-sm w-auto border-0 bg-light text-muted fw-medium">
-                    <option>6 Tháng qua</option>
-                    <option>Năm nay</option>
-                </select>
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark">Tiến độ Doanh thu Ký kết</h5>
+                    <small class="text-muted">Biểu đồ giá trị hợp đồng được ký qua các tháng gần nhất (Triệu VNĐ)</small>
+                </div>
+                <span class="badge bg-primary-light text-primary px-3 py-2 rounded-pill">
+                    <i class="fa-solid fa-chart-area me-1"></i> 6 Tháng qua
+                </span>
             </div>
-            <canvas id="revenueChart" height="100"></canvas>
+            <div style="position: relative; min-height: 280px;">
+                <canvas id="revenueChart"></canvas>
+            </div>
         </div>
     </div>
     
-    <!-- Activity Feed -->
+    <!-- Recent System Activities Feed -->
     <div class="col-12 col-lg-4">
         <div class="glass-card p-4 h-100 d-flex flex-column">
-            <h5 class="fw-bold mb-4">Hoạt động gần đây</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-dark">Hoạt động gần đây</h5>
+                <span class="badge bg-light text-muted border">Tự động Audit</span>
+            </div>
             
             @if (ViewBag.RecentActivities != null)
             {
-                foreach (var activity in (List<AI_CRM.Domain.Entities.NhatKyHeThong>)ViewBag.RecentActivities)
-                {
-                    string iconClass = "fa-circle-info text-primary";
-                    string bgClass = "bg-primary-light";
-                    var actionUpper = activity.Action.ToUpper();
-                    if (actionUpper.Contains("THÊM") || actionUpper.Contains("TẠO") || actionUpper.Contains("INSERT")) { iconClass = "fa-plus-circle text-success"; bgClass = "bg-success-light"; }
-                    else if (actionUpper.Contains("SỬA") || actionUpper.Contains("CẬP NHẬT") || actionUpper.Contains("UPDATE")) { iconClass = "fa-pen-to-square text-warning"; bgClass = "bg-warning-light"; }
-                    else if (actionUpper.Contains("XÓA") || actionUpper.Contains("LỖI") || actionUpper.Contains("DELETE")) { iconClass = "fa-triangle-exclamation text-danger"; bgClass = "bg-danger-light"; }
-                    else if (actionUpper.Contains("ĐĂNG NHẬP") || actionUpper.Contains("LOGIN")) { iconClass = "fa-right-to-bracket text-info"; bgClass = "bg-info-light"; }
+                <div class="d-flex flex-column gap-3 my-auto">
+                    @foreach (var activity in (List<AI_CRM.Domain.Entities.NhatKyHeThong>)ViewBag.RecentActivities)
+                    {
+                        string iconClass = "fa-circle-info text-primary";
+                        string bgClass = "bg-primary-light";
+                        var actionUpper = activity.Action.ToUpper();
+                        if (actionUpper.Contains("THÊM") || actionUpper.Contains("TẠO") || actionUpper.Contains("INSERT")) { iconClass = "fa-plus-circle text-success"; bgClass = "bg-success-light"; }
+                        else if (actionUpper.Contains("SỬA") || actionUpper.Contains("CẬP NHẬT") || actionUpper.Contains("UPDATE")) { iconClass = "fa-pen-to-square text-warning"; bgClass = "bg-warning-light"; }
+                        else if (actionUpper.Contains("XÓA") || actionUpper.Contains("LỖI") || actionUpper.Contains("DELETE")) { iconClass = "fa-triangle-exclamation text-danger"; bgClass = "bg-danger-light"; }
+                        else if (actionUpper.Contains("ĐĂNG NHẬP") || actionUpper.Contains("LOGIN")) { iconClass = "fa-right-to-bracket text-info"; bgClass = "bg-info-light"; }
 
-                    // Time formatting
-                    var timeSpan = DateTime.Now - activity.Timestamp;
-                    string timeStr = timeSpan.TotalMinutes < 60 ? $"{(int)timeSpan.TotalMinutes} phút trước" : 
-                                     timeSpan.TotalHours < 24 ? $"{(int)timeSpan.TotalHours} giờ trước" : 
-                                     $"{(int)timeSpan.TotalDays} ngày trước";
+                        var timeSpan = DateTime.Now - activity.Timestamp;
+                        string timeStr = timeSpan.TotalMinutes < 60 ? $"{(int)timeSpan.TotalMinutes} phút trước" : 
+                                         timeSpan.TotalHours < 24 ? $"{(int)timeSpan.TotalHours} giờ trước" : 
+                                         $"{(int)timeSpan.TotalDays} ngày trước";
 
-                    <div class="d-flex gap-3 mb-4">
-                        <div class="stat-icon @bgClass shadow-sm" style="width: 45px; height: 45px; font-size: 1.1rem; flex-shrink: 0;">
-                            <i class="fa-solid @iconClass"></i>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon @bgClass shadow-sm" style="width: 40px; height: 40px; font-size: 1rem; flex-shrink: 0; border-radius: 10px;">
+                                <i class="fa-solid @iconClass"></i>
+                            </div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@activity.Action</h6>
+                                    <small class="text-secondary" style="font-size: 0.72rem;">@timeStr</small>
+                                </div>
+                                <p class="text-muted small mb-0 text-truncate" title="@activity.Details" style="font-size: 0.8rem;">
+                                    @activity.Details
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.95rem;">@activity.Action</h6>
-                            <p class="text-muted small mb-0 text-truncate" style="max-width: 200px;" title="@activity.Details">@activity.Details</p>
-                            <p class="text-secondary mb-0" style="font-size: 0.75rem;">
-                                @(activity.NguoiDung?.Username ?? "Hệ thống") • @timeStr
-                            </p>
-                        </div>
-                    </div>
-                }
+                    }
+                </div>
             }
             
-            <div class="mt-auto pt-3">
-                <a href="@Url.Action("SystemLogs", "Admin")" class="btn btn-light text-primary fw-medium w-100 rounded-pill">Xem tất cả hoạt động</a>
+            <div class="mt-3 pt-3 border-top">
+                <a href="@Url.Action("SystemLogs", "Admin")" class="btn btn-light text-primary fw-medium w-100 rounded-pill py-2 shadow-none border">
+                    <i class="fa-solid fa-list-ul me-1"></i> Xem toàn bộ nhật ký hệ thống
+                </a>
             </div>
         </div>
     </div>
 </div>
-<!-- Additional Charts Row -->
-<div class="row g-4 mt-1">
-    <!-- Chart 1: Doughnut -->
+
+<!-- ADDITIONAL BUSINESS CHARTS ROW -->
+<div class="row g-4">
+    <!-- Chart 1: Project Status Doughnut -->
     <div class="col-12 col-md-4">
         <div class="glass-card p-4 h-100">
-            <h6 class="fw-bold mb-4">Trạng thái Dự án</h6>
-            <div style="position: relative; height: 250px; width: 100%;">
+            <h6 class="fw-bold mb-3 text-dark">
+                <i class="fa-solid fa-chart-pie me-2 text-primary"></i>Trạng thái Dự án
+            </h6>
+            <div style="position: relative; height: 230px; width: 100%;">
                 <canvas id="projectStatusChart"></canvas>
             </div>
         </div>
     </div>
     
-    <!-- Chart 2: Bar -->
+    <!-- Chart 2: Top Contracts Bar -->
     <div class="col-12 col-md-4">
         <div class="glass-card p-4 h-100">
-            <h6 class="fw-bold mb-4">Top Hợp đồng Giá trị cao</h6>
-            <div style="position: relative; height: 250px; width: 100%;">
+            <h6 class="fw-bold mb-3 text-dark">
+                <i class="fa-solid fa-trophy me-2 text-warning"></i>Top Hợp đồng Giá trị cao
+            </h6>
+            <div style="position: relative; height: 230px; width: 100%;">
                 <canvas id="contractValueChart"></canvas>
             </div>
         </div>
     </div>
     
-    <!-- Chart 3: Polar Area -->
+    <!-- Chart 3: Employee Allocation Polar Area -->
     <div class="col-12 col-md-4">
         <div class="glass-card p-4 h-100">
-            <h6 class="fw-bold mb-4">Phân bổ Nhân sự</h6>
-            <div style="position: relative; height: 250px; width: 100%;">
+            <h6 class="fw-bold mb-3 text-dark">
+                <i class="fa-solid fa-users-gear me-2 text-info"></i>Phân bổ Nhân sự Theo Vai trò
+            </h6>
+            <div style="position: relative; height: 230px; width: 100%;">
                 <canvas id="employeeAllocationChart"></canvas>
             </div>
         </div>
@@ -176,7 +481,7 @@
         const employeeLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(((System.Collections.Generic.Dictionary<string, int>)ViewBag.EmployeeAllocationData).Keys));
         const employeeValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(((System.Collections.Generic.Dictionary<string, int>)ViewBag.EmployeeAllocationData).Values));
 
-        // Common Options
+        // Common Chart Options
         const commonOptions = {
             responsive: true,
             maintainAspectRatio: false,
@@ -185,7 +490,7 @@
                     position: 'bottom',
                     labels: {
                         font: { family: "'Inter', sans-serif", size: 12 },
-                        padding: 20
+                        padding: 16
                     }
                 },
                 tooltip: {
@@ -200,21 +505,21 @@
 
         // 1. Line Chart: Revenue
         const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
-        let gradient = ctxRevenue.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.4)');
+        let gradient = ctxRevenue.createLinearGradient(0, 0, 0, 320);
+        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.35)');
         gradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
 
         new Chart(ctxRevenue, {
             type: 'line',
             data: {
-                labels: revenueLabels.reverse(), // reverse to show from oldest to newest
+                labels: revenueLabels.reverse(),
                 datasets: [{
                     label: 'Doanh thu (Triệu VNĐ)',
                     data: revenueValues.reverse(),
                     borderColor: '#4f46e5',
                     backgroundColor: gradient,
                     borderWidth: 3,
-                    tension: 0.4,
+                    tension: 0.35,
                     fill: true,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: '#4f46e5',
@@ -225,6 +530,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
                     tooltip: commonOptions.plugins.tooltip
@@ -254,12 +560,12 @@
                     data: projectStatusValues.length > 0 ? projectStatusValues : [1],
                     backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ef4444', '#8b5cf6'],
                     borderWidth: 0,
-                    hoverOffset: 4
+                    hoverOffset: 6
                 }]
             },
             options: {
                 ...commonOptions,
-                cutout: '70%',
+                cutout: '68%',
             }
         });
 
@@ -272,9 +578,9 @@
                 datasets: [{
                     label: 'Giá trị (Tỷ VNĐ)',
                     data: topContractValues.length > 0 ? topContractValues : [0],
-                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                    borderRadius: 6,
-                    barThickness: 25
+                    backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                    borderRadius: 8,
+                    barThickness: 22
                 }]
             },
             options: {
@@ -306,11 +612,11 @@
                 datasets: [{
                     data: employeeValues.length > 0 ? employeeValues : [1],
                     backgroundColor: [
-                        'rgba(99, 102, 241, 0.7)',
-                        'rgba(236, 72, 153, 0.7)',
-                        'rgba(16, 185, 129, 0.7)',
-                        'rgba(245, 158, 11, 0.7)',
-                        'rgba(59, 130, 246, 0.7)'
+                        'rgba(99, 102, 241, 0.75)',
+                        'rgba(236, 72, 153, 0.75)',
+                        'rgba(16, 185, 129, 0.75)',
+                        'rgba(245, 158, 11, 0.75)',
+                        'rgba(59, 130, 246, 0.75)'
                     ],
                     borderWidth: 2,
                     borderColor: '#fff'

@@ -1,0 +1,318 @@
+@model AI_CRM.WebMvc.Models.PaginatedList<AI_CRM.Domain.Entities.Ticket>
+@using AI_CRM.Domain.Entities
+@{
+    ViewData["Title"] = "Quản lý Sự cố & Ticket (Helpdesk)";
+    var currentStatus = ViewBag.CurrentStatus as TicketStatus?;
+    var currentPriority = ViewBag.CurrentPriority as TicketPriority?;
+}
+
+<!-- Alert Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- Page Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold mb-1 text-dark">
+            <i class="fa-solid fa-headset text-primary me-2"></i>Quản lý Sự cố & Ticket Hỗ trợ (IT Helpdesk)
+        </h3>
+        <p class="text-muted small mb-0">
+            Tiếp nhận báo lỗi phần mềm (HIS, LIS, PACS), phân công kỹ sư xử lý và giám sát cam kết thời gian dịch vụ (SLA).
+        </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-medium d-flex align-items-center gap-2">
+            <i class="fa-solid fa-plus"></i> Tạo Ticket Mới
+        </a>
+    </div>
+</div>
+
+<!-- KPI Mini Stats Strip -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="glass-card p-3 border-0 shadow-sm d-flex align-items-center gap-3">
+            <div class="stat-icon bg-primary-light" style="width: 44px; height: 44px; border-radius: 10px; font-size: 1.15rem;">
+                <i class="fa-solid fa-ticket"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-dark fs-5">@ViewBag.TotalTickets</div>
+                <small class="text-muted">Tổng số sự cố</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="glass-card p-3 border-0 shadow-sm d-flex align-items-center gap-3">
+            <div class="stat-icon bg-info-light" style="width: 44px; height: 44px; border-radius: 10px; font-size: 1.15rem; background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-dark fs-5">@ViewBag.NewCount</div>
+                <small class="text-muted">Mới tiếp nhận</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="glass-card p-3 border-0 shadow-sm d-flex align-items-center gap-3">
+            <div class="stat-icon bg-warning-light" style="width: 44px; height: 44px; border-radius: 10px; font-size: 1.15rem;">
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-dark fs-5">@ViewBag.InProgressCount</div>
+                <small class="text-muted">Đang xử lý</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="glass-card p-3 border-0 shadow-sm d-flex align-items-center gap-3">
+            <div class="stat-icon bg-danger-light" style="width: 44px; height: 44px; border-radius: 10px; font-size: 1.15rem;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-danger fs-5">@ViewBag.CriticalCount</div>
+                <small class="text-muted">Sự cố khẩn cấp</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="glass-card p-4 mb-4 border-0 shadow-sm rounded-4">
+    <form asp-action="Index" method="get">
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-md-4">
+                <div class="input-group bg-light rounded-pill overflow-hidden border">
+                    <span class="input-group-text bg-transparent border-0 pe-1 text-muted">
+                        <i class="fa-solid fa-search"></i>
+                    </span>
+                    <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control border-0 bg-transparent shadow-none" placeholder="Tìm kiếm theo tiêu đề, bệnh viện, kỹ sư...">
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="status" class="form-select rounded-pill border text-muted">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="@TicketStatus.New" selected="@(currentStatus == TicketStatus.New)">Mới tiếp nhận (New)</option>
+                    <option value="@TicketStatus.InProgress" selected="@(currentStatus == TicketStatus.InProgress)">Đang xử lý (In Progress)</option>
+                    <option value="@TicketStatus.Resolved" selected="@(currentStatus == TicketStatus.Resolved)">Đã giải quyết (Resolved)</option>
+                    <option value="@TicketStatus.Closed" selected="@(currentStatus == TicketStatus.Closed)">Đã đóng (Closed)</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="priority" class="form-select rounded-pill border text-muted">
+                    <option value="">-- Tất cả mức độ --</option>
+                    <option value="@TicketPriority.Critical" selected="@(currentPriority == TicketPriority.Critical)">Khẩn cấp (Critical - 4h)</option>
+                    <option value="@TicketPriority.High" selected="@(currentPriority == TicketPriority.High)">Mức cao (High - 12h)</option>
+                    <option value="@TicketPriority.Medium" selected="@(currentPriority == TicketPriority.Medium)">Trung bình (Medium - 24h)</option>
+                    <option value="@TicketPriority.Low" selected="@(currentPriority == TicketPriority.Low)">Thấp (Low - 48h)</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary rounded-pill px-3 w-100 fw-medium">
+                    <i class="fa-solid fa-filter me-1"></i> Lọc
+                </button>
+                <a asp-action="Index" class="btn btn-light rounded-pill px-3 border" title="Đặt lại">
+                    <i class="fa-solid fa-rotate-right text-muted"></i>
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Tickets Table Card -->
+<div class="glass-card overflow-hidden border-0 shadow-sm rounded-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-muted" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                <tr>
+                    <th class="ps-4 py-3 fw-bold border-bottom-0">Mã</th>
+                    <th class="py-3 fw-bold border-bottom-0">Tiêu đề sự cố & Bệnh viện</th>
+                    <th class="py-3 fw-bold border-bottom-0">Mức độ (Priority)</th>
+                    <th class="py-3 fw-bold border-bottom-0">Trạng thái (Status)</th>
+                    <th class="py-3 fw-bold border-bottom-0">Kỹ thuật viên phụ trách</th>
+                    <th class="py-3 fw-bold border-bottom-0">Hạn SLA</th>
+                    <th class="text-end pe-4 py-3 fw-bold border-bottom-0">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var ticket in Model)
+                    {
+                        var now = DateTime.Now;
+                        bool isResolved = ticket.Status == TicketStatus.Resolved || ticket.Status == TicketStatus.Closed;
+                        bool isSlaBreached = !isResolved && ticket.SlaDeadline.HasValue && now > ticket.SlaDeadline.Value;
+
+                        <tr>
+                            <td class="ps-4 py-3 fw-bold text-primary">
+                                #TK-@ticket.Id.ToString("D4")
+                            </td>
+                            <td class="py-3" style="max-width: 320px;">
+                                <div class="fw-bold text-dark text-truncate" title="@ticket.Title">
+                                    <a asp-action="Details" asp-route-id="@ticket.Id" class="text-decoration-none text-dark hover-primary">
+                                        @ticket.Title
+                                    </a>
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fa-solid fa-hospital text-primary me-1"></i>@(ticket.Customer?.CompanyName ?? "Khách hàng y tế")
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                @switch (ticket.Priority)
+                                {
+                                    case TicketPriority.Critical:
+                                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #fee2e2; color: #b91c1c;">
+                                            <span class="pulse-dot pulse-danger"></span>Khẩn cấp (4h)
+                                        </span>
+                                        break;
+                                    case TicketPriority.High:
+                                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #ffedd5; color: #c2410c;">
+                                            <i class="fa-solid fa-angles-up me-1"></i>Mức cao (12h)
+                                        </span>
+                                        break;
+                                    case TicketPriority.Medium:
+                                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #fef3c7; color: #b45309;">
+                                            <i class="fa-solid fa-equals me-1"></i>Trung bình (24h)
+                                        </span>
+                                        break;
+                                    case TicketPriority.Low:
+                                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #ecfdf5; color: #047857;">
+                                            <i class="fa-solid fa-arrow-down me-1"></i>Thấp (48h)
+                                        </span>
+                                        break;
+                                }
+                            </td>
+                            <td class="py-3">
+                                @switch (ticket.Status)
+                                {
+                                    case TicketStatus.New:
+                                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #e0f2fe; color: #0369a1;">
+                                            <i class="fa-solid fa-bell me-1"></i>Mới tạo
+                                        </span>
+                                        break;
+                                    case TicketStatus.InProgress:
+                                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #fef9c3; color: #a16207;">
+                                            <i class="fa-solid fa-spinner fa-spin me-1"></i>Đang xử lý
+                                        </span>
+                                        break;
+                                    case TicketStatus.Resolved:
+                                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background: #dcfce7; color: #15803d;">
+                                            <i class="fa-solid fa-check me-1"></i>Đã xử lý
+                                        </span>
+                                        break;
+                                    case TicketStatus.Closed:
+                                        <span class="badge rounded-pill px-3 py-2 fw-semibold bg-light text-muted border">
+                                            <i class="fa-solid fa-lock me-1"></i>Đã đóng
+                                        </span>
+                                        break;
+                                }
+                            </td>
+                            <td class="py-3">
+                                @if (ticket.AssignedToEmployee != null)
+                                {
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar bg-primary-light text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-weight: 600; font-size: 0.85rem;">
+                                            @(ticket.AssignedToEmployee.FullName.Substring(0, 1))
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-dark small">@ticket.AssignedToEmployee.FullName</div>
+                                            <small class="text-muted" style="font-size: 0.72rem;">@ticket.AssignedToEmployee.Position</small>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-light text-danger border">
+                                        <i class="fa-solid fa-user-plus me-1"></i>Chưa gán kỹ sư
+                                    </span>
+                                }
+                            </td>
+                            <td class="py-3 small">
+                                @if (ticket.SlaDeadline.HasValue)
+                                {
+                                    if (isResolved)
+                                    {
+                                        <span class="text-success"><i class="fa-solid fa-circle-check me-1"></i>Đạt SLA</span>
+                                    }
+                                    else if (isSlaBreached)
+                                    {
+                                        <span class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i>Quá hạn</span>
+                                    }
+                                    else
+                                    {
+                                        var remain = ticket.SlaDeadline.Value - now;
+                                        <span class="text-dark fw-medium"><i class="fa-regular fa-clock me-1 text-primary"></i>Còn @((int)remain.TotalHours)h @remain.Minutes m</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4 py-3">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a asp-action="Details" asp-route-id="@ticket.Id" class="btn btn-sm btn-light text-primary border rounded-3 px-2 py-1" title="Xem chi tiết & bình luận">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@ticket.Id" class="btn btn-sm btn-light text-warning border rounded-3 px-2 py-1" title="Sửa thông tin">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                    {
+                                        <form asp-action="Delete" asp-route-id="@ticket.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa ticket sự cố này?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-light text-danger border rounded-3 px-2 py-1" title="Xóa">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-clipboard-check fs-1 mb-3 opacity-50"></i>
+                            <p class="mb-0 fs-5">Hiện không có Ticket sự cố nào cần xử lý.</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model != null && Model.TotalPages > 1)
+    {
+        <div class="p-3 border-top d-flex justify-content-between align-items-center">
+            <span class="small text-muted">Hiển thị trang @Model.PageIndex / @Model.TotalPages (Tổng số @Model.TotalCount ticket)</span>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                    <a class="page-link rounded-pill px-3 me-1" asp-action="Index" asp-route-page="@(Model.PageIndex - 1)" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-status="@ViewBag.CurrentStatus" asp-route-priority="@ViewBag.CurrentPriority">Trước</a>
+                </li>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        <a class="page-link rounded-circle mx-1 text-center" style="width: 32px; height: 32px; padding: 5px 0;" asp-action="Index" asp-route-page="@i" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-status="@ViewBag.CurrentStatus" asp-route-priority="@ViewBag.CurrentPriority">@i</a>
+                    </li>
+                }
+                <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                    <a class="page-link rounded-pill px-3 ms-1" asp-action="Index" asp-route-page="@(Model.PageIndex + 1)" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-status="@ViewBag.CurrentStatus" asp-route-priority="@ViewBag.CurrentPriority">Sau</a>
+                </li>
+            </ul>
+        </div>
+    }
+</div>

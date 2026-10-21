@@ -26,6 +26,8 @@ namespace AI_CRM.Domain.Entities
         public ICollection<NhanVienPhuTrach> NhanVienPhuTrachs { get; set; } = new List<NhanVienPhuTrach>();
         public ICollection<LichSuHoiDap> LichSuHoiDaps { get; set; } = new List<LichSuHoiDap>();
         public ICollection<NhatKyHeThong> NhatKyHeThongs { get; set; } = new List<NhatKyHeThong>();
+        public ICollection<Ticket> CreatedTickets { get; set; } = new List<Ticket>();
+        public ICollection<TicketComment> TicketComments { get; set; } = new List<TicketComment>();
     }
 
     public class KhachHang
@@ -63,6 +65,7 @@ namespace AI_CRM.Domain.Entities
         public ICollection<HopDong> HopDongs { get; set; } = new List<HopDong>();
         public ICollection<DuAn> DuAns { get; set; } = new List<DuAn>();
         public ICollection<LichSuLamViec> LichSuLamViecs { get; set; } = new List<LichSuLamViec>();
+        public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
     }
 
     public class TrangThaiHopDong
@@ -140,6 +143,7 @@ namespace AI_CRM.Domain.Entities
         public ICollection<TienDoDuAn> TienDoDuAns { get; set; } = new List<TienDoDuAn>();
         public ICollection<LichSuLamViec> LichSuLamViecs { get; set; } = new List<LichSuLamViec>();
         public ICollection<TaiLieuNoiBo> TaiLieuNoiBos { get; set; } = new List<TaiLieuNoiBo>();
+        public ICollection<Ticket> AssignedTickets { get; set; } = new List<Ticket>();
     }
 
     public class DuAnNhanVien

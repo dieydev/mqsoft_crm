@@ -27,6 +27,8 @@ builder.Services.AddScoped<AI_CRM.Application.Interfaces.IAdminService, AI_CRM.I
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.IAuthService, AI_CRM.Infrastructure.Services.AuthService>();
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.IEmployeeService, AI_CRM.Infrastructure.Services.EmployeeService>();
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.IReportService, AI_CRM.Infrastructure.Services.ReportService>();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.ITicketRepository, AI_CRM.Infrastructure.Repositories.TicketRepository>();
+builder.Services.AddScoped<AI_CRM.Application.Interfaces.ITicketService, AI_CRM.Infrastructure.Services.TicketService>();
 
 // Cấu hình giới hạn file upload tối đa lên 50MB (mặc định của Kestrel chỉ là 28.6MB)
 builder.WebHost.ConfigureKestrel(options =>

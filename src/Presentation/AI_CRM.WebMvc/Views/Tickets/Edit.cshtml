@@ -1,0 +1,95 @@
+@model AI_CRM.Domain.Entities.Ticket
+@using AI_CRM.Domain.Entities
+@{
+    ViewData["Title"] = "Cập nhật Ticket #" + Model.Id;
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1 text-dark">
+                    <i class="fa-solid fa-pen-to-square text-warning me-2"></i>Cập nhật Ticket #TK-@Model.Id.ToString("D4")
+                </h3>
+                <p class="text-muted small mb-0">Chỉnh sửa thông tin sự cố, người phụ trách và trạng thái xử lý.</p>
+            </div>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-light rounded-pill px-3 border shadow-sm text-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại Chi tiết
+            </a>
+        </div>
+
+        <div class="glass-card p-4 border-0 shadow-sm rounded-4 bg-white">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedAt" />
+                <input type="hidden" asp-for="CreatedByUserId" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- Tiêu đề -->
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label fw-bold text-dark">Tiêu đề sự cố <span class="text-danger">*</span></label>
+                    <input asp-for="Title" class="form-control py-2 shadow-none" required />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <!-- Cơ sở y tế -->
+                    <div class="col-12 col-md-6">
+                        <label asp-for="CustomerId" class="form-label fw-bold text-dark">Bệnh viện / Cơ sở y tế <span class="text-danger">*</span></label>
+                        <select asp-for="CustomerId" class="form-select py-2 shadow-none" asp-items="ViewBag.CustomerId" required></select>
+                        <span asp-validation-for="CustomerId" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Mức độ ưu tiên -->
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Priority" class="form-label fw-bold text-dark">Mức độ ưu tiên & SLA <span class="text-danger">*</span></label>
+                        <select asp-for="Priority" class="form-select py-2 shadow-none" required>
+                            <option value="@TicketPriority.Critical" selected="@(Model.Priority == TicketPriority.Critical)">🔴 Khẩn cấp - Critical (4h)</option>
+                            <option value="@TicketPriority.High" selected="@(Model.Priority == TicketPriority.High)">🟠 Mức cao - High (12h)</option>
+                            <option value="@TicketPriority.Medium" selected="@(Model.Priority == TicketPriority.Medium)">🟡 Trung bình - Medium (24h)</option>
+                            <option value="@TicketPriority.Low" selected="@(Model.Priority == TicketPriority.Low)">🟢 Mức thấp - Low (48h)</option>
+                        </select>
+                        <span asp-validation-for="Priority" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <!-- Trạng thái -->
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Status" class="form-label fw-bold text-dark">Trạng thái xử lý <span class="text-danger">*</span></label>
+                        <select asp-for="Status" class="form-select py-2 shadow-none" required>
+                            <option value="@TicketStatus.New" selected="@(Model.Status == TicketStatus.New)">Mới tiếp nhận (New)</option>
+                            <option value="@TicketStatus.InProgress" selected="@(Model.Status == TicketStatus.InProgress)">Đang xử lý (In Progress)</option>
+                            <option value="@TicketStatus.Resolved" selected="@(Model.Status == TicketStatus.Resolved)">Đã giải quyết (Resolved)</option>
+                            <option value="@TicketStatus.Closed" selected="@(Model.Status == TicketStatus.Closed)">Đã đóng (Closed)</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Kỹ thuật viên phụ trách -->
+                    <div class="col-12 col-md-6">
+                        <label asp-for="AssignedToEmployeeId" class="form-label fw-bold text-dark">Kỹ thuật viên phụ trách</label>
+                        <select asp-for="AssignedToEmployeeId" class="form-select py-2 shadow-none" asp-items="ViewBag.AssignedToEmployeeId">
+                            <option value="">-- Chưa gán kỹ sư --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Mô tả chi tiết -->
+                <div class="mb-4">
+                    <label asp-for="Description" class="form-label fw-bold text-dark">Mô tả sự cố & Giải pháp <span class="text-danger">*</span></label>
+                    <textarea asp-for="Description" class="form-control shadow-none" rows="5" required></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-light rounded-pill px-4 border">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-warning rounded-pill px-5 shadow-sm fw-medium text-dark">
+                        <i class="fa-solid fa-save me-2"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

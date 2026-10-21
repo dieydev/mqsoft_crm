@@ -80,6 +80,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<LichSuHoiDap> LichSuHoiDaps { get; set; }
     public DbSet<DanhGiaCauTraLoi> DanhGiaCauTraLois { get; set; }
     public DbSet<NhatKyHeThong> NhatKyHeThongs { get; set; }
+    public DbSet<Ticket> Tickets { get; set; }
+    public DbSet<TicketComment> TicketComments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -103,6 +105,8 @@ public class ApplicationDbContext : DbContext
         builder.Entity<LichSuHoiDap>().ToTable("LichSuHoiDap");
         builder.Entity<DanhGiaCauTraLoi>().ToTable("DanhGiaCauTraLoi");
         builder.Entity<NhatKyHeThong>().ToTable("NhatKyHeThong");
+        builder.Entity<Ticket>().ToTable("Ticket");
+        builder.Entity<TicketComment>().ToTable("TicketComment");
 
         // NguoiDung -> VaiTro
         builder.Entity<NguoiDung>()
@@ -267,5 +271,39 @@ public class ApplicationDbContext : DbContext
         builder.Entity<DuAn>().HasKey(d => d.ProjectId);
         builder.Entity<NhanVienPhuTrach>().HasKey(n => n.EmployeeId);
         builder.Entity<NhomTaiLieu>().HasKey(n => n.CategoryId);
+
+        // Ticket & TicketComment
+        builder.Entity<Ticket>().HasKey(t => t.Id);
+        builder.Entity<TicketComment>().HasKey(tc => tc.Id);
+
+        builder.Entity<Ticket>()
+            .HasOne(t => t.Customer)
+            .WithMany(k => k.Tickets)
+            .HasForeignKey(t => t.CustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Ticket>()
+            .HasOne(t => t.CreatedByUser)
+            .WithMany(u => u.CreatedTickets)
+            .HasForeignKey(t => t.CreatedByUserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.Entity<Ticket>()
+            .HasOne(t => t.AssignedToEmployee)
+            .WithMany(e => e.AssignedTickets)
+            .HasForeignKey(t => t.AssignedToEmployeeId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.Entity<TicketComment>()
+            .HasOne(tc => tc.Ticket)
+            .WithMany(t => t.Comments)
+            .HasForeignKey(tc => tc.TicketId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<TicketComment>()
+            .HasOne(tc => tc.User)
+            .WithMany(u => u.TicketComments)
+            .HasForeignKey(tc => tc.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

@@ -17,39 +17,59 @@
 </head>
 <body>
     <!-- Sidebar -->
-    <nav class="sidebar shadow-lg">
-        <div class="sidebar-header text-center py-4">
-            <img src="~/images/logo.png" alt="MQ Soft Logo" class="img-fluid" style="max-height: 100px;" />
+    <nav class="sidebar shadow-sm">
+        <div class="sidebar-header text-center py-3">
+            <a asp-controller="Admin" asp-action="Index" class="d-inline-block text-decoration-none">
+                <img src="~/images/logo.png" alt="MQ Soft Logo" class="img-fluid" style="max-height: 55px;" />
+            </a>
         </div>
-        <ul class="nav flex-column">
+        <ul class="nav flex-column mb-3">
+            <!-- TỔNG QUAN -->
+            <li class="sidebar-category">Tổng quan & Báo cáo</li>
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" ? "active" : "")" asp-controller="Admin" asp-action="Index">
-                    <i class="fa-solid fa-chart-pie w-20px"></i> Tổng quan
+                    <i class="fa-solid fa-chart-pie w-20px"></i> Bảng điều khiển
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Report" ? "active" : "")" asp-controller="Report" asp-action="Index">
+                    <i class="fa-solid fa-file-invoice w-20px"></i> Trung tâm Báo cáo
+                </a>
+            </li>
+
+            <!-- NGHIỆP VỤ Y TẾ -->
+            <li class="sidebar-category mt-2">Nghiệp vụ Y tế</li>
+            <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Customer" ? "active" : "")" asp-controller="Customer" asp-action="Index">
-                    <i class="fa-solid fa-building w-20px"></i> Khách hàng
+                    <i class="fa-solid fa-hospital-user w-20px"></i> Khách hàng (CSKCB)
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Contract" ? "active" : "")" asp-controller="Contract" asp-action="Index">
-                    <i class="fa-solid fa-file-contract w-20px"></i> Hợp đồng
+                    <i class="fa-solid fa-file-contract w-20px"></i> Hợp đồng y tế
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Project" ? "active" : "")" asp-controller="Project" asp-action="Index">
-                    <i class="fa-solid fa-project-diagram w-20px"></i> Dự án phần mềm
+                    <i class="fa-solid fa-laptop-medical w-20px"></i> Dự án phần mềm
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Task" ? "active" : "")" asp-controller="Task" asp-action="Index">
-                    <i class="fa-solid fa-tasks w-20px"></i> Tiến độ dự án
+                    <i class="fa-solid fa-list-check w-20px"></i> Tiến độ & Việc
+                </a>
+            </li>
+
+            <!-- VẬN HÀNH & HỖ TRỢ -->
+            <li class="sidebar-category mt-2">Vận hành & Hỗ trợ</li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Tickets" ? "active" : "")" asp-controller="Tickets" asp-action="Index">
+                    <i class="fa-solid fa-ticket-simple w-20px text-danger"></i> Sự cố & Ticket (Helpdesk)
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Interaction" ? "active" : "")" asp-controller="Interaction" asp-action="Index">
-                    <i class="fa-solid fa-headset w-20px"></i> CSKH
+                    <i class="fa-solid fa-headset w-20px"></i> CSKH & Nhật ký
                 </a>
             </li>
             <li class="nav-item">
@@ -58,23 +78,24 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Report" ? "active" : "")" asp-controller="Report" asp-action="Index">
-                    <i class="fa-solid fa-chart-line w-20px"></i> Báo cáo
-                </a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Employee" ? "active" : "")" asp-controller="Employee" asp-action="Index">
                     <i class="fa-solid fa-users-gear w-20px"></i> Nhân sự dự án
                 </a>
             </li>
+
+            <!-- HỆ THỐNG & AI -->
+            <li class="sidebar-category mt-2">Hệ thống & Trí tuệ AI</li>
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "User" ? "active" : "")" asp-controller="User" asp-action="Index">
-                    <i class="fa-solid fa-users w-20px"></i> Người dùng
+                    <i class="fa-solid fa-user-shield w-20px"></i> Tài khoản & Quyền
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Chatbot" ? "active" : "")" asp-controller="Chatbot" asp-action="Index">
-                    <i class="fa-solid fa-robot w-20px"></i> Trợ lý AI
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Chatbot" ? "active" : "") d-flex justify-content-between align-items-center" asp-controller="Chatbot" asp-action="Index">
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-robot w-20px text-danger"></i> Trợ lý AI
+                    </span>
+                    <span class="badge rounded-pill text-white" style="background: linear-gradient(135deg, #6366f1, #ec4899); font-size: 0.65rem; padding: 3px 8px;">Gemini</span>
                 </a>
             </li>
         </ul>

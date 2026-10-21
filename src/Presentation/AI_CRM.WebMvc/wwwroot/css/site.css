@@ -34,48 +34,69 @@ body {
     left: 0;
     background-color: var(--sidebar-bg);
     color: var(--sidebar-text);
-    padding-top: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 2rem;
     transition: all 0.3s ease;
     z-index: 1000;
     overflow-y: auto;
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .sidebar-header {
-    padding: 1rem 1.5rem;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--sidebar-text);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 2rem;
+    padding: 1rem 1.25rem 0.75rem 1.25rem;
+    margin-bottom: 0.5rem;
 }
 
-.sidebar-header i {
-    color: var(--primary-color);
+.sidebar-category {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    padding: 0.85rem 1.25rem 0.35rem 1.25rem;
 }
 
 .nav-item {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.15rem;
 }
 
 .nav-link {
     color: var(--sidebar-text);
-    padding: 0.75rem 1.5rem;
+    padding: 0.6rem 1rem;
+    margin: 0 0.85rem;
     display: flex;
     align-items: center;
     gap: 12px;
     font-weight: 500;
-    border-radius: 0 25px 25px 0;
-    margin-right: 1.5rem;
-    transition: all 0.2s;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
 }
 
-.nav-link:hover,
-.nav-link.active {
-    background-color: var(--primary-color);
-    color: #fff;
+.nav-link:hover {
+    background-color: rgba(79, 70, 229, 0.06);
+    color: var(--primary-color);
+    transform: translateX(3px);
 }
+
+.nav-link.active {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(99, 102, 241, 0.06));
+    color: var(--primary-color) !important;
+    font-weight: 600;
+    border-left-color: var(--primary-color);
+}
+
+.nav-link i {
+    font-size: 1rem;
+    opacity: 0.85;
+}
+
+.nav-link.active i {
+    opacity: 1;
+    color: var(--primary-color);
+}
+
 
 /* Main Content */
 .main-content {
@@ -98,11 +119,15 @@ body.sidebar-collapsed .main-content {
 .topbar {
     height: 70px;
     background-color: var(--surface-color);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 99;
 }
 
 .user-profile img {
@@ -251,4 +276,182 @@ body.sidebar-collapsed .main-content {
 [data-bs-theme="dark"] .btn-outline-secondary:hover {
     background-color: rgba(255, 255, 255, 0.2) !important;
     color: #fff !important;
+}
+
+/* --- DASHBOARD UPGRADES: Quick Actions, Smart Alerts, & KPI Cards --- */
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    background: var(--surface-color);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.quick-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+    color: var(--primary-color);
+    border-color: rgba(79, 70, 229, 0.3);
+}
+
+.quick-action-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.smart-alert-card {
+    background: var(--surface-color);
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+    position: relative;
+    transition: all 0.25s ease;
+}
+
+.smart-alert-card:hover {
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.07);
+    transform: translateY(-3px);
+}
+
+.smart-alert-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 5px;
+}
+
+.smart-alert-card.alert-danger-accent::before {
+    background: linear-gradient(180deg, #ef4444, #dc2626);
+}
+
+.smart-alert-card.alert-warning-accent::before {
+    background: linear-gradient(180deg, #f59e0b, #d97706);
+}
+
+.smart-alert-card.alert-info-accent::before {
+    background: linear-gradient(180deg, #3b82f6, #2563eb);
+}
+
+.smart-alert-card.alert-success-accent::before {
+    background: linear-gradient(180deg, #10b981, #059669);
+}
+
+.badge-countdown {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border-radius: 20px;
+    letter-spacing: 0.2px;
+}
+
+.badge-countdown.urgent {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.badge-countdown.warning {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.badge-countdown.normal {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.badge-countdown.success {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.pulse-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulseGlow 2s infinite;
+}
+
+.pulse-dot.pulse-danger {
+    background-color: #ef4444;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+}
+
+.pulse-dot.pulse-warning {
+    background-color: #f59e0b;
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+}
+
+.pulse-dot.pulse-success {
+    background-color: #10b981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+}
+
+@keyframes pulseGlow {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.progress-custom {
+    height: 7px;
+    border-radius: 10px;
+    background-color: #e2e8f0;
+    overflow: hidden;
+}
+
+.progress-custom .progress-bar {
+    border-radius: 10px;
+    transition: width 0.6s ease;
+}
+
+[data-bs-theme="dark"] .quick-action-btn {
+    background: var(--surface-color);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+
+[data-bs-theme="dark"] .smart-alert-card {
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-bs-theme="dark"] .badge-countdown.urgent {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
+[data-bs-theme="dark"] .badge-countdown.warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+}
+
+[data-bs-theme="dark"] .progress-custom {
+    background-color: #334155;
 }
