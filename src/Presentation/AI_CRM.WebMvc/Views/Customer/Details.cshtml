@@ -6,6 +6,9 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h3 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-address-card me-2 text-primary"></i>Hồ sơ Khách hàng</h3>
     <div>
+        <button id="btnAiSummary" class="btn text-white rounded-pill px-4 shadow-sm fw-medium me-2" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+            <i class="fa-solid fa-wand-magic-sparkles me-2"></i> AI Phân tích hồ sơ
+        </button>
         <a asp-action="Edit" asp-route-id="@Model?.CustomerId" class="btn btn-warning rounded-pill px-4 shadow-sm fw-medium me-2">
             <i class="fa-solid fa-pen me-2"></i> Sửa
         </a>
@@ -97,6 +100,23 @@
             </div>
         </div>
 
+        <div class="glass-card p-4 border-0 shadow-sm rounded-4 bg-white mb-4" id="aiSummaryCard" style="display: none; border-left: 4px solid #6366f1 !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-indigo d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-brain text-primary"></i> Đánh giá & Khuyến nghị Chiến lược (AI Assistant)
+                </h5>
+                <span class="badge text-white" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">Gemini Pro</span>
+            </div>
+            <div id="aiSummaryLoading" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang phân tích...</span>
+                </div>
+                <p class="text-muted mt-2 mb-0">AI đang phân tích dữ liệu CSKCB, hợp đồng và tiến độ dự án...</p>
+            </div>
+            <div id="aiSummaryContent" class="text-dark line-height-lg" style="display: none; white-space: pre-wrap; font-size: 0.95rem;">
+            </div>
+        </div>
+
         <div class="glass-card p-4 border-0 shadow-sm rounded-4 bg-white">
             <h5 class="fw-bold mb-3">Ghi chú khách hàng</h5>
             <div class="bg-light p-3 rounded-3 border">
@@ -112,3 +132,43 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.getElementById('btnAiSummary')?.addEventListener('click', async function () {
+            const card = document.getElementById('aiSummaryCard');
+            const loading = document.getElementById('aiSummaryLoading');
+            const content = document.getElementById('aiSummaryContent');
+            
+            card.style.display = 'block';
+            loading.style.display = 'block';
+            content.style.display = 'none';
+
+            card.scrollIntoView({ behavior: 'smooth' });
+
+            try {
+                const response = await fetch('@Url.Action("GetAiSummary", "Customer")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=@Model?.CustomerId`
+                });
+
+                const data = await response.json();
+                loading.style.display = 'none';
+                content.style.display = 'block';
+
+                if (data.success) {
+                    content.innerText = data.summary;
+                } else {
+                    content.innerHTML = `<div class="alert alert-danger mb-0">${data.message || 'Không thể tạo tóm tắt AI.'}</div>`;
+                }
+            } catch (err) {
+                loading.style.display = 'none';
+                content.style.display = 'block';
+                content.innerHTML = `<div class="alert alert-danger mb-0">Lỗi kết nối tới máy chủ AI: ${err.message}</div>`;
+            }
+        });
+    </script>
+}

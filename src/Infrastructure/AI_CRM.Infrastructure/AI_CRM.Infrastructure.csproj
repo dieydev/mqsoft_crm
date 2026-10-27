@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\AI_CRM.Application\AI_CRM.Application.csproj" />
     <ProjectReference Include="..\..\Core\AI_CRM.Domain\AI_CRM.Domain.csproj" />
+    <ProjectReference Include="..\AI_CRM.AI\AI_CRM.AI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

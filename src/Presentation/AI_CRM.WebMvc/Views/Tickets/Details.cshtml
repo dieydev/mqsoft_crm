@@ -34,6 +34,9 @@
         <h3 class="fw-bold mb-0 text-dark">@Model.Title</h3>
     </div>
     <div class="d-flex align-items-center gap-2">
+        <button id="btnAiDiagnosis" class="btn text-white rounded-pill px-3 shadow-sm fw-medium" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+            <i class="fa-solid fa-wand-magic-sparkles me-1"></i> AI Chẩn đoán & Gợi ý
+        </button>
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-warning rounded-pill px-3 shadow-sm fw-medium">
             <i class="fa-solid fa-pen me-1"></i> Sửa Ticket
         </a>
@@ -52,6 +55,24 @@
                 <i class="fa-solid fa-circle-info text-primary"></i> Hiện trạng & Triệu chứng sự cố
             </h5>
             <div class="p-3 rounded-3 bg-light border text-dark" style="white-space: pre-wrap; line-height: 1.6;">@Model.Description</div>
+        </div>
+
+        <!-- AI Assistant: Chẩn đoán & Gợi ý giải pháp -->
+        <div class="glass-card p-4 border-0 shadow-sm rounded-4 bg-white mb-4" id="aiDiagnosisCard" style="display: none; border-left: 4px solid #6366f1 !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-indigo d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-microchip text-primary"></i> Trợ lý Kỹ thuật Y tế AI (Chẩn đoán & Giải pháp)
+                </h5>
+                <span class="badge text-white" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">HealthTech AI</span>
+            </div>
+            <div id="aiDiagnosisLoading" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang phân tích...</span>
+                </div>
+                <p class="text-muted mt-2 mb-0">AI đang tra cứu tài liệu kỹ thuật và xây dựng quy trình khắc phục sự cố...</p>
+            </div>
+            <div id="aiDiagnosisContent" class="text-dark line-height-lg" style="display: none; white-space: pre-wrap; font-size: 0.95rem;">
+            </div>
         </div>
 
         <!-- 2. Lịch sử trao đổi / Nhật ký xử lý -->
@@ -253,3 +274,43 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.getElementById('btnAiDiagnosis')?.addEventListener('click', async function () {
+            const card = document.getElementById('aiDiagnosisCard');
+            const loading = document.getElementById('aiDiagnosisLoading');
+            const content = document.getElementById('aiDiagnosisContent');
+
+            card.style.display = 'block';
+            loading.style.display = 'block';
+            content.style.display = 'none';
+
+            card.scrollIntoView({ behavior: 'smooth' });
+
+            try {
+                const response = await fetch('@Url.Action("GetAiSolution", "Tickets")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=@Model.Id`
+                });
+
+                const data = await response.json();
+                loading.style.display = 'none';
+                content.style.display = 'block';
+
+                if (data.success) {
+                    content.innerText = data.solution;
+                } else {
+                    content.innerHTML = `<div class="alert alert-danger mb-0">${data.message || 'Không thể lấy chẩn đoán AI.'}</div>`;
+                }
+            } catch (err) {
+                loading.style.display = 'none';
+                content.style.display = 'block';
+                content.innerHTML = `<div class="alert alert-danger mb-0">Lỗi kết nối tới máy chủ AI: ${err.message}</div>`;
+            }
+        });
+    </script>
+}

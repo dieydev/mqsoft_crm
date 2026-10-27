@@ -11,10 +11,12 @@ namespace AI_CRM.Infrastructure.Services
     public class CustomerService : ICustomerService
     {
         private readonly ApplicationDbContext _context;
+        private readonly AI_CRM.AI.Interfaces.IAiAssistantService _aiAssistantService;
 
-        public CustomerService(ApplicationDbContext context)
+        public CustomerService(ApplicationDbContext context, AI_CRM.AI.Interfaces.IAiAssistantService aiAssistantService)
         {
             _context = context;
+            _aiAssistantService = aiAssistantService;
         }
 
         public async Task<List<KhachHang>> GetCustomersAsync(string searchString, int? statusFilter)
@@ -113,6 +115,46 @@ namespace AI_CRM.Infrastructure.Services
         public async Task<bool> CustomerExistsAsync(int id)
         {
             return await _context.KhachHangs.AnyAsync(e => e.CustomerId == id);
+        }
+
+        public async Task<string> GetCustomerAiSummaryAsync(int id)
+        {
+            var customer = await _context.KhachHangs
+                .Include(c => c.HopDongs)
+                .Include(c => c.DuAns)
+                .Include(c => c.LichSuLamViecs)
+                .Include(c => c.Tickets)
+                .FirstOrDefaultAsync(c => c.CustomerId == id);
+
+            if (customer == null)
+            {
+                return "Không tìm thấy thông tin cơ sở khám chữa bệnh yêu cầu.";
+            }
+
+            var recentInteractions = customer.LichSuLamViecs
+                .OrderByDescending(l => l.WorkDate)
+                .Take(3)
+                .Select(l => $"{l.WorkDate:dd/MM/yyyy}: {l.InteractionType} - {l.Content} (Kết quả: {l.Result})");
+
+            var aiContext = new AI_CRM.AI.Models.CustomerAiContext
+            {
+                CompanyName = customer.CompanyName,
+                FacilityCode = customer.FacilityCode,
+                HospitalLevel = customer.HospitalLevel,
+                HospitalClass = customer.HospitalClass,
+                BedCount = customer.BedCount,
+                DailyOutpatients = customer.DailyOutpatients,
+                CurrentSoftware = customer.CurrentSoftware,
+                OwnershipType = customer.OwnershipType,
+                ActiveContractsCount = customer.HopDongs.Count(h => !h.IsDeleted),
+                TotalContractValue = customer.HopDongs.Where(h => !h.IsDeleted).Sum(h => h.ContractValue ?? 0),
+                ActiveProjectsCount = customer.DuAns.Count(d => !d.IsDeleted),
+                OpenTicketsCount = customer.Tickets.Count(t => t.Status != TicketStatus.Closed && t.Status != TicketStatus.Resolved),
+                RecentInteractions = string.Join("; ", recentInteractions)
+            };
+
+            var result = await _aiAssistantService.SummarizeCustomerAsync(aiContext);
+            return result.IsSuccess ? result.Content : $"Lỗi khi phân tích: {result.ErrorMessage}";
         }
     }
 }

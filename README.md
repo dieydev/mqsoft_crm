@@ -92,13 +92,17 @@ MQ_AICRM/
 │   │   ├── 📁 AI_CRM.Infrastructure/     # Triển khai tầng hạ tầng, cơ sở dữ liệu & dịch vụ ngoại vi
 │   │   │   ├── Data/                     # ApplicationDbContext, DbSeeder (Khởi tạo dữ liệu mẫu)
 │   │   │   ├── Migrations/               # EF Core Migrations
-│   │   │   └── Services/                 # ChatbotService (RAG + Gemini), AuthService, CustomerService...
+│   │   │   └── Services/                 # ChatbotService, TicketService, CustomerService...
 │   │   │
-│   │   └── 📁 AI_CRM.AI/                 # Module chuyên trách trí tuệ nhân tạo
+│   │   └── 📁 AI_CRM.AI/                 # Module chuyên trách Trí tuệ Nhân tạo
+│   │       ├── Interfaces/               # IGeminiClient, IAiAssistantService
+│   │       ├── Models/                   # CustomerAiContext, TicketAiContext, AiAnalysisResult
+│   │       └── Services/                 # GeminiClient (Fallback đa model), AiAssistantService
 │   │
 │   └── 📂 Presentation/
 │       └── 📁 AI_CRM.WebMvc/             # Ứng dụng Web MVC chính
-│           ├── Controllers/              # Admin, Auth, Chatbot, Customer, Project, Contract...
+│           ├── Controllers/              # Admin, Auth, Chatbot, Customer, Tickets...
+│           ├── Hubs/                     # NotificationHub (SignalR Real-time)
 │           ├── Views/                    # Giao diện Razor Views & Thành phần UI
 │           ├── ViewComponents/           # NotificationViewComponent, v.v.
 │           ├── Filters/                  # UserActivityFilter (Theo dõi truy cập)
@@ -106,6 +110,12 @@ MQ_AICRM/
 │           ├── wwwroot/                  # Tệp tĩnh: CSS, JavaScript, Thư viện hình ảnh, Uploads
 │           ├── Program.cs                # Dependency Injection & Middleware Pipeline
 │           └── appsettings.json          # Cấu hình Connection String & API Keys
+│
+├── 📂 tests/
+│   └── 📁 AI_CRM.UnitTests/              # Bộ kiểm thử đơn vị tự động (xUnit, Moq, FluentAssertions)
+│       ├── TicketServiceTests.cs         # Kiểm thử tính toán SLA, thời hạn xử lý sự cố y tế
+│       ├── CustomerServiceTests.cs       # Kiểm thử CRUD & Soft Delete khách hàng bệnh viện
+│       └── AiAssistantServiceTests.cs    # Kiểm thử phân tích & gợi ý giải pháp của AI
 │
 ├── 📄 MQ_AICRM.sln                       # Visual Studio Solution
 └── 📄 README.md                          # Tài liệu hướng dẫn dự án

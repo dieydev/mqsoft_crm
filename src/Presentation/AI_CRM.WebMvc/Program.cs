@@ -15,6 +15,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 // Register Services
+builder.Services.AddScoped<AI_CRM.AI.Interfaces.IGeminiClient, AI_CRM.AI.Services.GeminiClient>();
+builder.Services.AddScoped<AI_CRM.AI.Interfaces.IAiAssistantService, AI_CRM.AI.Services.AiAssistantService>();
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.IUserService, AI_CRM.Infrastructure.Services.UserService>();
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.ICustomerService, AI_CRM.Infrastructure.Services.CustomerService>();
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.IContractService, AI_CRM.Infrastructure.Services.ContractService>();
@@ -29,6 +31,8 @@ builder.Services.AddScoped<AI_CRM.Application.Interfaces.IEmployeeService, AI_CR
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.IReportService, AI_CRM.Infrastructure.Services.ReportService>();
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.ITicketRepository, AI_CRM.Infrastructure.Repositories.TicketRepository>();
 builder.Services.AddScoped<AI_CRM.Application.Interfaces.ITicketService, AI_CRM.Infrastructure.Services.TicketService>();
+
+builder.Services.AddSignalR();
 
 // Cấu hình giới hạn file upload tối đa lên 50MB (mặc định của Kestrel chỉ là 28.6MB)
 builder.WebHost.ConfigureKestrel(options =>
@@ -95,6 +99,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHub<AI_CRM.WebMvc.Hubs.NotificationHub>("/notificationHub");
 
 // Gọi Seeder để tạo dữ liệu giả lập cho biểu đồ (Phần 3)
 using (var scope = app.Services.CreateScope())

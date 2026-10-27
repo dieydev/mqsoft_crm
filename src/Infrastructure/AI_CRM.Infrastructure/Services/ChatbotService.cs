@@ -1,13 +1,12 @@
+using AI_CRM.AI.Interfaces;
+using AI_CRM.AI.Models;
 using AI_CRM.Application.Interfaces;
 using AI_CRM.Domain.Entities;
 using AI_CRM.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -16,13 +15,12 @@ namespace AI_CRM.Infrastructure.Services
     public class ChatbotService : IChatbotService
     {
         private readonly ApplicationDbContext _context;
-        private readonly string _geminiApiKey;
-        private static readonly HttpClient _httpClient = new HttpClient();
+        private readonly IAiAssistantService _aiAssistantService;
 
-        public ChatbotService(ApplicationDbContext context, IConfiguration configuration)
+        public ChatbotService(ApplicationDbContext context, IAiAssistantService aiAssistantService)
         {
             _context = context;
-            _geminiApiKey = configuration["GeminiApiKey"];
+            _aiAssistantService = aiAssistantService;
         }
 
         public async Task<List<LichSuHoiDap>> GetChatHistoryAsync(int userId)
@@ -69,7 +67,7 @@ namespace AI_CRM.Infrastructure.Services
         {
             var q = question.ToLower();
             
-            // 1. TÀI LIỆU NỘI BỘ (Như cũ)
+            // 1. TÀI LIỆU NỘI BỘ (RAG Context)
             var documents = await _context.TaiLieuNoiBos
                 .Include(d => d.NhomTaiLieu)
                 .Where(d => !d.IsDeleted)
@@ -83,26 +81,26 @@ namespace AI_CRM.Infrastructure.Services
                 contextText += "\n--- TÀI LIỆU NỘI BỘ (Để tra cứu) ---\n";
                 foreach(var doc in documents.Take(20))
                 {
-                    contextText += $"- Tiêu đề: {doc.Title}, Mô tả nội dung: {doc.Description}, Đường dẫn file: {doc.FilePath}\n";
+                    contextText += $"- Tiêu đề: {doc.Title}, Mô tả nội dung: {doc.Description}, Đường dẫn: {doc.FilePath}\n";
                     docLinks += $"- [{doc.Title}]({doc.FilePath})\n";
                 }
             }
 
-            // 2. TỐI ƯU HÓA: TRÍCH XUẤT DỮ LIỆU ĐỘNG (RAG)
+            // 2. TRÍCH XUẤT DỮ LIỆU ĐỘNG (RAG)
             contextText += "\n--- DỮ LIỆU CƠ SỞ CHỌN LỌC ---\n";
             bool hasDbData = false;
 
-            if (q.Contains("khách") || q.Contains("công ty"))
+            if (q.Contains("khách") || q.Contains("công ty") || q.Contains("bệnh viện") || q.Contains("phòng khám"))
             {
                 var customers = await _context.KhachHangs.Where(k => !k.IsDeleted)
                     .OrderByDescending(k => k.CreatedDate)
-                    .Select(k => new { k.CustomerCode, k.CompanyName, k.Representative, k.Phone, k.Email, k.Address }).Take(20).ToListAsync();
+                    .Select(k => new { k.CustomerCode, k.CompanyName, k.FacilityCode, k.HospitalLevel, k.HospitalClass, k.BedCount, k.CurrentSoftware, k.Representative, k.Phone, k.Email }).Take(20).ToListAsync();
                 var total = await _context.KhachHangs.CountAsync(k => !k.IsDeleted);
-                contextText += $"Tổng Khách hàng: {total}. Danh sách (Top 20 mới nhất): {JsonSerializer.Serialize(customers)}\n";
+                contextText += $"Tổng Khách hàng (CSKCB): {total}. Danh sách (Top 20 mới nhất): {JsonSerializer.Serialize(customers)}\n";
                 hasDbData = true;
             }
 
-            if (q.Contains("dự án") || q.Contains("project"))
+            if (q.Contains("dự án") || q.Contains("project") || q.Contains("tiến độ"))
             {
                 var projects = await _context.DuAns.Include(d => d.TrangThaiDuAn).Where(d => !d.IsDeleted)
                     .OrderByDescending(d => d.CreatedDate)
@@ -112,7 +110,7 @@ namespace AI_CRM.Infrastructure.Services
                 hasDbData = true;
             }
 
-            if (q.Contains("hợp đồng") || q.Contains("contract"))
+            if (q.Contains("hợp đồng") || q.Contains("contract") || q.Contains("giá trị"))
             {
                 var contracts = await _context.HopDongs.Include(h => h.KhachHang).Include(h => h.TrangThaiHopDong).Where(h => !h.IsDeleted)
                     .OrderByDescending(h => h.CreatedDate)
@@ -122,7 +120,7 @@ namespace AI_CRM.Infrastructure.Services
                 hasDbData = true;
             }
 
-            if (q.Contains("nhân sự") || q.Contains("nhân viên") || q.Contains("người"))
+            if (q.Contains("nhân sự") || q.Contains("nhân viên") || q.Contains("người") || q.Contains("kỹ thuật"))
             {
                 var employees = await _context.NhanVienPhuTrachs.Where(e => e.IsActive)
                     .Select(e => new { e.FullName, e.Department, e.Position }).Take(20).ToListAsync();
@@ -131,34 +129,22 @@ namespace AI_CRM.Infrastructure.Services
                 hasDbData = true;
             }
 
+            if (q.Contains("sự cố") || q.Contains("ticket") || q.Contains("lỗi") || q.Contains("hỗ trợ"))
+            {
+                var tickets = await _context.Tickets.Include(t => t.Customer).OrderByDescending(t => t.CreatedAt)
+                    .Select(t => new { t.Id, t.Title, Customer = t.Customer.CompanyName, Priority = t.Priority.ToString(), Status = t.Status.ToString(), t.CreatedAt }).Take(20).ToListAsync();
+                contextText += $"Sự cố Ticket gần nhất: {JsonSerializer.Serialize(tickets)}\n";
+                hasDbData = true;
+            }
+
             if (!hasDbData)
             {
                 var totalCus = await _context.KhachHangs.CountAsync(k => !k.IsDeleted);
                 var totalProj = await _context.DuAns.CountAsync(d => !d.IsDeleted);
                 var totalCont = await _context.HopDongs.CountAsync(h => !h.IsDeleted);
-                contextText += $"Thống kê tổng quan: {totalCus} Khách hàng, {totalProj} Dự án, {totalCont} Hợp đồng.\n";
+                var totalTicket = await _context.Tickets.CountAsync();
+                contextText += $"Thống kê tổng quan: {totalCus} Khách hàng CSKCB, {totalProj} Dự án phần mềm, {totalCont} Hợp đồng, {totalTicket} Sự cố Ticket.\n";
             }
-            
-            // Đã gỡ bỏ phần nạp mã nguồn HTML (CSHTML) vì không cần thiết và tốn token.
-
-            if (string.IsNullOrEmpty(_geminiApiKey) || _geminiApiKey == "YOUR_GEMINI_API_KEY_HERE")
-            {
-                return "Xin lỗi, API Key của Gemini chưa được cấu hình. Hệ thống không thể xử lý dữ liệu lớn này.";
-            }
-
-            string prompt = $@"Bạn là Trợ lý AI thông minh của hệ thống MQSoft CRM (phần mềm quản lý khách hàng chuyên cho lĩnh vực Y tế như HIS, LIS, PACS, EMR). 
-Tuyệt đối tuân thủ các quy tắc sau:
-1. Nếu người dùng hỏi về các dữ liệu cụ thể (như danh sách khách hàng, thông tin dự án, hợp đồng, nhân sự cụ thể), hãy trả lời dựa trên phần DỮ LIỆU TỪ HỆ THỐNG bên dưới.
-2. Nếu thông tin cụ thể mà người dùng hỏi KHÔNG CÓ trong DỮ LIỆU TỪ HỆ THỐNG, bạn hãy trả lời: ""Thông tin này hiện chưa có trong cơ sở dữ liệu hệ thống hoặc tôi không có quyền truy cập"", tuyệt đối không tự bịa ra dữ liệu (hallucinate).
-3. Nếu người dùng hỏi các câu hỏi chung chung (ví dụ: chào hỏi, hỏi về tính năng phần mềm CRM, hỏi cách dùng hệ thống, hỏi khái niệm về y tế/công nghệ), bạn ĐƯỢC PHÉP tự do trả lời dựa trên kiến thức của bạn.
-4. Trả lời bằng tiếng Việt, lịch sự, chuyên nghiệp, thân thiện và ngắn gọn.
-5. Từ chối lịch sự mọi câu hỏi nằm ngoài phạm vi công nghệ, y tế, hoặc quản trị doanh nghiệp.
-
-DỮ LIỆU HIỆN TẠI TỪ HỆ THỐNG:
-{contextText}
-
-Câu hỏi của người dùng:
-{question}";
 
             // Lấy 5 tin nhắn gần nhất làm bộ nhớ ngữ cảnh (Memory)
             var history = await _context.LichSuHoiDaps
@@ -166,74 +152,22 @@ Câu hỏi của người dùng:
                 .OrderByDescending(c => c.CreatedDate)
                 .Take(5)
                 .ToListAsync();
-            history.Reverse(); // Đảo ngược để theo thứ tự thời gian từ cũ đến mới
+            history.Reverse();
 
-            var contentsList = new List<object>();
-            
-            // Đổ lịch sử vào (role: user, role: model)
-            foreach(var h in history)
+            var historyItems = history.SelectMany(h => new[]
             {
-                contentsList.Add(new { role = "user", parts = new[] { new { text = h.Question } } });
-                contentsList.Add(new { role = "model", parts = new[] { new { text = h.Answer } } });
-            }
-            
-            // Câu hỏi hiện tại
-            contentsList.Add(new { role = "user", parts = new[] { new { text = prompt } } });
+                new ChatMessageItem { Role = "user", Content = h.Question },
+                new ChatMessageItem { Role = "model", Content = h.Answer }
+            }).ToList();
 
-            // Danh sách các model fallback (Dùng bản Flash để tiết kiệm Quota cho Free Tier)
-            string[] models = new[] { 
-                "gemini-2.5-flash", 
-                "gemini-2.0-flash", 
-                "gemini-flash-latest", 
-                "gemini-flash-lite-latest" 
-            };
+            string responseText = await _aiAssistantService.ChatAsync(question, contextText, historyItems);
 
-            var requestBody = new {
-                contents = contentsList
-            };
-            var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-
-            string lastError = "";
-
-            foreach (var model in models)
+            if (!string.IsNullOrEmpty(docLinks) && !responseText.Contains("Tài liệu đính kèm liên quan"))
             {
-                try
-                {
-                    string apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={_geminiApiKey}";
-                    var response = await _httpClient.PostAsync(apiUrl, content);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var jsonString = await response.Content.ReadAsStringAsync();
-                        using var doc = JsonDocument.Parse(jsonString);
-                        var text = doc.RootElement
-                            .GetProperty("candidates")[0]
-                            .GetProperty("content")
-                            .GetProperty("parts")[0]
-                            .GetProperty("text").GetString();
-
-                        if (!string.IsNullOrEmpty(docLinks))
-                        {
-                            text += "\n\n**Tài liệu đính kèm liên quan:**\n" + docLinks;
-                        }
-
-                        return text;
-                    }
-                    else
-                    {
-                        var errorBody = await response.Content.ReadAsStringAsync();
-                        lastError = $"Model {model} failed with status: {response.StatusCode}. Details: {errorBody}";
-                        continue; 
-                    }
-                }
-                catch (Exception ex)
-                {
-                    lastError = $"Model {model} exception: {ex.Message}";
-                    continue; 
-                }
+                responseText += "\n\n**Tài liệu tham khảo liên quan:**\n" + docLinks;
             }
 
-            return "Xin lỗi, đã xảy ra lỗi từ phía Google Gemini API sau khi thử nhiều Model khác nhau. Chi tiết lỗi cuối: " + lastError;
+            return responseText;
         }
 
         public async Task<bool> RateAnswerAsync(int chatHistoryId, bool isHelpful, string comment)

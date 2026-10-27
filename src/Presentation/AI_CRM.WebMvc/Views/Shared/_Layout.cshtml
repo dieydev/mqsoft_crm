@@ -239,5 +239,37 @@
             }
         });
     </script>
+
+    <!-- SignalR Realtime Client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        (function () {
+            if (typeof signalR !== 'undefined') {
+                const connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/notificationHub")
+                    .withAutomaticReconnect()
+                    .build();
+
+                connection.on("ReceiveNotification", function (data) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: data.type === 'danger' ? 'error' : (data.type === 'warning' ? 'warning' : 'info'),
+                            title: data.title || 'Thông báo hệ thống',
+                            text: data.message,
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 6000,
+                            timerProgressBar: true
+                        });
+                    }
+                });
+
+                connection.start().catch(function (err) {
+                    console.log("SignalR not connected yet:", err);
+                });
+            }
+        })();
+    </script>
 </body>
 </html>

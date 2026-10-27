@@ -17,17 +17,20 @@ namespace AI_CRM.WebMvc.Controllers
         private readonly ICustomerService _customerService;
         private readonly IEmployeeService _employeeService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly Microsoft.AspNetCore.SignalR.IHubContext<AI_CRM.WebMvc.Hubs.NotificationHub> _hubContext;
 
         public TicketsController(
             ITicketService ticketService,
             ICustomerService customerService,
             IEmployeeService employeeService,
-            ICurrentUserService currentUserService)
+            ICurrentUserService currentUserService,
+            Microsoft.AspNetCore.SignalR.IHubContext<AI_CRM.WebMvc.Hubs.NotificationHub> hubContext)
         {
             _ticketService = ticketService;
             _customerService = customerService;
             _employeeService = employeeService;
             _currentUserService = currentUserService;
+            _hubContext = hubContext;
         }
 
         // GET: /Tickets
@@ -88,7 +91,21 @@ namespace AI_CRM.WebMvc.Controllers
             if (ModelState.IsValid)
             {
                 int? userId = _currentUserService.UserId;
-                await _ticketService.CreateTicketAsync(ticket, userId);
+                var createdTicket = await _ticketService.CreateTicketAsync(ticket, userId);
+
+                // Gửi thông báo real-time qua SignalR
+                try
+                {
+                    await _hubContext.Clients.All.SendAsync("ReceiveNotification", new
+                    {
+                        title = "🚨 Sự cố Y tế mới!",
+                        message = $"Ticket #{createdTicket.Id}: {createdTicket.Title}",
+                        type = createdTicket.Priority == TicketPriority.Critical ? "danger" : "warning",
+                        timestamp = DateTime.Now.ToString("HH:mm:ss")
+                    });
+                }
+                catch { /* Ignore SignalR broadcast error */ }
+
                 TempData["SuccessMessage"] = "Đã tiếp nhận sự cố và tạo Ticket hỗ trợ thành công!";
                 return RedirectToAction(nameof(Index));
             }
@@ -191,6 +208,20 @@ namespace AI_CRM.WebMvc.Controllers
             await _ticketService.AssignTechnicianAsync(ticketId, employeeId);
             TempData["SuccessMessage"] = "Đã phân công kỹ thuật viên phụ trách thành công!";
             return RedirectToAction(nameof(Details), new { id = ticketId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetAiSolution(int id)
+        {
+            try
+            {
+                var solution = await _ticketService.GetTicketAiSolutionAsync(id);
+                return Json(new { success = true, solution });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi khi lấy chẩn đoán AI: " + ex.Message });
+            }
         }
     }
 }

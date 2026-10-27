@@ -17,5 +17,6 @@ namespace AI_CRM.Application.Interfaces
         Task<TicketComment> AddCommentAsync(int ticketId, int? userId, string content);
         DateTime CalculateSlaDeadline(TicketPriority priority, DateTime createdAt);
         string GetSlaStatus(Ticket ticket);
+        Task<string> GetTicketAiSolutionAsync(int ticketId);
     }
 }

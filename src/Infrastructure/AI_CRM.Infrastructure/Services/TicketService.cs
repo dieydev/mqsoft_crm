@@ -10,10 +10,17 @@ namespace AI_CRM.Infrastructure.Services
     public class TicketService : ITicketService
     {
         private readonly ITicketRepository _ticketRepository;
+        private readonly AI_CRM.AI.Interfaces.IAiAssistantService _aiAssistantService;
+        private readonly IDocumentService _documentService;
 
-        public TicketService(ITicketRepository ticketRepository)
+        public TicketService(
+            ITicketRepository ticketRepository,
+            AI_CRM.AI.Interfaces.IAiAssistantService aiAssistantService,
+            IDocumentService documentService)
         {
             _ticketRepository = ticketRepository;
+            _aiAssistantService = aiAssistantService;
+            _documentService = documentService;
         }
 
         public async Task<IEnumerable<Ticket>> GetTicketsAsync(string searchString = null, TicketStatus? status = null, TicketPriority? priority = null)
@@ -182,6 +189,33 @@ namespace AI_CRM.Infrastructure.Services
             }
 
             return $"Đúng hạn (Còn {remainHours}h)";
+        }
+
+        public async Task<string> GetTicketAiSolutionAsync(int ticketId)
+        {
+            var ticket = await _ticketRepository.GetByIdAsync(ticketId);
+            if (ticket == null)
+            {
+                return "Không tìm thấy thông tin sự cố Ticket.";
+            }
+
+            // Lấy các tài liệu kỹ thuật nội bộ liên quan
+            var docs = await _documentService.GetDocumentsAsync();
+            var relevantDocs = docs.Take(5).Select(d => $"- {d.Title}: {d.Description}");
+
+            var context = new AI_CRM.AI.Models.TicketAiContext
+            {
+                TicketId = ticket.Id,
+                Title = ticket.Title,
+                Description = ticket.Description,
+                CustomerName = ticket.Customer?.CompanyName ?? "Khách hàng y tế",
+                Priority = ticket.Priority.ToString(),
+                CurrentSoftware = ticket.Customer?.CurrentSoftware,
+                RelevantKnowledgeBase = string.Join("\n", relevantDocs)
+            };
+
+            var result = await _aiAssistantService.AnalyzeTicketSolutionAsync(context);
+            return result.IsSuccess ? result.Content : $"Lỗi khi phân tích giải pháp: {result.ErrorMessage}";
         }
     }
 }

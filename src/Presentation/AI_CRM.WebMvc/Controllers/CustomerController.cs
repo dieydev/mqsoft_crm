@@ -119,5 +119,19 @@ namespace AI_CRM.WebMvc.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        public async Task<IActionResult> GetAiSummary(int id)
+        {
+            try
+            {
+                var summary = await _customerService.GetCustomerAiSummaryAsync(id);
+                return Json(new { success = true, summary });
+            }
+            catch (System.Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi khi tạo tóm tắt AI: " + ex.Message });
+            }
+        }
     }
 }

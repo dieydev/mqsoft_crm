@@ -14,5 +14,6 @@ namespace AI_CRM.Application.Interfaces
         Task<KhachHang?> GetCustomerDetailsAsync(int id);
         Task<bool> DeleteCustomerAsync(int id);
         Task<bool> CustomerExistsAsync(int id);
+        Task<string> GetCustomerAiSummaryAsync(int id);
     }
 }
