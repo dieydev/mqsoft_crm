@@ -4,9 +4,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
 using AI_CRM.Application.Interfaces;
 using AI_CRM.Domain.Entities;
 using AI_CRM.WebMvc.Models;
+using AI_CRM.WebMvc.Hubs;
 
 namespace AI_CRM.WebMvc.Controllers
 {
@@ -17,14 +19,14 @@ namespace AI_CRM.WebMvc.Controllers
         private readonly ICustomerService _customerService;
         private readonly IEmployeeService _employeeService;
         private readonly ICurrentUserService _currentUserService;
-        private readonly Microsoft.AspNetCore.SignalR.IHubContext<AI_CRM.WebMvc.Hubs.NotificationHub> _hubContext;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
         public TicketsController(
             ITicketService ticketService,
             ICustomerService customerService,
             IEmployeeService employeeService,
             ICurrentUserService currentUserService,
-            Microsoft.AspNetCore.SignalR.IHubContext<AI_CRM.WebMvc.Hubs.NotificationHub> hubContext)
+            IHubContext<NotificationHub> hubContext)
         {
             _ticketService = ticketService;
             _customerService = customerService;
